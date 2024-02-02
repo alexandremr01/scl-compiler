@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "lex.yy.c"
+#include <string.h>
+
+#include "global.h"
+
+extern FILE *yyin;
+extern int yylex (void);
 
 void printToken(yytoken_kind_t token) {
     switch (token) {
@@ -40,8 +45,8 @@ void printToken(yytoken_kind_t token) {
 
 int main(int argc, char *argv[]) {
     FILE *f_in;
-    if (argc != 2) {
-        printf("Usage: scl file\n");
+    if (argc < 2) {
+        printf("Usage: scl file [--lexical_only] \n");
         return 1;
     }
     if (f_in = fopen(argv[1],"r")) 
@@ -50,15 +55,20 @@ int main(int argc, char *argv[]) {
         printf("FATAL: Could not open %s \n", argv[1]);
         return 1;
     }
-    int i=0;
-    int line_number=0;
-    printf("Line 0\n");
-    while ((i = yylex ())){
-        if (i == NEWLINE) {
-            line_number += 1;
-            printf("\nLine %d\n", line_number);
+    if (argc == 3 && strcmp(argv[2], "--lexical_only") == 0){
+        int i=0;
+        int line_number=0;
+        printf("Line 0\n");
+        while ((i = yylex ())){
+            if (i == NEWLINE) {
+                line_number += 1;
+                printf("\nLine %d\n", line_number);
+            }
+            printToken(i);
         }
-        printToken(i);
+        return 0;
     }
+    
+    yyparse();
     return 0;
 }
