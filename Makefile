@@ -5,7 +5,7 @@ BUILD=./bin
 
 SOURCEDIR := $(CURDIR)/src
 
-SOURCEFILES  := main.c 
+SOURCEFILES  := main.c lex.yy.c syntax.tab.c
 
 SRC :=  $(foreach file, $(SOURCEFILES), $(addprefix $(SOURCEDIR)/, $(file)))
 
@@ -23,7 +23,7 @@ build:
 	@mkdir -p $(BUILD)
 	flex -o $(SOURCEDIR)/lex.yy.c $(SOURCEDIR)/lex.l
 	bison -o $(SOURCEDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/syntax.y
-	$(CC) $(CFLAGS) $(SOURCEDIR)/lex.yy.c $(SOURCEDIR)/syntax.tab.c $(SRC) $(LDFLAGS) -o $(BUILD)/scl
+	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/scl
 
 clean:
 	-@rm -rvf $(BUILD) **/**.yy.c test/**.out src/**.tab.* src/**.output
