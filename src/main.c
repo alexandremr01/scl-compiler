@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "lex.yy.c"
 
-void printToken(TokenType token) {
+void printToken(yytoken_kind_t token) {
     switch (token) {
         case ERROR: printf("Error\n"); break;
         case NEWLINE: break;

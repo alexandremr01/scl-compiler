@@ -1,4 +1,6 @@
 **.yy.c
+**.tab.*
+**.output
+**.out
 
 bin/
-test/**.out

@@ -22,10 +22,11 @@ all: build
 build:
 	@mkdir -p $(BUILD)
 	flex -o $(SOURCEDIR)/lex.yy.c $(SOURCEDIR)/lex.l
+	bison -o $(SOURCEDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/syntax.y
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/scl
 
 clean:
-	-@rm -rvf $(BUILD) **/**.yy.c test/**.out
+	-@rm -rvf $(BUILD) **/**.yy.c test/**.out src/**.tab.* src/**.output
 
 test:
 	sh test/1-test-al.sh
