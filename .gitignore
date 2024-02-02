@@ -1,3 +1,4 @@
 **.yy.c
 
 bin/
+test/**.out

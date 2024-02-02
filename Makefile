@@ -9,7 +9,7 @@ SOURCEFILES  := main.c
 
 SRC :=  $(foreach file, $(SOURCEFILES), $(addprefix $(SOURCEDIR)/, $(file)))
 
-.PHONY: build-docker run-docker all build
+.PHONY: build-docker run-docker all build test
 
 build-docker:
 	docker build -t scl_compiler_docker .
@@ -25,4 +25,7 @@ build:
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/scl
 
 clean:
-	-@rm -rvf $(BUILD) **/**.yy.c
+	-@rm -rvf $(BUILD) **/**.yy.c test/**.out
+
+test:
+	sh test/1-test-al.sh

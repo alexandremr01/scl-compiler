@@ -1,0 +1,53 @@
+Line 0
+Type: void
+Identifier
+Symbol: (
+Symbol: )
+
+Line 1
+Symbol: {
+
+Line 2
+Type: int
+Identifier
+Symbol: ;
+
+Line 3
+Identifier
+Operator: =
+Number
+Symbol: ;
+
+Line 4
+Keyword: while
+Symbol: (
+Identifier
+Operator: <
+Number
+Symbol: )
+Symbol: {
+
+Line 5
+Identifier
+Symbol: (
+Identifier
+Symbol: )
+Symbol: ;
+
+Line 6
+Identifier
+Operator: =
+Identifier
+Operator: +
+Number
+Symbol: ;
+
+Line 7
+Symbol: }
+
+Line 8
+Keyword: return
+Symbol: ;
+
+Line 9
+Symbol: }
