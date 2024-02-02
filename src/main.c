@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "global.h"
+#include "syntax.tab.h"
 
 extern FILE *yyin;
 extern int yylex (void);
@@ -35,16 +35,29 @@ void printToken(yytoken_kind_t token) {
         case RBRACKET: printf("Symbol: ]\n"); break;
         case LBRACES: printf("Symbol: {\n"); break;
         case RBRACES: printf("Symbol: }\n"); break;
-        case LCOMMENT: printf("Comment: Start\n"); break;
-        case RCOMMENT: printf("Comment: End\n"); break;
         case ID: printf("Identifier\n"); break;
         case NUM: printf("Number\n"); break;
         default: printf("Unknown token\n"); break;
     }
 }
 
+void lexic_parser_only(){
+    int i=0;
+    int line_number=0;
+    printf("Line 0\n");
+    while ((i = yylex ())){
+        if (i == NEWLINE) {
+            line_number += 1;
+            printf("\nLine %d\n", line_number);
+        }
+        printToken(i);
+    }
+    return;
+}
+
 int main(int argc, char *argv[]) {
     FILE *f_in;
+
     if (argc < 2) {
         printf("Usage: scl file [--lexical_only] \n");
         return 1;
@@ -55,20 +68,17 @@ int main(int argc, char *argv[]) {
         printf("FATAL: Could not open %s \n", argv[1]);
         return 1;
     }
-    if (argc == 3 && strcmp(argv[2], "--lexical_only") == 0){
-        int i=0;
-        int line_number=0;
-        printf("Line 0\n");
-        while ((i = yylex ())){
-            if (i == NEWLINE) {
-                line_number += 1;
-                printf("\nLine %d\n", line_number);
-            }
-            printToken(i);
+    for (int i=2; i < argc; i++){
+        if (strcmp(argv[i], "--lexical_only") == 0){
+            lexic_parser_only();
+            return 0;
+        } else if (strcmp(argv[i], "--debug") == 0){
+            yydebug=1;
+        } else {
+            printf("FATAL: unrecognized command-line option \'%s\'\n", argv[i]);
+            return 1;
         }
-        return 0;
     }
-    
     yyparse();
     return 0;
 }

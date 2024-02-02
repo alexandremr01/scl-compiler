@@ -1,11 +1,11 @@
 CC        := gcc
 CFLAGS    := -Wextra -Wundef -Wpointer-arith -Wcast-align -pedantic -std=c11 -D_XOPEN_SOURCE=500 -Werror=vla
 LDFLAGS   := -lfl
-BUILD=./bin
+BUILD     := ./bin
 
 SOURCEDIR := $(CURDIR)/src
 
-SOURCEFILES  := main.c lex.yy.c syntax.tab.c
+SOURCEFILES    := main.c lex.yy.c syntax.tab.c
 GENERATEDFILES := *.yy.c *.tab.* *.output
 
 SRC :=  $(foreach file, $(SOURCEFILES), $(addprefix $(SOURCEDIR)/, $(file)))
@@ -24,8 +24,8 @@ all: build
 build:
 	@mkdir -p $(BUILD)
 	flex -o $(SOURCEDIR)/lex.yy.c $(SOURCEDIR)/lex.l
-	bison -o $(SOURCEDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/syntax.y
-	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/scl
+	bison --debug -o $(SOURCEDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/syntax.y
+	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/sclc
 
 clean:
 	-@rm -rvf $(BUILD) $(GEN) test/*.out

@@ -4,9 +4,12 @@ letter      [a-zA-Z]
 identifier  {letter}+
 newline     \n
 whitespace  [ \t]+
+single_line_comment    \/\/.*
+multi_line_comment     \/\*.+\*\/
 %{
-#include "global.h"
+#include "syntax.tab.h"
 %}
+%option yylineno
 %%
 "if"            {return IF;}
 "else"          {return ELSE;}
@@ -32,11 +35,12 @@ whitespace  [ \t]+
 "]"             {return RBRACKET;}
 "{"             {return LBRACES;}
 "}"             {return RBRACES;}
-"/*"            {return LCOMMENT;}
-"*/"            {return RCOMMENT;}
+","             {return COMMA;}
 {number}        {return NUM;}
 {identifier}    {return ID;}
-{newline}       {return NEWLINE;}
+{newline}       ;
 {whitespace}    ;
+{single_line_comment} ;
+{multi_line_comment} ;
 .               {return ERROR;}
 %%
