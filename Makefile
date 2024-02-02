@@ -1,4 +1,15 @@
-.PHONY: build-docker run-docker build
+CC        := gcc
+CFLAGS    := -Wextra -Wundef -Wpointer-arith -Wcast-align -pedantic -std=c11 -D_XOPEN_SOURCE=500 -Werror=vla
+LDFLAGS   := -lfl
+BUILD=./bin
+
+SOURCEDIR := $(CURDIR)/src
+
+SOURCEFILES  := main.c 
+
+SRC :=  $(foreach file, $(SOURCEFILES), $(addprefix $(SOURCEDIR)/, $(file)))
+
+.PHONY: build-docker run-docker all build
 
 build-docker:
 	docker build -t scl_compiler_docker .
@@ -6,12 +17,12 @@ build-docker:
 run-docker:
 	docker run -it -v $(PWD):/app scl_compiler_docker
 
-GEN_FOLDER=generated
+all: build
 
 build:
-	mkdir -p $(GEN_FOLDER)
-	flex -o $(GEN_FOLDER)/lex.yy.c lex.l
-	gcc -o $(GEN_FOLDER)/prog $(GEN_FOLDER)/lex.yy.c -lfl
+	@mkdir -p $(BUILD)
+	flex -o $(SOURCEDIR)/lex.yy.c $(SOURCEDIR)/lex.l
+	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/scl
 
 clean:
-	rm -rf $(GEN_FOLDER)
+	-@rm -rvf $(BUILD) **/**.yy.c
