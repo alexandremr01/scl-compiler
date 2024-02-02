@@ -6,8 +6,10 @@ BUILD=./bin
 SOURCEDIR := $(CURDIR)/src
 
 SOURCEFILES  := main.c lex.yy.c syntax.tab.c
+GENERATEDFILES := *.yy.c *.tab.* *.output
 
 SRC :=  $(foreach file, $(SOURCEFILES), $(addprefix $(SOURCEDIR)/, $(file)))
+GEN :=  $(foreach file, $(GENERATEDFILES), $(addprefix $(SOURCEDIR)/, $(file)))
 
 .PHONY: build-docker run-docker all build test
 
@@ -26,7 +28,7 @@ build:
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/scl
 
 clean:
-	-@rm -rvf $(BUILD) **/**.yy.c test/**.out src/**.tab.* src/**.output
+	-@rm -rvf $(BUILD) $(GEN) test/*.out
 
 test:
 	sh test/1-test-al.sh
