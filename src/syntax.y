@@ -1,4 +1,4 @@
-%start unit
+%start program
 %debug
 %{
     #include "ast.h"
@@ -14,7 +14,7 @@
     char* string;
 }
 %type  <data_type>  type_specifier
-%type <node> unit external_declaration function_definition
+%type <node> program units external_declaration function_definition
 %type <node> declaration
 
 %token ERROR NEWLINE // internal
@@ -29,8 +29,20 @@
 %token <string> ID 
 %token NUM 
 %%
-unit: external_declaration { astree = newAbstractSyntaxTree($1); }
-    | unit external_declaration 
+program: units { 
+    ASTNode *root = newASTNode();
+    root->firstChild = $1;
+    astree = newAbstractSyntaxTree(root);
+}
+
+units: external_declaration { $$ = $1; }
+    | units external_declaration {
+        ASTNode *p = $1;
+        while(p->sibling != NULL) 
+            p = p->sibling;
+        p->sibling = $2; 
+        $$ = $1;
+    }
 
 external_declaration: function_definition { $$ = $1; }
                     | declaration { $$ = $1; }

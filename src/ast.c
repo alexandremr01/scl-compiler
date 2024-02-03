@@ -16,3 +16,18 @@ ASTNode *newASTNode(){
     return node;
 }
 
+void printTree(ASTNode *node, int level){
+    if (node == NULL) return;
+    for(int i=0; i<level;i++) printf("\t");
+    switch (node->kind){
+        case ROOT_NODE:
+            printf("Program Root\n"); break;
+        case DECLARATION_NODE:
+            printf("Declaration: var %s with type %d\n", node->name, node->type);
+    }
+    ASTNode *aux = node->firstChild;
+    while (aux != NULL){
+        printTree(aux, level+1);
+        aux = aux->sibling;
+    }
+}

@@ -9,16 +9,6 @@ extern FILE *yyin;
 extern int yylex (void);
 extern AbstractSyntaxTree* parse();
 
-void printTree(ASTNode *node){
-    if (node == NULL) return;
-    printf("Current node: %d\n", node->kind);
-    ASTNode *aux = node->firstChild;
-    while (aux != NULL){
-        printTree(aux);
-        aux = aux->sibling;
-    }
-}
-
 void printToken(yytoken_kind_t token) {
     switch (token) {
         case ERROR: printf("Error\n"); break;
@@ -92,6 +82,6 @@ int main(int argc, char *argv[]) {
         }
     }
     AbstractSyntaxTree *tree = parse();
-    printTree(tree->root);
+    printTree(tree->root, 0);
     return 0;
 }

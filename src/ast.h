@@ -5,7 +5,7 @@ typedef enum dataType {
 } DataType;
 
 typedef enum nodeKind {
-    DECLARATION_NODE
+    ROOT_NODE, DECLARATION_NODE
 } NodeKind;
 
 typedef struct astNode {
@@ -22,5 +22,5 @@ typedef struct abstractSyntaxTree {
 } AbstractSyntaxTree;
 
 AbstractSyntaxTree *newAbstractSyntaxTree();
-
 ASTNode *newASTNode();
+void printTree(ASTNode *node, int level);
