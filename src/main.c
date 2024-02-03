@@ -2,10 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ast.h"
 #include "syntax.tab.h"
 
 extern FILE *yyin;
 extern int yylex (void);
+extern AbstractSyntaxTree* parse();
+
+void printTree(ASTNode *node){
+    if (node == NULL) return;
+    printf("Current node: %d\n", node->kind);
+    ASTNode *aux = node->firstChild;
+    while (aux != NULL){
+        printTree(aux);
+        aux = aux->sibling;
+    }
+}
 
 void printToken(yytoken_kind_t token) {
     switch (token) {
@@ -79,6 +91,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     }
-    yyparse();
+    AbstractSyntaxTree *tree = parse();
+    printTree(tree->root);
     return 0;
 }

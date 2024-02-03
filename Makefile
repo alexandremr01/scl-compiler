@@ -5,7 +5,7 @@ BUILD     := ./bin
 
 SOURCEDIR := $(CURDIR)/src
 
-SOURCEFILES    := main.c lex.yy.c syntax.tab.c
+SOURCEFILES    := main.c ast.c lex.yy.c syntax.tab.c
 GENERATEDFILES := *.yy.c *.tab.* *.output
 
 SRC :=  $(foreach file, $(SOURCEFILES), $(addprefix $(SOURCEDIR)/, $(file)))

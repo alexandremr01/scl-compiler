@@ -1,3 +1,22 @@
+%start unit
+%debug
+%{
+    #include "ast.h"
+    static int yyerror(char*);
+    extern int yylex(void);
+    extern int yylineno;
+    AbstractSyntaxTree *astree;
+
+%}
+%union{
+    DataType data_type;
+    ASTNode *node;
+    char* string;
+}
+%type  <data_type>  type_specifier
+%type <node> unit external_declaration function_definition
+%type <node> declaration
+
 %token ERROR NEWLINE // internal
 %token IF ELSE WHILE // control
 %token VOID INT // types
@@ -7,21 +26,30 @@
 %token LPAREN RPAREN
 %token LBRACKET RBRACKET
 %token LBRACES RBRACES
-%token ID NUM
-%start unit
-%debug
-%{
-static int yyerror(char*);
-extern int yylex(void);
-extern int yylineno;
-%}
-
+%token <string> ID 
+%token NUM 
 %%
-unit: external_declaration | unit external_declaration 
-external_declaration: function_definition | declaration
-function_definition: type_specifier ID LPAREN RPAREN compound_statement 
-type_specifier: INT | VOID
-declaration: type_specifier ID SEMICOLON | type_specifier ID LBRACKET NUM RBRACKET SEMICOLON 
+unit: external_declaration { astree = newAbstractSyntaxTree($1); }
+    | unit external_declaration 
+
+external_declaration: function_definition { $$ = $1; }
+                    | declaration { $$ = $1; }
+
+function_definition: type_specifier ID LPAREN RPAREN compound_statement
+type_specifier: INT {$$ = INTEGER_TYPE;} | VOID {$$ = VOID_TYPE;} 
+declaration: type_specifier ID SEMICOLON  { 
+                $$ = newASTNode();
+                $$->type = $1;
+                $$->name = $2; 
+                $$->kind = DECLARATION_NODE;
+            }
+            | type_specifier ID LBRACKET NUM RBRACKET SEMICOLON  { 
+                $$ = newASTNode();
+                $$->type = $1;
+                $$->name = $2; 
+                $$->kind = DECLARATION_NODE;
+                // TODO: treat array
+            }
 /* expression_list: expression_list expression_statement | expression_statement */
 
 statement_list: statement_list statement | 
@@ -48,8 +76,11 @@ args:       arg_list |
 arg_list:   arg_list COMMA expression | expression
 
 %%
-int yyerror(char * message)
-{ 
+int yyerror(char* message) { 
     printf("Syntax error at line %d\n",yylineno);
     return 0;
+}
+AbstractSyntaxTree* parse(){
+    yyparse();
+    return astree;
 }
