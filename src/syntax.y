@@ -15,7 +15,8 @@
 }
 %type  <data_type>  type_specifier
 %type <node> program units external_declaration function_definition
-%type <node> declaration
+%type <node> declaration declaration_list compound_statement statement_list expression
+%type <node> statement expression_statement selection_statement iteration_statement jump_statement
 
 %token ERROR NEWLINE // internal
 %token IF ELSE WHILE // control
@@ -30,7 +31,7 @@
 %token NUM 
 %%
 program: units { 
-    ASTNode *root = newASTNode();
+    ASTNode *root = newASTNode(ROOT_NODE);
     root->firstChild = $1;
     astree = newAbstractSyntaxTree(root);
 }
@@ -47,34 +48,89 @@ units: external_declaration { $$ = $1; }
 external_declaration: function_definition { $$ = $1; }
                     | declaration { $$ = $1; }
 
-function_definition: type_specifier ID LPAREN RPAREN compound_statement
+function_definition: type_specifier ID LPAREN RPAREN compound_statement {
+    $$ = newASTNode(FUNCTION_DEFINITION_NODE);
+    $$->type = $1;
+    $$->name = $2; 
+    $$->firstChild = $5;
+}
 type_specifier: INT {$$ = INTEGER_TYPE;} | VOID {$$ = VOID_TYPE;} 
 declaration: type_specifier ID SEMICOLON  { 
-                $$ = newASTNode();
+                $$ = newASTNode(DECLARATION_NODE);
                 $$->type = $1;
                 $$->name = $2; 
-                $$->kind = DECLARATION_NODE;
             }
             | type_specifier ID LBRACKET NUM RBRACKET SEMICOLON  { 
-                $$ = newASTNode();
+                $$ = newASTNode(DECLARATION_NODE);
                 $$->type = $1;
                 $$->name = $2; 
-                $$->kind = DECLARATION_NODE;
                 // TODO: treat array
             }
 /* expression_list: expression_list expression_statement | expression_statement */
 
-statement_list: statement_list statement | 
-declaration_list: declaration_list declaration | 
-compound_statement: LBRACES declaration_list statement_list RBRACES
-statement: expression_statement | compound_statement | selection_statement | iteration_statement | jump_statement
-expression_statement: expression SEMICOLON | SEMICOLON
-// TODO: for now, if and while only accept statements
-selection_statement: IF LPAREN expression RPAREN statement | IF LPAREN expression RPAREN statement ELSE statement
-iteration_statement: WHILE LPAREN expression RPAREN statement
-jump_statement: RETURN SEMICOLON | RETURN expression SEMICOLON
+statement_list: statement_list statement {
+    if ($1 == NULL) {
+        $$ = $2;
+    } else {
+        ASTNode *p = $1;
+        while(p->sibling != NULL) 
+            p = p->sibling;
+        p->sibling = $2; 
+        $$ = $1;
+    }
+}| {$$=NULL;}
+declaration_list: declaration_list declaration {
+    if ($1 == NULL) {
+        $$ = $2;
+    } else {
+        ASTNode *p = $1;
+        while(p->sibling != NULL) 
+            p = p->sibling;
+        p->sibling = $2; 
+        $$ = $1;
+    }
+}| {$$=NULL;}
+compound_statement: LBRACES declaration_list statement_list RBRACES {
+    if ($2 == NULL) 
+        $$ = $3;
+    ASTNode *p = $2;
+    while(p->sibling != NULL) 
+        p = p->sibling;
+    p->sibling = $3;
+    $$ = $2;
+}
 
-expression: var ASSIGN expression | simple_exp {}
+statement: expression_statement {$$=$1;}
+            | compound_statement {$$=$1;}
+            | selection_statement {$$=$1;}
+            | iteration_statement {$$=$1;}
+            | jump_statement {$$=$1;}
+expression_statement: expression SEMICOLON {$$=$1;} | SEMICOLON {$$ = newASTNode(EMPTY_NODE);}
+// TODO: for now, if and while only accept statements
+selection_statement: IF LPAREN expression RPAREN statement {
+                    $$ = newASTNode(IF_NODE);
+                    $$->firstChild = $3;
+                    $$->firstChild->sibling = $5;
+                } 
+                    | IF LPAREN expression RPAREN statement ELSE statement{
+                    $$ = newASTNode(IF_NODE);
+                    $$->firstChild = $3;
+                    $3->sibling = $5;
+                    $5->sibling = $7;
+                } 
+iteration_statement: WHILE LPAREN expression RPAREN statement {
+                    $$ = newASTNode(WHILE_NODE);
+                    $$->firstChild = $3;
+                    $3->sibling = $5;
+                } 
+jump_statement: RETURN SEMICOLON {$$ = newASTNode(RETURN_NODE);} 
+                | RETURN expression SEMICOLON {
+                    $$ = newASTNode(RETURN_NODE);
+                    $$->firstChild = $2;
+                } 
+
+expression: var ASSIGN expression {$$ = newASTNode(EXPRESSION_NODE);} 
+            | simple_exp {$$ = newASTNode(EXPRESSION_NODE);}
 var:        ID | ID LBRACKET NUM RBRACKET {}
 simple_exp: sum_exp relational sum_exp | sum_exp
 relational: LT | GT | LEQ | GEQ | EQ | DIFFERENT
