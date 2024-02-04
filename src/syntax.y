@@ -3,10 +3,12 @@
 %{
     #include "ast.h"
     static int yyerror(char*);
-    extern int yylex(void);
+    extern int yylex();
     extern int yylineno;
     AbstractSyntaxTree *astree;
-
+    extern int getToken();
+    extern int syntaxErrors;
+    extern char* yytext;
 %}
 %union{
     DataType data_type;
@@ -60,12 +62,13 @@ declaration: type_specifier ID SEMICOLON  {
                 $$->name = $2; 
                 // TODO: treat array
             }
+            | error SEMICOLON {yyerrok; $$ = NULL;}
 /* expression_list: expression_list expression_statement | expression_statement */
 
 statement_list: statement_list statement { $$ = appendSibling($1, $2);}
-                | {$$=NULL;}
+                | %empty {$$=NULL;}
 declaration_list: declaration_list declaration { $$ = appendSibling($1, $2);}
-                | {$$=NULL;}
+                | %empty {$$=NULL;}
 compound_statement: LBRACES declaration_list statement_list RBRACES {
     if ($2 == NULL) 
         $$ = $3;
@@ -81,6 +84,7 @@ statement: expression_statement {$$=$1;}
             | selection_statement {$$=$1;}
             | iteration_statement {$$=$1;}
             | jump_statement {$$=$1;}
+            | error SEMICOLON {yyerrok; $$ = NULL;}
 expression_statement: expression SEMICOLON {$$=$1;} | SEMICOLON {$$ = newASTNode(EMPTY_NODE);}
 // TODO: for now, if and while only accept statements
 selection_statement: IF LPAREN expression RPAREN statement {
@@ -150,13 +154,14 @@ call:       ID LPAREN args RPAREN {
                 $$->name = $1;
                 $$->firstChild = $3;
             }
-args:       arg_list {$$=$1;} | {$$=NULL;}
+args:       arg_list {$$=$1;} | %empty {$$=NULL;}
 arg_list:   arg_list COMMA expression { $$ = appendSibling($1, $3); }
             | expression  {$$=$1;} 
 
 %%
 int yyerror(char* message) { 
-    printf("Syntax error at line %d\n",yylineno);
+    printf("Line %d: Error at token \'%s\'.\n",yylineno,yytext);
+    syntaxErrors += 1;
     return 0;
 }
 AbstractSyntaxTree* parse(){

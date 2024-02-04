@@ -2,7 +2,12 @@
 #define SYMBOLIC_TABLE_H_
 
 #include "external/uthash.h"
+
 #include "datatypes.h"
+#include "ast.h"
+
+#include <strings.h>
+#include <stdio.h>
 
 typedef enum symbtabEntryKind {
     FUNCTION_ENTRY, VARIABLE_ENTRY

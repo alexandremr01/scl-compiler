@@ -9,6 +9,7 @@
 extern FILE *yyin;
 extern int yylex (void);
 extern AbstractSyntaxTree* parse();
+int syntaxErrors = 0;
 
 void printToken(yytoken_kind_t token) {
     switch (token) {
@@ -88,8 +89,9 @@ int main(int argc, char *argv[]) {
     }
 
     AbstractSyntaxTree *tree = parse();
+
     SymbolicTable* table = newSymbolicTable();
-    int errors = semanticAnalysis(tree, table, 0);
+    int semanticErrors = semanticAnalysis(tree, table, 0);
 
     // Debug utilities
     if (print_ast) {
@@ -103,6 +105,7 @@ int main(int argc, char *argv[]) {
         printf("\n\n");
     }
 
+    int errors = syntaxErrors + semanticErrors;
     if (errors > 0) 
         printf("%d compile errors\n", errors);
     else printf("Compilation successful\n");

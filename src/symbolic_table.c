@@ -1,7 +1,4 @@
 #include "symbolic_table.h"
-#include "ast.h"
-#include <strings.h>
-#include <stdio.h>
 
 SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTableEntryKind kind){
     SymbolicTableEntry *entry = (SymbolicTableEntry *)malloc(sizeof(SymbolicTableEntry));
