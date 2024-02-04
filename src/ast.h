@@ -1,8 +1,9 @@
-#include <stdlib.h>
+#ifndef AST_H_
+#define AST_H_
 
-typedef enum dataType {
-    NONE_TYPE, INTEGER_TYPE, VOID_TYPE
-} DataType;
+#include <stdlib.h>
+#include "symbolic_table.h"
+#include "datatypes.h"
 
 typedef enum nodeKind {
     ROOT_NODE, DECLARATION_NODE, FUNCTION_DEFINITION_NODE, EMPTY_NODE,
@@ -29,3 +30,5 @@ ASTNode *newASTNode(NodeKind nodeKind);
 ASTNode *newEmptyStatementNode();
 void printTree(ASTNode *node, int level);
 ASTNode *appendSibling(ASTNode *reference, ASTNode *newSibling);
+
+#endif

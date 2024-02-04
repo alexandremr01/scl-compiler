@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "semantic_analysis.h"
 #include "ast.h"
 #include "syntax.tab.h"
 
@@ -59,7 +60,7 @@ void lexic_parser_only(){
 
 int main(int argc, char *argv[]) {
     FILE *f_in;
-
+    int print_ast=0, print_symbolic_table=0;
     if (argc < 2) {
         printf("Usage: scl file [--lexical_only] \n");
         return 1;
@@ -74,6 +75,10 @@ int main(int argc, char *argv[]) {
         if (strcmp(argv[i], "--lexical_only") == 0){
             lexic_parser_only();
             return 0;
+        } else if (strcmp(argv[i], "--print_ast") == 0){
+            print_ast = 1;
+        } else if (strcmp(argv[i], "--print_symbolic_table") == 0){
+            print_symbolic_table = 1;
         } else if (strcmp(argv[i], "--debug") == 0){
             yydebug=1;
         } else {
@@ -81,7 +86,26 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     }
+
     AbstractSyntaxTree *tree = parse();
-    printTree(tree->root, 0);
+    SymbolicTable* table = newSymbolicTable();
+    int errors = semanticAnalysis(tree, table, 0);
+
+    // Debug utilities
+    if (print_ast) {
+        printf("Abstract Syntax Tree:\n");
+        printTree(tree->root, 0);
+        printf("\n\n");
+    }
+    if (print_symbolic_table) {
+        printf("Symbolic Table:\n");
+        printSymbolicTable(table);
+        printf("\n\n");
+    }
+
+    if (errors > 0) 
+        printf("%d compile errors", errors);
+    else printf("Compilation successful");
+
     return 0;
 }
