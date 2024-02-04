@@ -37,7 +37,11 @@ multi_line_comment     \/\*.+\*\/
 "{"             {return LBRACES;}
 "}"             {return RBRACES;}
 ","             {return COMMA;}
-{number}        {return NUM;}
+{number}       {
+    yylval.string = malloc(yyleng + 1);   
+    memcpy(yylval.string, yytext, yyleng + 1); 
+    return NUM;
+}
 {identifier}    {
     yylval.string = malloc(yyleng + 1);   
     memcpy(yylval.string, yytext, yyleng + 1); 

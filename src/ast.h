@@ -6,7 +6,9 @@ typedef enum dataType {
 
 typedef enum nodeKind {
     ROOT_NODE, DECLARATION_NODE, FUNCTION_DEFINITION_NODE, EMPTY_NODE,
-    IF_NODE, WHILE_NODE, RETURN_NODE, EXPRESSION_NODE
+    IF_NODE, WHILE_NODE, RETURN_NODE, EXPRESSION_NODE,
+    ASSIGNMENT_NODE, SUM_NODE, MULTIPLICATION_NODE, CONSTANT_NODE, CALL_NODE,
+    VAR_REFERENCE_NODE
 } NodeKind;
 
 typedef struct astNode {
@@ -26,3 +28,4 @@ AbstractSyntaxTree *newAbstractSyntaxTree();
 ASTNode *newASTNode(NodeKind nodeKind);
 ASTNode *newEmptyStatementNode();
 void printTree(ASTNode *node, int level);
+ASTNode *appendSibling(ASTNode *reference, ASTNode *newSibling);

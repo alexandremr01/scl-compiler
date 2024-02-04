@@ -17,6 +17,7 @@
 %type <node> program units external_declaration function_definition
 %type <node> declaration declaration_list compound_statement statement_list expression
 %type <node> statement expression_statement selection_statement iteration_statement jump_statement
+%type <node> simple_exp sum_exp term factor call var args arg_list
 
 %token ERROR NEWLINE // internal
 %token IF ELSE WHILE // control
@@ -27,8 +28,7 @@
 %token LPAREN RPAREN
 %token LBRACKET RBRACKET
 %token LBRACES RBRACES
-%token <string> ID 
-%token NUM 
+%token <string> ID NUM 
 %%
 program: units { 
     ASTNode *root = newASTNode(ROOT_NODE);
@@ -37,13 +37,7 @@ program: units {
 }
 
 units: external_declaration { $$ = $1; }
-    | units external_declaration {
-        ASTNode *p = $1;
-        while(p->sibling != NULL) 
-            p = p->sibling;
-        p->sibling = $2; 
-        $$ = $1;
-    }
+    | units external_declaration { $$ = appendSibling($1, $2);}
 
 external_declaration: function_definition { $$ = $1; }
                     | declaration { $$ = $1; }
@@ -68,28 +62,10 @@ declaration: type_specifier ID SEMICOLON  {
             }
 /* expression_list: expression_list expression_statement | expression_statement */
 
-statement_list: statement_list statement {
-    if ($1 == NULL) {
-        $$ = $2;
-    } else {
-        ASTNode *p = $1;
-        while(p->sibling != NULL) 
-            p = p->sibling;
-        p->sibling = $2; 
-        $$ = $1;
-    }
-}| {$$=NULL;}
-declaration_list: declaration_list declaration {
-    if ($1 == NULL) {
-        $$ = $2;
-    } else {
-        ASTNode *p = $1;
-        while(p->sibling != NULL) 
-            p = p->sibling;
-        p->sibling = $2; 
-        $$ = $1;
-    }
-}| {$$=NULL;}
+statement_list: statement_list statement { $$ = appendSibling($1, $2);}
+                | {$$=NULL;}
+declaration_list: declaration_list declaration { $$ = appendSibling($1, $2);}
+                | {$$=NULL;}
 compound_statement: LBRACES declaration_list statement_list RBRACES {
     if ($2 == NULL) 
         $$ = $3;
@@ -129,19 +105,54 @@ jump_statement: RETURN SEMICOLON {$$ = newASTNode(RETURN_NODE);}
                     $$->firstChild = $2;
                 } 
 
-expression: var ASSIGN expression {$$ = newASTNode(EXPRESSION_NODE);} 
-            | simple_exp {$$ = newASTNode(EXPRESSION_NODE);}
-var:        ID | ID LBRACKET NUM RBRACKET {}
-simple_exp: sum_exp relational sum_exp | sum_exp
+expression: var ASSIGN expression {
+                $$ = newASTNode(ASSIGNMENT_NODE);
+                $$->firstChild = $1;
+                $1->sibling = $3;
+            } 
+            | simple_exp { $$ = $1; }
+var:        ID {
+                $$ = newASTNode(VAR_REFERENCE_NODE);
+                $$->name = $1;
+            }
+            | ID LBRACKET NUM RBRACKET {
+                $$ = newASTNode(VAR_REFERENCE_NODE);
+                $$->name = $1;
+                // TODO: how to treat vector access??
+            }
+simple_exp: sum_exp relational sum_exp {
+                $$ = newASTNode(EXPRESSION_NODE);
+                $$->firstChild = $1;
+                $1->sibling = $3;
+            } | sum_exp {$$ = $1;}
 relational: LT | GT | LEQ | GEQ | EQ | DIFFERENT
-sum_exp:    sum_exp sum term | term
+sum_exp:    sum_exp sum term {
+                $$ = newASTNode(SUM_NODE);
+                $$->firstChild = $1;
+                $1->sibling = $3;
+            }| term {$$ = $1;}
 sum:        PLUS | MINUS
-term:       term mult_op factor | factor
+term:       term mult_op factor {
+                $$ = newASTNode(MULTIPLICATION_NODE);
+                $$->firstChild = $1;
+                $1->sibling = $3;
+            }| factor {$$ = $1;}
 mult_op:    TIMES | OVER
-factor:     LPAREN expression RPAREN | var | NUM | call
-call:       ID LPAREN args RPAREN
-args:       arg_list | 
-arg_list:   arg_list COMMA expression | expression
+factor:     LPAREN expression RPAREN {$$=$2;}
+             | var {$$=$1;}
+             | NUM {
+                $$ = newASTNode(CONSTANT_NODE);
+                $$->name = $1;
+            }
+             | call {$$=$1;}
+call:       ID LPAREN args RPAREN {
+                $$ = newASTNode(CALL_NODE);
+                $$->name = $1;
+                $$->firstChild = $3;
+            }
+args:       arg_list {$$=$1;} | {$$=NULL;}
+arg_list:   arg_list COMMA expression { $$ = appendSibling($1, $3); }
+            | expression  {$$=$1;} 
 
 %%
 int yyerror(char* message) { 

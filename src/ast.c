@@ -17,6 +17,16 @@ ASTNode *newASTNode(NodeKind nodeKind){
     return node;
 }
 
+ASTNode *appendSibling(ASTNode *reference, ASTNode *newSibling){
+    if (reference == NULL) 
+        return newSibling;
+    ASTNode *p = reference;
+    while(p->sibling != NULL) 
+        p = p->sibling;
+    p->sibling = newSibling; 
+    return reference;
+}
+
 void printTree(ASTNode *node, int level){
     if (node == NULL) return;
     for(int i=0; i<level;i++) printf("\t");
@@ -41,6 +51,24 @@ void printTree(ASTNode *node, int level){
             break;
         case EXPRESSION_NODE:
             printf("Expression: TBD\n");
+            break;
+        case ASSIGNMENT_NODE:
+            printf("Assignment\n");
+            break;
+        case SUM_NODE:
+            printf("Sum\n");
+            break;
+        case MULTIPLICATION_NODE:
+            printf("Multiplication\n");
+            break;
+        case CONSTANT_NODE:
+            printf("Constant %s\n", node->name);
+            break;
+        case CALL_NODE:
+            printf("Call %s\n", node->name);
+            break;
+        case VAR_REFERENCE_NODE:
+            printf("Variable %s\n", node->name);
             break;
     }
     ASTNode *aux = node->firstChild;
