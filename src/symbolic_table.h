@@ -4,10 +4,15 @@
 #include "external/uthash.h"
 #include "datatypes.h"
 
+typedef enum symbtabEntryKind {
+    FUNCTION_ENTRY, VARIABLE_ENTRY
+} SymbolicTableEntryKind;
+
 typedef struct symbtabEntry {
     char *name;
     DataType type;
-    char *scope;
+    SymbolicTableEntryKind kind;
+
     UT_hash_handle hh;         
 } SymbolicTableEntry;
 
@@ -16,8 +21,9 @@ typedef struct symbtab {
 } SymbolicTable;
 
 void insertVariable(SymbolicTable *table, char *name, DataType type);
-SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type);
-SymbolicTableEntry * getVariable(SymbolicTable *table, char *name);
+void insertFunction(SymbolicTable *table, char *name, DataType type);
+
+SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name);
 SymbolicTable * newSymbolicTable();
 void printSymbolicTable(SymbolicTable *table);
 

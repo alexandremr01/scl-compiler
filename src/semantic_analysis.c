@@ -5,6 +5,12 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
 int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug){
     int errors = 0;
     semanticAnalysisNode(tree->root, symbolicTable, debug, &errors);
+
+    SymbolicTableEntry *mainFunction = getSymbolicTableEntry(symbolicTable, "main");
+    if (mainFunction == NULL || mainFunction->kind != FUNCTION_ENTRY) {
+        printf("Error: No function named main.\n");
+        errors++;
+    }
     return errors;
 }
 
@@ -14,6 +20,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
     switch (node->kind){
         case FUNCTION_DEFINITION_NODE:
             if (debug) printf("Declaration: function %s with return type %d\n", node->name, node->type);
+            insertFunction(symbolicTable, node->name, node->type);
             break;
         case ROOT_NODE:
             if (debug) printf("Program Root\n"); 
@@ -24,7 +31,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
                 printf("Error: Variable \'%s\' declared void.\n", node->name);
                 *errors += 1;
             }
-            stEntry = getVariable(symbolicTable, node->name);
+            stEntry = getSymbolicTableEntry(symbolicTable, node->name);
             if (stEntry != NULL){
                 printf("Error: Name \'%s\' already in use.\n", node->name);
                 *errors += 1;
@@ -59,10 +66,19 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
             break;
         case CALL_NODE:
             if (debug) printf("Call %s\n", node->name);
+            stEntry = getSymbolicTableEntry(symbolicTable, node->name);
+            if (stEntry == NULL){
+                printf("Error: Name \'%s\' does not exist.\n", node->name);
+                *errors += 1;
+            } else if (stEntry->kind != FUNCTION_ENTRY){
+                printf("Error: Name \'%s\' is not a function.\n", node->name);
+                *errors += 1;
+            }
+
             break;
         case VAR_REFERENCE_NODE:
             if (debug) printf("Variable %s\n", node->name);
-            stEntry = getVariable(symbolicTable, node->name);
+            stEntry = getSymbolicTableEntry(symbolicTable, node->name);
             if (stEntry == NULL){
                 printf("Error: Name \'%s\' is not defined.\n", node->name);
                 *errors += 1;

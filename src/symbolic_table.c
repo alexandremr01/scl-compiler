@@ -3,16 +3,22 @@
 #include <strings.h>
 #include <stdio.h>
 
-void insertVariable(SymbolicTable *table, char *name, DataType type){
-    SymbolicTableEntry *entry = newSymbolicTableEntry(name, type);
-    HASH_ADD_KEYPTR(hh, table->entries, entry->name, strlen(entry->name), entry);
-}
-
-SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type){
+SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTableEntryKind kind){
     SymbolicTableEntry *entry = (SymbolicTableEntry *)malloc(sizeof(SymbolicTableEntry));
     entry->name = name;
     entry->type = type;
+    entry->kind = kind;
     return entry;
+}
+
+void insertVariable(SymbolicTable *table, char *name, DataType type){
+    SymbolicTableEntry *entry = newSymbolicTableEntry(name, type, VARIABLE_ENTRY);
+    HASH_ADD_KEYPTR(hh, table->entries, entry->name, strlen(entry->name), entry);
+}
+
+void insertFunction(SymbolicTable *table, char *name, DataType type){
+    SymbolicTableEntry *entry = newSymbolicTableEntry(name, type, FUNCTION_ENTRY);
+    HASH_ADD_KEYPTR(hh, table->entries, entry->name, strlen(entry->name), entry);
 }
 
 SymbolicTable* newSymbolicTable(){
@@ -21,7 +27,7 @@ SymbolicTable* newSymbolicTable(){
     return table;
 }
 
-SymbolicTableEntry * getVariable(SymbolicTable *table, char *name) {
+SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name) {
     SymbolicTableEntry *entry = NULL;
     HASH_FIND_STR(table->entries, name, entry);
     return entry;

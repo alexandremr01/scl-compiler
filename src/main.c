@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 
     // Debug utilities
     if (print_ast) {
-        printf("Abstract Syntax Tree:\n");
+        printf("\nAbstract Syntax Tree:\n");
         printTree(tree->root, 0);
         printf("\n\n");
     }
@@ -104,8 +104,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (errors > 0) 
-        printf("%d compile errors", errors);
-    else printf("Compilation successful");
+        printf("%d compile errors\n", errors);
+    else printf("Compilation successful\n");
 
     return 0;
 }
