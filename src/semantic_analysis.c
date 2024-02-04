@@ -28,12 +28,12 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
         case DECLARATION_NODE:
             if (debug) printf("Declaration: var %s with type %d\n", node->name, node->type);
             if (node->type == VOID_TYPE) {
-                printf("Error: Variable \'%s\' declared void.\n", node->name);
+                printf("Line %d: Variable \'%s\' declared void.\n", node->line_number, node->name);
                 *errors += 1;
             }
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);
             if (stEntry != NULL){
-                printf("Error: Name \'%s\' already in use.\n", node->name);
+                printf("Line %d: Name \'%s\' already in use.\n", node->line_number, node->name);
                 *errors += 1;
             }
             if (node->type != VOID_TYPE && stEntry == NULL)
@@ -68,10 +68,10 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
             if (debug) printf("Call %s\n", node->name);
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);
             if (stEntry == NULL){
-                printf("Error: Name \'%s\' does not exist.\n", node->name);
+                printf("Line %d: Name \'%s\' does not exist.\n", node->line_number,node->name);
                 *errors += 1;
             } else if (stEntry->kind != FUNCTION_ENTRY){
-                printf("Error: Name \'%s\' is not a function.\n", node->name);
+                printf("Line %d: Name \'%s\' is not a function.\n", node->line_number, node->name);
                 *errors += 1;
             }
 
@@ -80,7 +80,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
             if (debug) printf("Variable %s\n", node->name);
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);
             if (stEntry == NULL){
-                printf("Error: Name \'%s\' is not defined.\n", node->name);
+                printf("Line %d: Name \'%s\' is not defined.\n", node->line_number, node->name);
                 *errors += 1;
             }// else if (stEntry->)
 

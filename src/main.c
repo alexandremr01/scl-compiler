@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 
     int errors = syntaxErrors + semanticErrors;
     if (errors > 0) 
-        printf("%d compile errors\n", errors);
+        printf("\n%d compile errors\n", errors);
     else printf("Compilation successful\n");
 
     return 0;

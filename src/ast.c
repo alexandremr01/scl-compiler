@@ -14,6 +14,7 @@ ASTNode *newASTNode(NodeKind nodeKind){
     node->name = NULL;
     node->type = NONE_TYPE;
     node->kind = nodeKind;
+    node->line_number = 0;
     return node;
 }
 

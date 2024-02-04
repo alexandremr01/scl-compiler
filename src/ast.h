@@ -19,6 +19,7 @@ typedef struct astNode {
     DataType type;
     NodeKind kind;
     char *name;
+    int line_number;
 } ASTNode;
 
 typedef struct abstractSyntaxTree {

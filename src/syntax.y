@@ -49,17 +49,20 @@ function_definition: type_specifier ID LPAREN RPAREN compound_statement {
     $$->type = $1;
     $$->name = $2; 
     $$->firstChild = $5;
+    $$->line_number = yylineno;
 }
 type_specifier: INT {$$ = INTEGER_TYPE;} | VOID {$$ = VOID_TYPE;} 
 declaration: type_specifier ID SEMICOLON  { 
                 $$ = newASTNode(DECLARATION_NODE);
                 $$->type = $1;
                 $$->name = $2; 
+                $$->line_number = yylineno;
             }
             | type_specifier ID LBRACKET NUM RBRACKET SEMICOLON  { 
                 $$ = newASTNode(DECLARATION_NODE);
                 $$->type = $1;
                 $$->name = $2; 
+                $$->line_number = yylineno;
                 // TODO: treat array
             }
             | error SEMICOLON {yyerrok; $$ = NULL;}
@@ -91,55 +94,65 @@ selection_statement: IF LPAREN expression RPAREN statement {
                     $$ = newASTNode(IF_NODE);
                     $$->firstChild = $3;
                     $$->firstChild->sibling = $5;
+                    $$->line_number = yylineno;
                 } 
                     | IF LPAREN expression RPAREN statement ELSE statement{
                     $$ = newASTNode(IF_NODE);
                     $$->firstChild = $3;
                     $3->sibling = $5;
                     $5->sibling = $7;
+                    $$->line_number = yylineno;
                 } 
 iteration_statement: WHILE LPAREN expression RPAREN statement {
                     $$ = newASTNode(WHILE_NODE);
                     $$->firstChild = $3;
                     $3->sibling = $5;
+                    $$->line_number = yylineno;
                 } 
 jump_statement: RETURN SEMICOLON {$$ = newASTNode(RETURN_NODE);} 
                 | RETURN expression SEMICOLON {
                     $$ = newASTNode(RETURN_NODE);
                     $$->firstChild = $2;
+                    $$->line_number = yylineno;
                 } 
 
 expression: var ASSIGN expression {
                 $$ = newASTNode(ASSIGNMENT_NODE);
                 $$->firstChild = $1;
                 $1->sibling = $3;
+                $$->line_number = yylineno;
             } 
             | simple_exp { $$ = $1; }
 var:        ID {
                 $$ = newASTNode(VAR_REFERENCE_NODE);
                 $$->name = $1;
+                $$->line_number = yylineno;
             }
             | ID LBRACKET NUM RBRACKET {
                 $$ = newASTNode(VAR_REFERENCE_NODE);
                 $$->name = $1;
+                $$->line_number = yylineno;
                 // TODO: how to treat vector access??
             }
 simple_exp: sum_exp relational sum_exp {
                 $$ = newASTNode(EXPRESSION_NODE);
                 $$->firstChild = $1;
                 $1->sibling = $3;
+                $$->line_number = yylineno;
             } | sum_exp {$$ = $1;}
 relational: LT | GT | LEQ | GEQ | EQ | DIFFERENT
 sum_exp:    sum_exp sum term {
                 $$ = newASTNode(SUM_NODE);
                 $$->firstChild = $1;
                 $1->sibling = $3;
+                $$->line_number = yylineno;
             }| term {$$ = $1;}
 sum:        PLUS | MINUS
 term:       term mult_op factor {
                 $$ = newASTNode(MULTIPLICATION_NODE);
                 $$->firstChild = $1;
                 $1->sibling = $3;
+                $$->line_number = yylineno;
             }| factor {$$ = $1;}
 mult_op:    TIMES | OVER
 factor:     LPAREN expression RPAREN {$$=$2;}
@@ -147,12 +160,14 @@ factor:     LPAREN expression RPAREN {$$=$2;}
              | NUM {
                 $$ = newASTNode(CONSTANT_NODE);
                 $$->name = $1;
+                $$->line_number = yylineno;
             }
              | call {$$=$1;}
 call:       ID LPAREN args RPAREN {
                 $$ = newASTNode(CALL_NODE);
                 $$->name = $1;
                 $$->firstChild = $3;
+                $$->line_number = yylineno;
             }
 args:       arg_list {$$=$1;} | %empty {$$=NULL;}
 arg_list:   arg_list COMMA expression { $$ = appendSibling($1, $3); }
