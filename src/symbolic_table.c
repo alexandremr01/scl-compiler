@@ -10,7 +10,8 @@ SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTa
     return entry;
 }
 
-void insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKind kind, DataType type, int line_number, int scope_level){
+
+SymbolicTableEntry *insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKind kind, DataType type, int line_number, int scope_level){
     SymbolicTableEntry *newEntry = newSymbolicTableEntry(name, type, kind, line_number, scope_level);
     
     SymbolicTableEntry *entry = NULL;
@@ -22,7 +23,18 @@ void insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKin
         SymbolicTableEntry *aux = NULL;
         HASH_REPLACE_STR(table->entries, name, newEntry, aux);
     }
+    return newEntry;
 }
+
+void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level){
+    insertSymbolicTable(table, name, VARIABLE_ENTRY, type, line_number, scope_level);
+}
+
+void insertFunction(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, DataTypeList *list){
+    SymbolicTableEntry *newEntry = insertSymbolicTable(table, name, FUNCTION_ENTRY, type, line_number, scope_level);
+    newEntry->parameterTypes = list;
+}
+
 
 SymbolicTable* newSymbolicTable(){
     SymbolicTable *table = (SymbolicTable *)malloc(sizeof(SymbolicTable));

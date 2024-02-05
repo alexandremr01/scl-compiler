@@ -20,6 +20,7 @@
 %type <node> declaration declaration_list compound_statement statement_list expression
 %type <node> statement expression_statement selection_statement iteration_statement jump_statement
 %type <node> simple_exp sum_exp term factor call var args arg_list
+%type <node> parameters parameter_list parameter
 
 %token ERROR NEWLINE // internal
 %token IF ELSE WHILE // control
@@ -31,6 +32,7 @@
 %token LBRACKET RBRACKET
 %token LBRACES RBRACES
 %token <string> ID NUM 
+
 %%
 program: units { 
     ASTNode *root = newASTNode(ROOT_NODE);
@@ -44,13 +46,30 @@ units: external_declaration { $$ = $1; }
 external_declaration: function_definition { $$ = $1; }
                     | declaration { $$ = $1; }
 
-function_definition: type_specifier ID LPAREN RPAREN compound_statement {
+function_definition: type_specifier ID LPAREN parameters RPAREN compound_statement {
     $$ = newASTNode(FUNCTION_DEFINITION_NODE);
     $$->type = $1;
     $$->name = $2; 
-    $$->firstChild = $5;
+    $$->firstChild = $6;
+    $6->sibling = $4;
     $$->line_number = yylineno;
 }
+parameters: parameter_list {$$=$1;} | %empty {$$=NULL;}
+parameter_list: parameter_list COMMA parameter {$$ = appendSibling($1, $3);}| parameter {$$=$1;} 
+parameter: type_specifier ID  { 
+        $$ = newASTNode(DECLARATION_NODE);
+        $$->type = $1;
+        $$->name = $2; 
+        $$->line_number = yylineno;
+    }
+ | type_specifier ID LBRACKET NUM RBRACKET SEMICOLON  { 
+        $$ = newASTNode(DECLARATION_NODE);
+        $$->type = $1;
+        $$->name = $2; 
+        $$->line_number = yylineno;
+        // TODO: treat array
+    }
+
 type_specifier: INT {$$ = INTEGER_TYPE;} | VOID {$$ = VOID_TYPE;} 
 declaration: type_specifier ID SEMICOLON  { 
                 $$ = newASTNode(DECLARATION_NODE);
@@ -73,14 +92,17 @@ statement_list: statement_list statement { $$ = appendSibling($1, $2);}
 declaration_list: declaration_list declaration { $$ = appendSibling($1, $2);}
                 | %empty {$$=NULL;}
 compound_statement: LBRACES declaration_list statement_list RBRACES {
+    $$ = newASTNode(COMPOUND_STATEMENT_NODE);
+    $$->line_number = yylineno;
+    
     if ($2 == NULL) 
-        $$ = $3;
+        $$->firstChild = $3;
     else { 
         ASTNode *p = $2;
         while(p->sibling != NULL) 
             p = p->sibling;
         p->sibling = $3;
-        $$ = $2;
+        $$->firstChild = $2;
     }
 }
 

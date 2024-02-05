@@ -13,12 +13,19 @@ typedef enum symbtabEntryKind {
     FUNCTION_ENTRY, VARIABLE_ENTRY
 } SymbolicTableEntryKind;
 
+typedef struct dataTypeList {
+    DataType type;
+    struct dataTypeList *next;
+} DataTypeList;
+
 typedef struct symbtabEntry {
     char *name;
     DataType type;
     SymbolicTableEntryKind kind;
     int definition_line_number;
     int scope_level;
+
+    DataTypeList *parameterTypes;
     struct symbtabEntry *next;
 
     UT_hash_handle hh;         
@@ -28,7 +35,8 @@ typedef struct symbtab {
     SymbolicTableEntry *entries;
 } SymbolicTable;
 
-void insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKind kind, DataType type, int line_number, int scope_level);
+void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level);
+void insertFunction(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, DataTypeList *list);
 
 SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name);
 void removeSymbolicTableEntry(SymbolicTable *table, char *name);

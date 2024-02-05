@@ -1,11 +1,11 @@
 CC        := gcc
-CFLAGS    := -Wextra -Wundef -Wpointer-arith -Wcast-align -pedantic -std=c11 -D_XOPEN_SOURCE=500 -Werror=vla
+CFLAGS    := -g -Wextra -Wundef -Wpointer-arith -Wcast-align -pedantic -std=c11 -D_XOPEN_SOURCE=500 -Werror=vla
 LDFLAGS   := -lfl
 BUILD     := ./bin
 
 SOURCEDIR := $(CURDIR)/src
 
-SOURCEFILES    := main.c ast.c symbolic_table.c semantic_analysis.c lex.yy.c syntax.tab.c
+SOURCEFILES    := main.c ast.c symbolic_table.c semantic_analysis.c lex.yy.c syntax.tab.c datatypes.c
 GENERATEDFILES := *.yy.c *.tab.* *.output
 
 SRC :=  $(foreach file, $(SOURCEFILES), $(addprefix $(SOURCEDIR)/, $(file)))

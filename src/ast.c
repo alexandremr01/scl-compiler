@@ -71,6 +71,8 @@ void printTree(ASTNode *node, int level){
         case VAR_REFERENCE_NODE:
             printf("Variable %s\n", node->name);
             break;
+        case COMPOUND_STATEMENT_NODE:
+            printf("Compound statement\n");
     }
     ASTNode *aux = node->firstChild;
     while (aux != NULL){
