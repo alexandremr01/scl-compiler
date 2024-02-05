@@ -20,7 +20,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
     switch (node->kind){
         case FUNCTION_DEFINITION_NODE:
             if (debug) printf("Declaration: function %s with return type %d\n", node->name, node->type);
-            insertFunction(symbolicTable, node->name, node->type);
+            insertFunction(symbolicTable, node->name, node->type, node->line_number);
             break;
         case ROOT_NODE:
             if (debug) printf("Program Root\n"); 
@@ -33,11 +33,11 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
             }
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);
             if (stEntry != NULL){
-                printf("Line %d: Name \'%s\' already in use.\n", node->line_number, node->name);
+                printf("Line %d: Name \'%s\' already in use. First defined in line %d.\n", node->line_number, node->name, stEntry->definition_line_number);
                 *errors += 1;
             }
             if (node->type != VOID_TYPE && stEntry == NULL)
-                insertVariable(symbolicTable, node->name, node->type);
+                insertVariable(symbolicTable, node->name, node->type, node->line_number);
             
             break;
         case IF_NODE: 

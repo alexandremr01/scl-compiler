@@ -1,20 +1,21 @@
 #include "symbolic_table.h"
 
-SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTableEntryKind kind){
+SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTableEntryKind kind, int line_number){
     SymbolicTableEntry *entry = (SymbolicTableEntry *)malloc(sizeof(SymbolicTableEntry));
     entry->name = name;
     entry->type = type;
     entry->kind = kind;
+    entry->definition_line_number = line_number;
     return entry;
 }
 
-void insertVariable(SymbolicTable *table, char *name, DataType type){
-    SymbolicTableEntry *entry = newSymbolicTableEntry(name, type, VARIABLE_ENTRY);
+void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number){
+    SymbolicTableEntry *entry = newSymbolicTableEntry(name, type, VARIABLE_ENTRY, line_number);
     HASH_ADD_KEYPTR(hh, table->entries, entry->name, strlen(entry->name), entry);
 }
 
-void insertFunction(SymbolicTable *table, char *name, DataType type){
-    SymbolicTableEntry *entry = newSymbolicTableEntry(name, type, FUNCTION_ENTRY);
+void insertFunction(SymbolicTable *table, char *name, DataType type, int line_number){
+    SymbolicTableEntry *entry = newSymbolicTableEntry(name, type, FUNCTION_ENTRY, line_number);
     HASH_ADD_KEYPTR(hh, table->entries, entry->name, strlen(entry->name), entry);
 }
 
