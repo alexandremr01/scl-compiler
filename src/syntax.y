@@ -75,11 +75,13 @@ declaration_list: declaration_list declaration { $$ = appendSibling($1, $2);}
 compound_statement: LBRACES declaration_list statement_list RBRACES {
     if ($2 == NULL) 
         $$ = $3;
-    ASTNode *p = $2;
-    while(p->sibling != NULL) 
-        p = p->sibling;
-    p->sibling = $3;
-    $$ = $2;
+    else { 
+        ASTNode *p = $2;
+        while(p->sibling != NULL) 
+            p = p->sibling;
+        p->sibling = $3;
+        $$ = $2;
+    }
 }
 
 statement: expression_statement {$$=$1;}
