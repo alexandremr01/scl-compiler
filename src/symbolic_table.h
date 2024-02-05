@@ -18,6 +18,8 @@ typedef struct symbtabEntry {
     DataType type;
     SymbolicTableEntryKind kind;
     int definition_line_number;
+    int scope_level;
+    struct symbtabEntry *next;
 
     UT_hash_handle hh;         
 } SymbolicTableEntry;
@@ -26,8 +28,7 @@ typedef struct symbtab {
     SymbolicTableEntry *entries;
 } SymbolicTable;
 
-void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number);
-void insertFunction(SymbolicTable *table, char *name, DataType type, int line_number);
+void insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKind kind, DataType type, int line_number, int scope_level);
 
 SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name);
 SymbolicTable * newSymbolicTable();

@@ -1,10 +1,10 @@
 #include "semantic_analysis.h"
 
-void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors);
+void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors, int scope_level);
 
 int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug){
     int errors = 0;
-    semanticAnalysisNode(tree->root, symbolicTable, debug, &errors);
+    semanticAnalysisNode(tree->root, symbolicTable, debug, &errors, 0);
 
     SymbolicTableEntry *mainFunction = getSymbolicTableEntry(symbolicTable, "main");
     if (mainFunction == NULL || mainFunction->kind != FUNCTION_ENTRY) {
@@ -14,13 +14,14 @@ int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int
     return errors;
 }
 
-void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors){
+void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors, int scope_level){
     if (node == NULL) return;
     SymbolicTableEntry * stEntry;
     switch (node->kind){
         case FUNCTION_DEFINITION_NODE:
             if (debug) printf("Declaration: function %s with return type %d\n", node->name, node->type);
-            insertFunction(symbolicTable, node->name, node->type, node->line_number);
+            insertSymbolicTable(symbolicTable, node->name, FUNCTION_ENTRY, node->type, node->line_number, scope_level);
+            scope_level += 1;
             break;
         case ROOT_NODE:
             if (debug) printf("Program Root\n"); 
@@ -32,12 +33,12 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
                 *errors += 1;
             }
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);
-            if (stEntry != NULL){
+            if (stEntry != NULL && stEntry->scope_level == scope_level){
                 printf("Line %d: Name \'%s\' already in use. First defined in line %d.\n", node->line_number, node->name, stEntry->definition_line_number);
                 *errors += 1;
             }
-            if (node->type != VOID_TYPE && stEntry == NULL)
-                insertVariable(symbolicTable, node->name, node->type, node->line_number);
+            if (node->type != VOID_TYPE && (stEntry == NULL || stEntry->scope_level < scope_level))
+                insertSymbolicTable(symbolicTable, node->name, VARIABLE_ENTRY, node->type, node->line_number, scope_level);
             
             break;
         case IF_NODE: 
@@ -88,7 +89,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
     }
     ASTNode *aux = node->firstChild;
     while (aux != NULL){
-        semanticAnalysisNode(aux, symbolicTable, debug, errors);
+        semanticAnalysisNode(aux, symbolicTable, debug, errors, scope_level);
         aux = aux->sibling;
     }
 }
