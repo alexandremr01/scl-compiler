@@ -36,6 +36,14 @@ SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name) {
     return entry;
 }
 
+void removeSymbolicTableEntry(SymbolicTable *table, char *name) {
+    SymbolicTableEntry *entry = getSymbolicTableEntry(table, name);
+    SymbolicTableEntry *aux = NULL;
+    if (entry->next == NULL)
+        HASH_DELETE(hh, table->entries, entry);
+    else HASH_REPLACE_STR(table->entries, name, entry->next, aux);
+}
+
 void printSymbolicTable(SymbolicTable *table){
     SymbolicTableEntry *entry;
 

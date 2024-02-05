@@ -31,6 +31,7 @@ typedef struct symbtab {
 void insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKind kind, DataType type, int line_number, int scope_level);
 
 SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name);
+void removeSymbolicTableEntry(SymbolicTable *table, char *name);
 SymbolicTable * newSymbolicTable();
 void printSymbolicTable(SymbolicTable *table);
 
