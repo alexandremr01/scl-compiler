@@ -17,7 +17,6 @@ DeleteStack * newDeleteStack(){
     stack->next = NULL;
     return stack;
 }
-
 void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors, int scope_level, DeleteStack *stack);
 
 int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug){
@@ -33,6 +32,7 @@ int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int
     }
     return errors;
 }
+
 
 void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors, int scope_level, DeleteStack *stack){
     if (node == NULL) return;
@@ -90,6 +90,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
             printf("Line %d: Name \'%s\' is not a function.\n", node->line_number, node->name);
             *errors += 1;
         } 
+        node->type = stEntry->type;
         ASTNode *parameter = node->firstChild;
         DataTypeList *dtypes = stEntry->parameterTypes;
 
@@ -163,23 +164,26 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
         case RETURN_NODE: 
             if (debug) printf("Return\n");
             break;
+        case ASSIGNMENT_NODE:
+            node->type = VOID_TYPE;
+            break;
         case EXPRESSION_NODE:
             if (debug) printf("Expression: TBD\n");
-            break;
-        case ASSIGNMENT_NODE:
-            if (debug) printf("Assignment\n");
+            node->type = INTEGER_TYPE;
             break;
         case SUM_NODE:
             if (debug) printf("Sum\n");
+            node->type = INTEGER_TYPE;
             break;
         case MULTIPLICATION_NODE:
             if (debug) printf("Multiplication\n");
+            node->type = INTEGER_TYPE;
             break;
         case CONSTANT_NODE:
             if (debug) printf("Constant %s\n", node->name);
-            break;
+            node->type = INTEGER_TYPE;
+            return;
         case CALL_NODE:
-            
             break;
         case VAR_REFERENCE_NODE:
             if (debug) printf("Variable %s\n", node->name);
@@ -187,8 +191,8 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
             if (stEntry == NULL){
                 printf("Line %d: Name \'%s\' is not defined.\n", node->line_number, node->name);
                 *errors += 1;
-            }// else if (stEntry->)
-
+            }
+            node->type = stEntry->type;
             break;
     }
     ASTNode *aux = node->firstChild;
@@ -196,4 +200,5 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug
         semanticAnalysisNode(aux, symbolicTable, debug, errors, scope_level, stack);
         aux = aux->sibling;
     }
+    return;
 }

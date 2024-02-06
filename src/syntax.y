@@ -145,6 +145,7 @@ expression: var ASSIGN expression {
                 $$->firstChild = $1;
                 $1->sibling = $3;
                 $$->line_number = yylineno;
+                $$->type = VOID_TYPE;
             } 
             | simple_exp { $$ = $1; }
 var:        ID {
@@ -185,6 +186,7 @@ factor:     LPAREN expression RPAREN {$$=$2;}
                 $$ = newASTNode(CONSTANT_NODE);
                 $$->name = $1;
                 $$->line_number = yylineno;
+                $$->type = INTEGER_TYPE;
             }
              | call {$$=$1;}
 call:       ID LPAREN args RPAREN {
