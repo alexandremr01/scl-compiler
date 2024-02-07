@@ -27,7 +27,6 @@ typedef struct astNode {
 
 typedef struct abstractSyntaxTree {
     ASTNode *root;
-    int nextTempReg;
 } AbstractSyntaxTree;
 
 AbstractSyntaxTree *newAbstractSyntaxTree();

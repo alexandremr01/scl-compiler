@@ -4,7 +4,6 @@
 AbstractSyntaxTree *newAbstractSyntaxTree(ASTNode *root){
     AbstractSyntaxTree *ast = (AbstractSyntaxTree *)malloc(sizeof(AbstractSyntaxTree));
     ast->root = root;
-    ast->nextTempReg = 0;
     return ast;
 }
 

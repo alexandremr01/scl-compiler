@@ -27,6 +27,7 @@ typedef struct irNode {
 typedef struct intermediateRepresentation {
     struct irNode *head;
     struct irNode *tail;
+    int nextTempReg;
 } IntermediateRepresentation;
 
 IntermediateRepresentation *newIntermediateRepresentation();

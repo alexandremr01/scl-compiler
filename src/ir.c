@@ -4,6 +4,7 @@ IntermediateRepresentation *newIntermediateRepresentation(){
     IntermediateRepresentation *ir = (IntermediateRepresentation *) malloc(sizeof(IntermediateRepresentation));
     ir->head = NULL;
     ir->tail = NULL;
+    ir->nextTempReg = 0;
     return ir;
 }
 
