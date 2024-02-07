@@ -5,6 +5,7 @@
 #include "semantic_analysis.h"
 #include "ast.h"
 #include "syntax.tab.h"
+#include "ir.h"
 
 extern FILE *yyin;
 extern int yylex (void);
@@ -60,10 +61,10 @@ void lexic_parser_only(){
 }
 
 int main(int argc, char *argv[]) {
-    FILE *f_in;
+    FILE *f_in, *f_out;
     int print_ast=0, print_symbolic_table=0;
-    if (argc < 2) {
-        printf("Usage: scl file [--lexical_only] \n");
+    if (argc < 3) {
+        printf("Usage: scl src_file output_file [--lexical_only] [--print_ast] [--print_symbolic_table]\n");
         return 1;
     }
     if (f_in = fopen(argv[1],"r")) 
@@ -72,7 +73,11 @@ int main(int argc, char *argv[]) {
         printf("FATAL: Could not open %s \n", argv[1]);
         return 1;
     }
-    for (int i=2; i < argc; i++){
+    if (!(f_out = fopen(argv[2],"w"))){
+        printf("FATAL: Could not open %s \n", argv[2]);
+        return 1;
+    }
+    for (int i=3; i < argc; i++){
         if (strcmp(argv[i], "--lexical_only") == 0){
             lexic_parser_only();
             return 0;
@@ -91,7 +96,9 @@ int main(int argc, char *argv[]) {
     AbstractSyntaxTree *tree = parse();
 
     SymbolicTable* table = newSymbolicTable();
-    int semanticErrors = semanticAnalysis(tree, table, 0);
+
+    IntermediateRepresentation *ir = newIntermediateRepresentation();
+    int semanticErrors = semanticAnalysis(tree, table, 0, ir);
 
     // Debug utilities
     if (print_ast) {
@@ -106,9 +113,13 @@ int main(int argc, char *argv[]) {
     }
 
     int errors = syntaxErrors + semanticErrors;
-    if (errors > 0) 
+    if (errors > 0) {
         printf("\n%d compile errors\n", errors);
-    else printf("Compilation successful\n");
+        return 1;
+    }
+    printIR(ir, f_out);
+   
+    printf("Compilation successful\n");
 
     return 0;
 }

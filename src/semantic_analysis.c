@@ -19,7 +19,7 @@ DeleteStack * newDeleteStack(){
 }
 void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors, int scope_level, DeleteStack *stack);
 
-int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug){
+int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug, IntermediateRepresentation *ir){
     int errors = 0;
 
     DeleteStack *stack = newDeleteStack();
