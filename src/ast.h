@@ -16,14 +16,18 @@ typedef struct astNode {
     struct astNode *firstChild;
     struct astNode *sibling;
 
+    SymbolicTableEntry *stEntry;
+
     DataType type;
     NodeKind kind;
     char *name;
     int line_number;
+    int tempRegResult;
 } ASTNode;
 
 typedef struct abstractSyntaxTree {
     ASTNode *root;
+    int nextTempReg;
 } AbstractSyntaxTree;
 
 AbstractSyntaxTree *newAbstractSyntaxTree();

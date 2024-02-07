@@ -4,6 +4,7 @@
 AbstractSyntaxTree *newAbstractSyntaxTree(ASTNode *root){
     AbstractSyntaxTree *ast = (AbstractSyntaxTree *)malloc(sizeof(AbstractSyntaxTree));
     ast->root = root;
+    ast->nextTempReg = 0;
     return ast;
 }
 
@@ -15,6 +16,8 @@ ASTNode *newASTNode(NodeKind nodeKind){
     node->type = NONE_TYPE;
     node->kind = nodeKind;
     node->line_number = 0;
+    node->tempRegResult = 0;
+    node->stEntry = NULL;
     return node;
 }
 

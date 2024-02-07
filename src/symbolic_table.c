@@ -7,6 +7,7 @@ SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTa
     entry->kind = kind;
     entry->definition_line_number = line_number;
     entry->scope_level = scope_level;
+    entry->address = 0x15;
     return entry;
 }
 

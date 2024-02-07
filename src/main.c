@@ -5,7 +5,7 @@
 #include "semantic_analysis.h"
 #include "ast.h"
 #include "syntax.tab.h"
-#include "ir.h"
+#include "codegen.h"
 
 extern FILE *yyin;
 extern int yylex (void);
@@ -97,8 +97,7 @@ int main(int argc, char *argv[]) {
 
     SymbolicTable* table = newSymbolicTable();
 
-    IntermediateRepresentation *ir = newIntermediateRepresentation();
-    int semanticErrors = semanticAnalysis(tree, table, 0, ir);
+    int semanticErrors = semanticAnalysis(tree, table, 0);
 
     // Debug utilities
     if (print_ast) {
@@ -117,6 +116,8 @@ int main(int argc, char *argv[]) {
         printf("\n%d compile errors\n", errors);
         return 1;
     }
+
+    IntermediateRepresentation *ir = codeGen(tree);
     printIR(ir, f_out);
    
     printf("Compilation successful\n");

@@ -4,7 +4,6 @@
 #include "external/uthash.h"
 
 #include "datatypes.h"
-#include "ast.h"
 
 #include <strings.h>
 #include <stdio.h>
@@ -24,6 +23,7 @@ typedef struct symbtabEntry {
     SymbolicTableEntryKind kind;
     int definition_line_number;
     int scope_level;
+    int address;
 
     DataTypeList *parameterTypes;
     struct symbtabEntry *next;
