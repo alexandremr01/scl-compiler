@@ -5,10 +5,10 @@
 #include "ir.h"
 
 typedef struct registerMapping {
-    char **map;
+    int *map;
 } RegisterMapping;
 
 RegisterMapping *newRegisterMapping(IntermediateRepresentation *ir);
-char *getRegister(RegisterMapping *rm, int temporary);
+int getRegisterAssignment(RegisterMapping *rm, int temporary);
 
 #endif 

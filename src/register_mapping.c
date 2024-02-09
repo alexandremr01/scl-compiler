@@ -86,11 +86,10 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
 RegisterMapping *newRegisterMapping(IntermediateRepresentation *ir){
     RegisterMapping *rm = (RegisterMapping *) malloc(sizeof(RegisterMapping));
     int number_temporaries = ir->nextTempReg;
-    rm->map = (char **) malloc(number_temporaries*sizeof(char*));
+    rm->map = (int*) malloc(number_temporaries*sizeof(int));
 
     for (int i=0; i<number_temporaries; i++){
-        rm->map[i] = (char *) malloc(MAX_REGISTER_NAME*sizeof(char));
-        strcpy(rm->map[i], "rx0");
+        rm->map[i] = 0;
     }
 
     DependenciesGraph *dg = buildDependencyGraph(ir);
@@ -99,7 +98,7 @@ RegisterMapping *newRegisterMapping(IntermediateRepresentation *ir){
     return rm;
 }
 
-char *getRegister(RegisterMapping *rm, int temporary){
+int getRegisterAssignment(RegisterMapping *rm, int temporary){
     return rm->map[temporary];
 }
 
