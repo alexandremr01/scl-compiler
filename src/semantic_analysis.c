@@ -12,11 +12,22 @@ void addDeleteStack(DeleteStack *s, char *name) {
     entry->next = s->next;
     s->next = entry;
 }
+
 DeleteStack * newDeleteStack(){
     DeleteStack *stack = (DeleteStack *)malloc(sizeof(DeleteStack));
     stack->next = NULL;
     return stack;
 }
+
+void freeStack(DeleteStack* curr) {
+    DeleteStack *next = NULL;
+    while(curr != NULL){
+        next = curr->next;
+        free(curr);
+        curr = next;
+    }
+}
+
 void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors, int scope_level, DeleteStack *stack);
 
 int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug){
@@ -24,6 +35,7 @@ int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int
 
     DeleteStack *stack = newDeleteStack();
     semanticAnalysisNode(tree, tree->root, symbolicTable, debug, &errors, 0, stack);
+    freeStack(stack);
 
     SymbolicTableEntry *mainFunction = getSymbolicTableEntry(symbolicTable, "main");
     if (mainFunction == NULL || mainFunction->kind != FUNCTION_ENTRY) {
@@ -39,7 +51,9 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
     SymbolicTableEntry * stEntry;
     if (node->kind == FUNCTION_DEFINITION_NODE) {
         if (debug) printf("Declaration: function %s with return type %d\n", node->name, node->type);
+        
         stack = newDeleteStack();
+
         ASTNode *parameters = node->firstChild->sibling;
     
         ASTNode *p = parameters;
@@ -73,10 +87,12 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
         semanticAnalysisNode(tree, node->firstChild, symbolicTable, debug, errors, scope_level, stack);
 
         scope_level--; 
-        while (stack->next != NULL){
-            removeSymbolicTableEntry(symbolicTable, stack->next->name);
-            stack = stack->next;
+        DeleteStack *aux = stack;
+        while (aux->next != NULL){
+            removeSymbolicTableEntry(symbolicTable, aux->next->name);
+            aux = aux->next;
         }
+        freeStack(stack);
         return;
     }
 

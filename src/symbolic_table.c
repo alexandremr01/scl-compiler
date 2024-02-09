@@ -44,6 +44,14 @@ SymbolicTable* newSymbolicTable(){
     return table;
 }
 
+void freeSymbolicTable(SymbolicTable *table) {
+    SymbolicTableEntry *entry;
+    for (entry = table->entries; entry != NULL; entry = entry->hh.next) {
+        HASH_DELETE(hh, table->entries, entry);
+    }
+    free(table);
+}
+
 SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name) {
     SymbolicTableEntry *entry = NULL;
     HASH_FIND_STR(table->entries, name, entry);

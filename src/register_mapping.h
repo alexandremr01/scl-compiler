@@ -10,5 +10,6 @@ typedef struct registerMapping {
 
 RegisterMapping *newRegisterMapping(IntermediateRepresentation *ir);
 int getRegisterAssignment(RegisterMapping *rm, int temporary);
+void freeRegisterMapping(RegisterMapping *rm);
 
 #endif 

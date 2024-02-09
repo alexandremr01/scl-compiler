@@ -64,3 +64,13 @@ void addCommentIR(IntermediateRepresentation *ir, char *comment){
     addNode(ir, node);
 }
 
+void freeIntermediateRepresentation(IntermediateRepresentation *ir) {
+    IRNode *node = ir->head;
+    IRNode *next = NULL;
+    while(node != NULL){
+        next = node->next;
+        free(node);
+        node = next;
+    }
+    free(ir);
+}

@@ -124,6 +124,10 @@ int main(int argc, char *argv[]) {
     RegisterMapping *rm = newRegisterMapping(ir);
 
     printIR(ir, f_out, rm);
+
+    freeIntermediateRepresentation(ir);
+    freeRegisterMapping(rm);
+    freeSymbolicTable(table);
    
     printf("Compilation successful\n");
 

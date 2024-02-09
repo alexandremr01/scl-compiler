@@ -41,6 +41,7 @@ void insertFunction(SymbolicTable *table, char *name, DataType type, int line_nu
 SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name);
 void removeSymbolicTableEntry(SymbolicTable *table, char *name);
 SymbolicTable * newSymbolicTable();
+void freeSymbolicTable(SymbolicTable *table);
 void printSymbolicTable(SymbolicTable *table);
 
 #endif

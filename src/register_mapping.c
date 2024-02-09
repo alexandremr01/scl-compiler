@@ -37,6 +37,15 @@ IntStack * pushStack(IntStack *stack, int v) {
     return el;
 }
 
+void freeIntStack(IntStack* curr) {
+    IntStack *next = NULL;
+    while(curr != NULL){
+        next = curr->next;
+        free(curr);
+        curr = next;
+    }
+}
+
 int *colorGraph(DependenciesGraph *dg, int number_temporaries, int num_colors) {
     int *map = (int*) malloc(number_temporaries*sizeof(int));
     int *active = (int*) malloc(number_temporaries*sizeof(int));
@@ -125,6 +134,9 @@ int *colorGraph(DependenciesGraph *dg, int number_temporaries, int num_colors) {
     }
     printf("\n");
 
+    freeIntStack(stack);
+    free(active);
+
     return map;
 }
 
@@ -135,6 +147,20 @@ void addEdge(DependenciesGraph *dg, int src, int dest) {
     newEl->value = dest;
     dg->adjList[src]->next = newEl;
     dg->num_neighbors[src]+=1;
+}
+
+void deleteDependencyGraph(DependenciesGraph *dg) {
+    free(dg->num_neighbors);
+    for (int i=0; i<dg->numNodes; i++){
+        AdjacencyListElement *el = dg->adjList[i], *next = NULL;
+        while(el != NULL){
+            next = el->next;
+            free(el);
+            el = next;
+        }
+    }
+    free(dg->adjList);
+    free(dg);
 }
 
 DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
@@ -187,6 +213,9 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
             }
         }
     }
+    
+    free(lifeStart);
+    free(lifeEnd);
 
     return dg;
 }
@@ -194,17 +223,17 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
 RegisterMapping *newRegisterMapping(IntermediateRepresentation *ir){
     RegisterMapping *rm = (RegisterMapping *) malloc(sizeof(RegisterMapping));
     int number_temporaries = ir->nextTempReg;
-    rm->map = (int*) malloc(number_temporaries*sizeof(int));
-
-    for (int i=0; i<number_temporaries; i++){
-        rm->map[i] = 0;
-    }
-
     DependenciesGraph *dg = buildDependencyGraph(ir);
     printGraph(dg);
     rm->map = colorGraph(dg, number_temporaries, 10);
+    deleteDependencyGraph(dg);
 
     return rm;
+}
+
+void freeRegisterMapping(RegisterMapping *rm) {
+    free(rm->map);
+    free(rm);
 }
 
 int getRegisterAssignment(RegisterMapping *rm, int temporary){
