@@ -8,10 +8,6 @@ IntermediateRepresentation *newIntermediateRepresentation(){
     return ir;
 }
 
-IRNode *newIRNode() {
-    return (IRNode *) malloc(sizeof(IRNode));
-}
-
 void addNode(IntermediateRepresentation *ir, IRNode *node){
     if (ir->head==NULL) ir->head=node;
     if (ir->tail==NULL) 
@@ -22,16 +18,21 @@ void addNode(IntermediateRepresentation *ir, IRNode *node){
     }
 }
 
-void addMovIR(IntermediateRepresentation *ir, int destination) {
+IRNode *newIRNode(Instruction instruction){
     IRNode * node = (IRNode *) malloc(sizeof(IRNode));
-    node->instruction = MOV;
+    node->instruction = instruction;
+    node->next = NULL;
+    return node;
+}
+
+void addMovIR(IntermediateRepresentation *ir, int destination) {
+    IRNode * node = newIRNode(MOV);
     node->dest = destination;
     addNode(ir, node);
 }
 
 void addLoadImIR(IntermediateRepresentation *ir, int destination, int value) {
-    IRNode * node = (IRNode *) malloc(sizeof(IRNode));
-    node->instruction = LOAD;
+    IRNode * node = newIRNode(LOAD);
     node->dest = destination;
     node->sourceKind = CONSTANT_SOURCE;
     node->source = value;
@@ -39,7 +40,7 @@ void addLoadImIR(IntermediateRepresentation *ir, int destination, int value) {
 }
 
 void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source){
-    IRNode * node = (IRNode *) malloc(sizeof(IRNode));
+    IRNode * node = newIRNode(STORE);
     node->instruction = STORE;
     node->dest = destination_address;
     node->sourceKind = REG_SOURCE;
@@ -49,8 +50,7 @@ void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shi
 }
 
 void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source){
-    IRNode * node = (IRNode *) malloc(sizeof(IRNode));
-    node->instruction = LOAD;
+    IRNode * node = newIRNode(LOAD);
     node->dest = destination_address;
     node->sourceKind = REG_SOURCE;
     node->source = register_source;
@@ -59,8 +59,7 @@ void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int s
 }
 
 void addCommentIR(IntermediateRepresentation *ir, char *comment){
-    IRNode * node = (IRNode *) malloc(sizeof(IRNode));
-    node->instruction = COMMENT;
+    IRNode * node = newIRNode(COMMENT);
     node->comment = comment;
     addNode(ir, node);
 }

@@ -31,7 +31,6 @@ typedef struct intermediateRepresentation {
 } IntermediateRepresentation;
 
 IntermediateRepresentation *newIntermediateRepresentation();
-IRNode *newIRNode();
 void addMovIR(IntermediateRepresentation *ir, int destination);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
 void addLoadImIR(IntermediateRepresentation *ir, int destination, int value);
