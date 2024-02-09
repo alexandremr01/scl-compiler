@@ -37,7 +37,6 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
                 int address_register = ir->nextTempReg++, result_register  =  node->firstChild->sibling->tempRegResult;
                 addLoadImIR(ir, address_register, node->firstChild->stEntry->address);
                 addStoreIR(ir, address_register, 0, result_register);
-                ir->nextTempReg++;
             }
             
             break;

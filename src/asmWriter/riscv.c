@@ -13,11 +13,12 @@ void printIR(IntermediateRepresentation *ir, FILE *f, RegisterMapping *rm){
                         getRegister(rm, p->dest), 
                         p->source
                     );
-                else 
+                else {
                     fprintf(f, "lw %s, 0(%s)\n", 
                         getRegister(rm, p->dest), 
                         getRegister(rm, p->source)
                     );
+                }
                 break;
             case STORE:
                 fprintf(f, "sw %s, 0(%s)\n", getRegister(rm, p->source), getRegister(rm, p->dest));
