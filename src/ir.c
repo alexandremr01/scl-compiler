@@ -65,25 +65,3 @@ void addCommentIR(IntermediateRepresentation *ir, char *comment){
     addNode(ir, node);
 }
 
-void printIR(IntermediateRepresentation *ir, FILE *f){
-    IRNode *p = ir->head;
-    while (p != NULL){
-        switch (p->instruction) {
-            case MOV:
-                fprintf(f, "mv #%d\n", p->dest);
-                break;
-            case LOAD:
-                if (p->sourceKind == CONSTANT_SOURCE)
-                    fprintf(f, "li #%d, %d\n", p->dest, p->source);
-                else fprintf(f, "lw #%d, 0(#%d)\n", p->dest, p->source);
-                break;
-            case STORE:
-                fprintf(f, "sw #%d, 0(#%d)\n", p->source, p->dest);
-                break;
-            case COMMENT:
-                fprintf(f, "//%s\n", p->comment);
-                break;
-        }
-        p = p->next;
-    }
-}

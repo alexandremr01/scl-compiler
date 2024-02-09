@@ -34,7 +34,6 @@ IntermediateRepresentation *newIntermediateRepresentation();
 IRNode *newIRNode();
 void addMovIR(IntermediateRepresentation *ir, int destination);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
-void printIR(IntermediateRepresentation *ir, FILE *f);
 void addLoadImIR(IntermediateRepresentation *ir, int destination, int value);
 void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
 void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);

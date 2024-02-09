@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include "semantic_analysis.h"
+#include "register_mapping.h"
+#include "asmWriter/riscv.h"
 #include "ast.h"
 #include "syntax.tab.h"
 #include "codegen.h"
@@ -118,7 +120,10 @@ int main(int argc, char *argv[]) {
     }
 
     IntermediateRepresentation *ir = codeGen(tree);
-    printIR(ir, f_out);
+
+    RegisterMapping *rm = newRegisterMapping(ir);
+
+    printIR(ir, f_out, rm);
    
     printf("Compilation successful\n");
 
