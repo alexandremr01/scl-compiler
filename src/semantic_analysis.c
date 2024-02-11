@@ -42,6 +42,7 @@ int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int
         printf("Error: No function named main.\n");
         errors++;
     }
+    tree->root->stEntry = mainFunction;
     return errors;
 }
 
@@ -79,6 +80,8 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
             scope_level,
             head
         );
+        stEntry = getSymbolicTableEntry(symbolicTable, node->name);
+        node->stEntry = stEntry;
         scope_level++;
         while (parameters != NULL){
             semanticAnalysisNode(tree, parameters, symbolicTable, debug, errors, scope_level, stack);
@@ -108,6 +111,7 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
         } 
         node->stEntry = stEntry;
         node->type = stEntry->type;
+        node->tempRegResult = -2;
         ASTNode *parameter = node->firstChild;
         DataTypeList *dtypes = stEntry->parameterTypes;
 

@@ -6,11 +6,17 @@ typedef struct objectCode {
     struct objectCode *next;
 } ObjectCode; 
 
-char *registerNames[6] = {
-    "rx0", "rx1", "rx2", "rx3", "rx4", "rx5"
+char *registerNames[7] = {
+    "x5", "x6", "x7", "x28", "x29", "x30", "x31"
 };
 
 char *getReg(RegisterMapping *rm, int temporary){
+    if (temporary == -1)
+        return "sp"; //sp or x2
+    else if (temporary == -2)
+        return "a0"; //a0 or x10
+    else if (temporary == -3)
+        return "x0"; 
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
 
@@ -33,6 +39,7 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
     currObj = objCode;
     IRNode *p = ir->head;
 
+    // give address to globals
     SymbolicTableGlobals *g = ir->globals->next;
     while (g!=NULL) {
         g->entry->address = ir->lastAddress;
@@ -40,6 +47,15 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
         g = g->next;
     }
 
+    // give label address to variables
+    while (p != NULL) {
+        if (p->instruction == LABEL){
+            p->varSource->address = p->address;
+        }
+        p = p->next;
+    }
+
+    p = ir->head;
     while (p != NULL) {
         currObj->next = (ObjectCode *) malloc(sizeof(ObjectCode));
         currObj = currObj->next;
@@ -51,11 +67,18 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 sprintf(currObj->assembly, "mv %s", getReg(rm, p->dest));
                 break;
             case ADD:
-                sprintf(currObj->assembly, "add %s, %s, %s", 
+                if (p->sourceKind == CONSTANT_SOURCE)
+                    sprintf(currObj->assembly, "add %s, %s, %d", 
+                        getReg(rm, p->dest),
+                        getReg(rm, p->source),
+                        p->source2
+                    );
+                else sprintf(currObj->assembly, "add %s, %s, %s", 
                     getReg(rm, p->dest),
                     getReg(rm, p->source),
                     getReg(rm, p->source2)
                 );
+                
                 break;
             case SUB:
                 sprintf(currObj->assembly, "sub %s, %s, %s", 
@@ -89,12 +112,19 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 sprintf(currObj->assembly, "//%s", p->comment);
                 break;
             case JUMP:
-                sprintf(currObj->assembly, "j %d", p->varSource->address);
+                if (p->sourceKind == CONSTANT_SOURCE)
+                    sprintf(currObj->assembly, "j %d", p->source);
+                else sprintf(currObj->assembly, "j %d", p->varSource->address);
                 break;
             case LABEL:
-                sprintf(currObj->assembly, "%s: nop", p->comment);
+                sprintf(currObj->assembly, "\n%s: addi rx0, rx0, 0", p->varSource->name);
                 break;
-
+            case JUMP_REGISTER:
+                sprintf(currObj->assembly, "jr %s", getReg(rm, p->dest));
+                break;
+            case NOP:
+                sprintf(currObj->assembly, "addi rx0, rx0, 0");
+                break;
         }
         p = p->next;
     }

@@ -17,8 +17,10 @@ void addNode(IntermediateRepresentation *ir, IRNode *node){
         ir->tail->next = node;
         ir->tail = node;
     }
-    if (node->instruction != COMMENT) 
+    if (node->instruction != COMMENT) {
+        node->address = ir->lastAddress;
         ir->lastAddress += 4;
+    }
 }
 
 IRNode *newIRNode(Instruction instruction){
@@ -113,14 +115,42 @@ void freeIntermediateRepresentation(IntermediateRepresentation *ir) {
     free(ir);
 }
 
-void addLabelIR(IntermediateRepresentation *ir, char *name) {
+void addLabelIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry) {
     IRNode * node = newIRNode(LABEL);
-    node->comment = name;
+    node->varSource = entry;
     addNode(ir, node);
 }
 
 void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry) {
     IRNode * node = newIRNode(JUMP);
+    node->sourceKind = VARIABLE_SOURCE;
     node->varSource = entry;
     addNode(ir, node);
+}
+
+void addJumpRegisterIR(IntermediateRepresentation *ir, int destinationRegister) {
+    IRNode * node = newIRNode(JUMP_REGISTER);
+    node->dest = destinationRegister;
+    addNode(ir, node);
+}
+
+void addAdditionImIR(IntermediateRepresentation *ir, int dest, int src, int imm) {
+    IRNode * node = newIRNode(ADD);
+    node->dest = dest;
+    node->sourceKind = CONSTANT_SOURCE;
+    node->source = src;
+    node->source2 = imm;
+    addNode(ir, node);
+}
+
+void addJumpImIR(IntermediateRepresentation *ir, int imm) {
+    IRNode * node = newIRNode(JUMP);
+    node->sourceKind = CONSTANT_SOURCE;
+    node->source = imm;
+    addNode(ir, node);
+}
+
+void addNopIR(IntermediateRepresentation *ir) {
+    IRNode * node = newIRNode(NOP);
+    addNode(ir, node); 
 }

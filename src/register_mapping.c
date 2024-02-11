@@ -1,6 +1,6 @@
 #include "register_mapping.h"
 
-#define MAX_REGISTER_NAME 6
+#define MAX_REGISTER_NAME 7
 
 typedef struct adjacencyListElement {
     int value;
@@ -173,7 +173,7 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
 
     for (int i=0; i<number_temporaries; i++){
         // all of them will start with a head element
-        dg->adjList[i] = (AdjacencyListElement *) malloc(sizeof(AdjacencyListElement));
+        dg->adjList[i] = (AdjacencyListElement*) malloc(sizeof(AdjacencyListElement));
         dg->adjList[i]->value = -1;
         dg->adjList[i]->next = NULL;
         dg->num_neighbors[i] = 0;
@@ -191,10 +191,10 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
     int instruction = 0;
     while (irNode != NULL){
         if (irNode->instruction != COMMENT) {
-            if (lifeStart[irNode->dest] == -1) 
+            if (irNode->dest >= 0 && lifeStart[irNode->dest] == -1) 
                 lifeStart[irNode->dest] = instruction;
-            lifeEnd[irNode->dest] = instruction;
-            if (irNode->sourceKind == REG_SOURCE)
+            if (irNode->dest >= 0) lifeEnd[irNode->dest] = instruction;
+            if (irNode->sourceKind == REG_SOURCE && irNode->source >= 0)
                 lifeEnd[irNode->source] = instruction;
         }
         irNode = irNode->next;

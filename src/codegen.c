@@ -1,11 +1,31 @@
 #include "semantic_analysis.h"
 
+#define SP_REGISTER -1
+#define A0_REGISTER -2
+#define X0_REGISTER -3
+#define INITIAL_STACK 2000
+
 void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlobals *globals);
+
+void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
+    for (int i=0; i<2; i++)
+        addNopIR(ir);
+    addAdditionImIR(ir, 
+        SP_REGISTER, 
+        X0_REGISTER,
+        INITIAL_STACK
+    );
+    addJumpIR(ir, main);
+    for (int i=0; i<4; i++)
+        addNopIR(ir);
+    addJumpImIR(ir, ir->lastAddress);
+}
 
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree){
     IntermediateRepresentation *ir = newIntermediateRepresentation();
     SymbolicTableGlobals *globals = (SymbolicTableGlobals *) malloc(sizeof(SymbolicTableGlobals));
     globals->next = NULL;
+    genHeader(ir, tree->root->stEntry);
     codeGenNode(tree->root, ir, globals);
 
     ir->globals = globals;
@@ -20,7 +40,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
 
     ASTNode *aux = node->firstChild;
     if (node->kind == FUNCTION_DEFINITION_NODE){
-        addLabelIR(ir, node->name);
+        addLabelIR(ir, node->stEntry);
     } 
     while (aux != NULL){
         codeGenNode(aux, ir, globals);
@@ -38,6 +58,11 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             }
             break;
         case FUNCTION_DEFINITION_NODE:
+            // lw rx3, 0(sp)
+            // jr rx3
+            address_register = ir->nextTempReg++;
+            addLoadMemIR(ir, address_register, 0, -1);  
+            addJumpRegisterIR(ir, address_register);
             break;
         case IF_NODE: 
             break;
