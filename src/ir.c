@@ -64,6 +64,24 @@ void addCommentIR(IntermediateRepresentation *ir, char *comment){
     addNode(ir, node);
 }
 
+void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(ADD);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    addNode(ir, node);
+}
+
+void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(SUB);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    addNode(ir, node);
+}
+
 void freeIntermediateRepresentation(IntermediateRepresentation *ir) {
     IRNode *node = ir->head;
     IRNode *next = NULL;

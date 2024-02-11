@@ -31,6 +31,22 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
             break;
         case RETURN_NODE: 
             break;
+        case SUM_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            addAdditionIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                node->tempRegResult
+            );
+            break;
+        case SUBTRACTION_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            addSubtractionIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                node->tempRegResult
+            );
+            break;
         case ASSIGNMENT_NODE:
             if (node->firstChild->stEntry != NULL){
                 addCommentIR(ir, "assignment");

@@ -191,6 +191,10 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
             if (debug) printf("Sum\n");
             node->type = INTEGER_TYPE;
             break;
+        case SUBTRACTION_NODE:
+            if (debug) printf("Subtraction\n");
+            node->type = INTEGER_TYPE;
+            break;
         case MULTIPLICATION_NODE:
             if (debug) printf("Multiplication\n");
             node->type = INTEGER_TYPE;

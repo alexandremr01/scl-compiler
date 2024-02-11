@@ -16,6 +16,20 @@ void printIR(IntermediateRepresentation *ir, FILE *f, RegisterMapping *rm){
             case MOV:
                 fprintf(f, "mv %s\n", getReg(rm, p->dest));
                 break;
+            case ADD:
+                fprintf(f, "add %s, %s, %s\n", 
+                    getReg(rm, p->dest),
+                    getReg(rm, p->source),
+                    getReg(rm, p->source2)
+                );
+                break;
+            case SUB:
+                fprintf(f, "sub %s, %s, %s\n", 
+                    getReg(rm, p->dest),
+                    getReg(rm, p->source),
+                    getReg(rm, p->source2)
+                );
+                break;
             case LOAD:
                 if (p->sourceKind == CONSTANT_SOURCE)
                     fprintf(f, "li %s, %d\n", 

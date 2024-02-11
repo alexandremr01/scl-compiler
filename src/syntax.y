@@ -20,7 +20,7 @@
 %type <node> declaration declaration_list compound_statement statement_list expression
 %type <node> statement expression_statement selection_statement iteration_statement jump_statement
 %type <node> simple_exp sum_exp term factor call var args arg_list
-%type <node> parameters parameter_list parameter
+%type <node> parameters parameter_list parameter sum
 
 %token ERROR NEWLINE // internal
 %token IF ELSE WHILE // control
@@ -167,12 +167,12 @@ simple_exp: sum_exp relational sum_exp {
             } | sum_exp {$$ = $1;}
 relational: LT | GT | LEQ | GEQ | EQ | DIFFERENT
 sum_exp:    sum_exp sum term {
-                $$ = newASTNode(SUM_NODE);
+                $$ = $2;
                 $$->firstChild = $1;
                 $1->sibling = $3;
                 $$->line_number = yylineno;
             }| term {$$ = $1;}
-sum:        PLUS | MINUS
+sum:        PLUS {$$=newASTNode(SUM_NODE);} | MINUS {$$=newASTNode(SUBTRACTION_NODE);}
 term:       term mult_op factor {
                 $$ = newASTNode(MULTIPLICATION_NODE);
                 $$->firstChild = $1;
