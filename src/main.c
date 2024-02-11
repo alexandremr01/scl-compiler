@@ -63,7 +63,7 @@ void lexic_parser_only(){
 }
 
 int main(int argc, char *argv[]) {
-    FILE *f_in, *f_out;
+    FILE *f_in, *f_asm, *f_bin;
     int print_ast=0, print_symbolic_table=0;
     if (argc < 3) {
         printf("Usage: scl src_file output_file [--lexical_only] [--print_ast] [--print_symbolic_table]\n");
@@ -75,7 +75,14 @@ int main(int argc, char *argv[]) {
         printf("FATAL: Could not open %s \n", argv[1]);
         return 1;
     }
-    if (!(f_out = fopen(argv[2],"w"))){
+    char *asmFileName = (char *) malloc((strlen(argv[2]) + 5)*sizeof(char));
+    strcpy(asmFileName, argv[2]);
+    strcat(asmFileName, ".asm");
+    if (!(f_asm = fopen(asmFileName,"w"))){
+        printf("FATAL: Could not open %s \n", argv[2]);
+        return 1;
+    }
+    if (!(f_bin = fopen(argv[2],"wb"))){
         printf("FATAL: Could not open %s \n", argv[2]);
         return 1;
     }
@@ -123,11 +130,12 @@ int main(int argc, char *argv[]) {
 
     RegisterMapping *rm = newRegisterMapping(ir);
 
-    printIR(ir, f_out, rm);
+    printIR(ir, f_asm, f_bin, rm);
 
     freeIntermediateRepresentation(ir);
     freeRegisterMapping(rm);
     freeSymbolicTable(table);
+    free(asmFileName);
    
     printf("Compilation successful\n");
 

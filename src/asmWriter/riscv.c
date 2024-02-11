@@ -1,5 +1,11 @@
 #include "riscv.h"
 
+typedef struct objectCode {
+    char assembly[25];
+    int binary; 
+    struct objectCode *next;
+} ObjectCode; 
+
 char *registerNames[6] = {
     "rx0", "rx1", "rx2", "rx3", "rx4", "rx5"
 };
@@ -22,7 +28,9 @@ int getSize(DataType d){
     return 0;
 }
 
-void printIR(IntermediateRepresentation *ir, FILE *f, RegisterMapping *rm){
+void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm){
+    ObjectCode *currObj = NULL, *objCode = (ObjectCode *) malloc(sizeof(ObjectCode));
+    currObj = objCode;
     IRNode *p = ir->head;
 
     SymbolicTableGlobals *g = ir->globals->next;
@@ -33,19 +41,24 @@ void printIR(IntermediateRepresentation *ir, FILE *f, RegisterMapping *rm){
     }
 
     while (p != NULL) {
+        currObj->next = (ObjectCode *) malloc(sizeof(ObjectCode));
+        currObj = currObj->next;
+        currObj->next = NULL;
+        strcpy(currObj->assembly, "");
+        currObj->binary = 0x20;
         switch (p->instruction) {
             case MOV:
-                fprintf(f, "mv %s\n", getReg(rm, p->dest));
+                sprintf(currObj->assembly, "mv %s", getReg(rm, p->dest));
                 break;
             case ADD:
-                fprintf(f, "add %s, %s, %s\n", 
+                sprintf(currObj->assembly, "add %s, %s, %s", 
                     getReg(rm, p->dest),
                     getReg(rm, p->source),
                     getReg(rm, p->source2)
                 );
                 break;
             case SUB:
-                fprintf(f, "sub %s, %s, %s\n", 
+                sprintf(currObj->assembly, "sub %s, %s, %s", 
                     getReg(rm, p->dest),
                     getReg(rm, p->source),
                     getReg(rm, p->source2)
@@ -53,29 +66,43 @@ void printIR(IntermediateRepresentation *ir, FILE *f, RegisterMapping *rm){
                 break;
             case LOAD:
                 if (p->sourceKind == CONSTANT_SOURCE)
-                    fprintf(f, "li %s, %d\n", 
+                    sprintf(currObj->assembly, "li %s, %d", 
                         getReg(rm, p->dest), 
                         p->source
                     );
                 else if  (p->sourceKind == VARIABLE_SOURCE) {
-                    fprintf(f, "li %s, %d\n", 
+                    sprintf(currObj->assembly, "li %s, %d", 
                         getReg(rm, p->dest), 
                         p->varSource->address
                     );
                 } else {
-                    fprintf(f, "lw %s, 0(%s)\n", 
+                    sprintf(currObj->assembly, "lw %s, 0(%s)", 
                         getReg(rm, p->dest), 
                         getReg(rm, p->source)
                     );
                 }
                 break;
             case STORE:
-                fprintf(f, "sw %s, 0(%s)\n", getReg(rm, p->source), getReg(rm, p->dest));
+                sprintf(currObj->assembly, "sw %s, 0(%s)", getReg(rm, p->source), getReg(rm, p->dest));
                 break;
             case COMMENT:
-                fprintf(f, "//%s\n", p->comment);
+                sprintf(currObj->assembly, "//%s", p->comment);
                 break;
         }
         p = p->next;
+    }
+
+    currObj = objCode->next;
+    while (currObj != NULL){
+        fprintf(f_asm, "%s\n", currObj->assembly);
+        fwrite(&currObj->binary, 4, 1, f_bin);
+        currObj = currObj->next;
+    }
+
+    currObj = objCode;
+    while (currObj != NULL){
+        objCode = currObj;
+        currObj = currObj->next;
+        free(objCode);
     }
 }
