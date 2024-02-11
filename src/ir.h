@@ -12,7 +12,7 @@ typedef enum sourceKind {
 } SourceKind;
 
 typedef enum instruction {
-    MOV, LOAD, STORE, COMMENT, ADD, SUB
+    MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP
 } Instruction;
 
 typedef struct irNode {
@@ -52,5 +52,8 @@ void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int de
 void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
 void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
 void addCommentIR(IntermediateRepresentation *ir, char *comment);
+
+void addLabelIR(IntermediateRepresentation *ir, char *name); 
+void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry); 
 
 #endif

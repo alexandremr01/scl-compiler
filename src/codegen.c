@@ -19,6 +19,9 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
     int address_register;
 
     ASTNode *aux = node->firstChild;
+    if (node->kind == FUNCTION_DEFINITION_NODE){
+        addLabelIR(ir, node->name);
+    } 
     while (aux != NULL){
         codeGenNode(aux, ir, globals);
         aux = aux->sibling;
@@ -33,6 +36,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
                 new_node->entry = node->stEntry;
                 globals->next = new_node;
             }
+            break;
+        case FUNCTION_DEFINITION_NODE:
             break;
         case IF_NODE: 
             break;
@@ -72,6 +77,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             ir->nextTempReg++;
             return;
         case CALL_NODE:
+            addJumpIR(ir, node->stEntry);
             break;
         case VAR_REFERENCE_NODE:
             address_register = ir->nextTempReg++;

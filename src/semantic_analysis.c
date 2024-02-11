@@ -106,6 +106,7 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
             printf("Line %d: Name \'%s\' is not a function.\n", node->line_number, node->name);
             *errors += 1;
         } 
+        node->stEntry = stEntry;
         node->type = stEntry->type;
         ASTNode *parameter = node->firstChild;
         DataTypeList *dtypes = stEntry->parameterTypes;

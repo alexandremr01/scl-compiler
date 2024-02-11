@@ -88,6 +88,13 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
             case COMMENT:
                 sprintf(currObj->assembly, "//%s", p->comment);
                 break;
+            case JUMP:
+                sprintf(currObj->assembly, "j %d", p->varSource->address);
+                break;
+            case LABEL:
+                sprintf(currObj->assembly, "%s: nop", p->comment);
+                break;
+
         }
         p = p->next;
     }

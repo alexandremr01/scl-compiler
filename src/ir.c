@@ -112,3 +112,15 @@ void freeIntermediateRepresentation(IntermediateRepresentation *ir) {
 
     free(ir);
 }
+
+void addLabelIR(IntermediateRepresentation *ir, char *name) {
+    IRNode * node = newIRNode(LABEL);
+    node->comment = name;
+    addNode(ir, node);
+}
+
+void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry) {
+    IRNode * node = newIRNode(JUMP);
+    node->varSource = entry;
+    addNode(ir, node);
+}
