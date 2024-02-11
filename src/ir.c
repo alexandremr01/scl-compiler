@@ -5,6 +5,7 @@ IntermediateRepresentation *newIntermediateRepresentation(){
     ir->head = NULL;
     ir->tail = NULL;
     ir->nextTempReg = 0;
+    ir->lastAddress = 0;
     return ir;
 }
 
@@ -16,6 +17,8 @@ void addNode(IntermediateRepresentation *ir, IRNode *node){
         ir->tail->next = node;
         ir->tail = node;
     }
+    if (node->instruction != COMMENT) 
+        ir->lastAddress += 4;
 }
 
 IRNode *newIRNode(Instruction instruction){
@@ -37,6 +40,14 @@ void addLoadImIR(IntermediateRepresentation *ir, int destination, int value) {
     node->sourceKind = CONSTANT_SOURCE;
     node->source = value;
     addNode(ir, node);
+}
+
+void addLoadAddressIR(IntermediateRepresentation *ir, int destination, SymbolicTableEntry *stEntry){
+    IRNode * node = newIRNode(LOAD);
+    node->dest = destination;
+    node->sourceKind = VARIABLE_SOURCE;
+    node->varSource = stEntry;
+    addNode(ir, node);  
 }
 
 void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source){
@@ -90,5 +101,14 @@ void freeIntermediateRepresentation(IntermediateRepresentation *ir) {
         free(node);
         node = next;
     }
+
+    SymbolicTableGlobals *g = ir->globals;
+    SymbolicTableGlobals *nextGlobal = NULL;
+    while(g != NULL){
+        nextGlobal = g->next;
+        free(g);
+        g = nextGlobal;
+    }
+
     free(ir);
 }

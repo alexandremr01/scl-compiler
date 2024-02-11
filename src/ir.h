@@ -8,7 +8,7 @@
 #include "datatypes.h"
 
 typedef enum sourceKind {
-    CONSTANT_SOURCE, REG_SOURCE
+    CONSTANT_SOURCE, REG_SOURCE, VARIABLE_SOURCE
 } SourceKind;
 
 typedef enum instruction {
@@ -20,16 +20,25 @@ typedef struct irNode {
     Instruction instruction;
     int dest;
     SourceKind sourceKind;
-    int source;
 
+    int source;
     int source2;
+    SymbolicTableEntry *varSource;
+
     char *comment;
 } IRNode;
+
+typedef struct symbolicTableGlobals {
+    SymbolicTableEntry *entry;
+    struct symbolicTableGlobals *next;
+} SymbolicTableGlobals;
 
 typedef struct intermediateRepresentation {
     struct irNode *head;
     struct irNode *tail;
     int nextTempReg;
+    SymbolicTableGlobals *globals;
+    int lastAddress;
 } IntermediateRepresentation;
 
 IntermediateRepresentation *newIntermediateRepresentation();
@@ -37,6 +46,7 @@ void freeIntermediateRepresentation(IntermediateRepresentation *ir);
 void addMovIR(IntermediateRepresentation *ir, int destination);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
 void addLoadImIR(IntermediateRepresentation *ir, int destination, int value);
+void addLoadAddressIR(IntermediateRepresentation *ir, int destination, SymbolicTableEntry *stEntry);
 void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
 void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
 void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);

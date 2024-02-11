@@ -8,8 +8,29 @@ char *getReg(RegisterMapping *rm, int temporary){
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
 
+int getSize(DataType d){
+    switch(d){
+        case NONE_TYPE:
+            return 0;
+        case INTEGER_TYPE:
+            return 4;
+        case VOID_TYPE:
+            return 0;
+        case FLOAT_TYPE:
+            return 4;
+    }
+    return 0;
+}
+
 void printIR(IntermediateRepresentation *ir, FILE *f, RegisterMapping *rm){
     IRNode *p = ir->head;
+
+    SymbolicTableGlobals *g = ir->globals->next;
+    while (g!=NULL) {
+        g->entry->address = ir->lastAddress;
+        ir->lastAddress += getSize(g->entry->type);
+        g = g->next;
+    }
 
     while (p != NULL) {
         switch (p->instruction) {
@@ -36,7 +57,12 @@ void printIR(IntermediateRepresentation *ir, FILE *f, RegisterMapping *rm){
                         getReg(rm, p->dest), 
                         p->source
                     );
-                else {
+                else if  (p->sourceKind == VARIABLE_SOURCE) {
+                    fprintf(f, "li %s, %d\n", 
+                        getReg(rm, p->dest), 
+                        p->varSource->address
+                    );
+                } else {
                     fprintf(f, "lw %s, 0(%s)\n", 
                         getReg(rm, p->dest), 
                         getReg(rm, p->source)

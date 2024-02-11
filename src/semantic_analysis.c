@@ -169,6 +169,7 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
             if (node->type != VOID_TYPE && (stEntry == NULL || stEntry->scope_level < scope_level)){
                 insertVariable(symbolicTable, node->name, node->type, node->line_number, scope_level);
                 addDeleteStack(stack, node->name);
+                node->stEntry = getSymbolicTableEntry(symbolicTable, node->name);
             }
             break;
         case IF_NODE: 
