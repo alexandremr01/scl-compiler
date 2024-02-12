@@ -5,13 +5,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
 
 void call(IntermediateRepresentation *ir, SymbolicTableEntry *fn) {
     int dest_address_register = ir->nextTempReg++;
-    int current_address_register = ir->nextTempReg++;
-    addLoadImIR(ir, current_address_register, ir->lastAddress + 4*5);
-    addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4);
-    addStoreIR(ir, SP_REGISTER, 0, current_address_register); 
-
-    addLoadAddressIR(ir, dest_address_register, fn);
-    addJumpRegisterIR(ir, dest_address_register);
+    int current_address_register = RA_REGISTER;
+    addJumpIR(ir, fn);
 }
 
 void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
@@ -47,15 +42,42 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
     int address_register;
     int bkp_stack = ir->lastStackAddress;
     ASTNode *aux = node->firstChild;
+    int returnStackPosition = 0;
+    int localsSize = 0;
     if (node->kind == FUNCTION_DEFINITION_NODE){
         ir->lastStackAddress = 0;
         addLabelIR(ir, node->stEntry);
+        
+        addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4);
+        addStoreIR(ir, SP_REGISTER, 0, RA_REGISTER); 
+        // first, iterate over non-parameter locals
+        SymbolicTableEntry *local = node->stEntry->locals;
+        while(local != NULL) {
+            if (!local->isParameter) {
+                local->address = localsSize;
+                localsSize += 4;
+            }
+            local = local->locals;
+        }
+        addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -localsSize);
+        returnStackPosition = localsSize;
+        localsSize += 4; // skip return address
+        // now, iterate over parameters to give their addresses
+        local = node->stEntry->locals;
+        while(local != NULL) {
+            printf("Seeing local %s from %s, %d\n", local->name, node->stEntry->name, local->isParameter);
+            if (local->isParameter) {
+                local->address = localsSize;
+                localsSize += 4;
+            }
+            local = local->locals;
+        }
     } 
     while (aux != NULL){
         codeGenNode(aux, ir, globals);
         aux = aux->sibling;
     }
-
+    ASTNode *parameter;
     switch (node->kind){
         case DECLARATION_NODE:
             if (node->stEntry->scope_level == 0){
@@ -64,15 +86,13 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
                 new_node->next = next;
                 new_node->entry = node->stEntry;
                 globals->next = new_node;
-            } else {
-                node->stEntry->address = ir->lastStackAddress;
-                ir->lastStackAddress+=4;
-            }
+            } 
             break;
         case FUNCTION_DEFINITION_NODE:
             address_register = ir->nextTempReg++;
-            addLoadMemIR(ir, address_register, 0, -1);  
-            addJumpRegisterIR(ir, address_register);
+            addLoadMemIR(ir, RA_REGISTER, returnStackPosition, SP_REGISTER); 
+            addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, localsSize);
+            addJumpRegisterIR(ir, RA_REGISTER);
             ir->lastStackAddress = bkp_stack;
             break;
         case IF_NODE: 
@@ -118,6 +138,12 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             ir->nextTempReg++;
             return;
         case CALL_NODE:
+            parameter = node->firstChild;
+            while (parameter != NULL){
+                addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4);
+                addStoreIR(ir, SP_REGISTER, 0, parameter->tempRegResult); 
+                parameter = parameter->sibling;
+            }
             call(ir, node->stEntry);
             break;
         case VAR_REFERENCE_NODE:
@@ -130,6 +156,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
                 addLoadMemIR(ir, node->tempRegResult, 0, address_register);      
             } else { 
                 // otherwise: wrt to SP
+                printf("Getting variable %s at %d\n", node->stEntry->name, node->stEntry->address);
                 addLoadMemIR(ir, node->tempRegResult, node->stEntry->address, SP_REGISTER); 
             }
             break;

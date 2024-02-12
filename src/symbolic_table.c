@@ -10,6 +10,8 @@ SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTa
     entry->address = -1;
     entry->next = NULL;
     entry->hasReturn = 0;
+    entry->locals = NULL;
+    entry->isParameter = 0;
     return entry;
 }
 

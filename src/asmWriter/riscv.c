@@ -8,7 +8,7 @@ typedef struct objectCode {
 } ObjectCode; 
 
 char *registerNames[7] = {
-    "x5", "x6", "x7", "x28", "x29", "x30", "x31"
+    "t0", "t1", "t2", "t3", "t4", "t5", "t6"
 };
 
 char *getReg(RegisterMapping *rm, int temporary){
@@ -17,7 +17,9 @@ char *getReg(RegisterMapping *rm, int temporary){
     else if (temporary == A0_REGISTER)
         return "a0"; //a0 or x10
     else if (temporary == X0_REGISTER)
-        return "x0"; 
+        return "zero"; 
+    else if (temporary == RA_REGISTER)
+        return "ra"; 
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
 
@@ -114,20 +116,23 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case JUMP:
                 if (p->sourceKind == CONSTANT_SOURCE)
-                    sprintf(currObj->assembly, "jal x0, %d", p->source);
-                else sprintf(currObj->assembly, "jal x0, %d", p->varSource->address);
+                    sprintf(currObj->assembly, "jal %s, %d", getReg(rm, RA_REGISTER), p->source);
+                else sprintf(currObj->assembly, "jal %s, %d", 
+                    getReg(rm, RA_REGISTER), 
+                    p->varSource->address - p->address
+                );
                 break;
             case LABEL:
-                sprintf(currObj->assembly, "\n%s: addi rx0, rx0, 0", p->varSource->name);
+                sprintf(currObj->assembly, "\n%s:\naddi zero, zero, 0", p->varSource->name);
                 break;
             case JUMP_REGISTER:
-                sprintf(currObj->assembly, "jalr x0, 0(%s)", getReg(rm, p->dest));
+                sprintf(currObj->assembly, "jalr %s, 0(%s)", getReg(rm, RA_REGISTER), getReg(rm, p->dest));
                 break;
             case MOV:
                 sprintf(currObj->assembly, "mv %s, %s", getReg(rm, p->dest), getReg(rm, p->source));
                 break;
             case NOP:
-                sprintf(currObj->assembly, "addi rx0, rx0, 0");
+                sprintf(currObj->assembly, "addi zero, zero, 0");
                 break;
         }
         p = p->next;

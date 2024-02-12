@@ -11,6 +11,7 @@
 #define A0_REGISTER -2
 #define X0_REGISTER -3
 #define FP_REGISTER -4
+#define RA_REGISTER -5
 
 typedef enum sourceKind {
     CONSTANT_SOURCE, REG_SOURCE, VARIABLE_SOURCE

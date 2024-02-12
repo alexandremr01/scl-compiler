@@ -28,6 +28,8 @@ typedef struct symbtabEntry {
 
     DataTypeList *parameterTypes;
     struct symbtabEntry *next;
+    struct symbtabEntry *locals;
+    int isParameter;
 
     UT_hash_handle hh;         
 } SymbolicTableEntry;

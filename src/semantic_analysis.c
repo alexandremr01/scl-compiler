@@ -85,8 +85,19 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
         scope_level++;
         while (parameters != NULL){
             semanticAnalysisNode(tree, parameters, symbolicTable, debug, errors, scope_level, stack, stEntry);
+            parameters->stEntry->isParameter = 1;
+            // parameters->stEntry->locals = node->stEntry->locals;
+            // node->stEntry->locals = parameters->stEntry;
             parameters = parameters->sibling;
         }
+        // printf("registered locals: ");
+        // SymbolicTableEntry *local = node->stEntry->locals;
+        // while(local != NULL) {
+        //     printf("%s ", local->name);
+        //     local = local->locals;
+        // }
+        // printf("\n");
+
         semanticAnalysisNode(tree, node->firstChild, symbolicTable, debug, errors, scope_level, stack, stEntry);
         if (!stEntry->hasReturn && node->type != VOID_TYPE) {
             printf("Line %d: Reached end of non-void function \'%s\' without a return value.\n", node->line_number, node->name);
@@ -177,7 +188,12 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
                 insertVariable(symbolicTable, node->name, node->type, node->line_number, scope_level);
                 addDeleteStack(stack, node->name);
                 node->stEntry = getSymbolicTableEntry(symbolicTable, node->name);
+                if (fn != NULL){
+                    node->stEntry->locals = fn->locals;
+                    fn->locals = node->stEntry;
+                }
             }
+            
             break;
         case RETURN_NODE: 
             if (node->firstChild->type != fn->type){
