@@ -4,9 +4,14 @@
 void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlobals *globals);
 
 void call(IntermediateRepresentation *ir, SymbolicTableEntry *fn) {
-    int address_register = ir->nextTempReg++;
-    addLoadAddressIR(ir, address_register, fn);
-    addJumpRegisterIR(ir, address_register);
+    int dest_address_register = ir->nextTempReg++;
+    int current_address_register = ir->nextTempReg++;
+    addLoadImIR(ir, current_address_register, ir->lastAddress + 4*5);
+    addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4);
+    addStoreIR(ir, SP_REGISTER, 0, current_address_register); 
+
+    addLoadAddressIR(ir, dest_address_register, fn);
+    addJumpRegisterIR(ir, dest_address_register);
 }
 
 void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
@@ -94,11 +99,15 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             );
             break;
         case ASSIGNMENT_NODE:
-            if (node->firstChild->stEntry != NULL){
-                addCommentIR(ir, "assignment");
-                int address_register = ir->nextTempReg++, result_register  =  node->firstChild->sibling->tempRegResult;
+            addCommentIR(ir, "assignment");
+            int result_register  =  node->firstChild->sibling->tempRegResult;
+            
+            if (node->firstChild->stEntry->scope_level == 0){
+                int address_register = ir->nextTempReg++;
                 addLoadAddressIR(ir, address_register, node->firstChild->stEntry);
                 addStoreIR(ir, address_register, 0, result_register);
+            } else {
+                addStoreIR(ir, SP_REGISTER, node->firstChild->stEntry->address, result_register); 
             }
             
             break;

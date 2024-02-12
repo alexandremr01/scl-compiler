@@ -4,6 +4,7 @@ typedef struct objectCode {
     char assembly[25];
     int binary; 
     struct objectCode *next;
+    int include;
 } ObjectCode; 
 
 char *registerNames[7] = {
@@ -34,7 +35,7 @@ int getSize(DataType d){
     return 0;
 }
 
-void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm){
+void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm, int includeASMComments){
     ObjectCode *currObj = NULL, *objCode = (ObjectCode *) malloc(sizeof(ObjectCode));
     currObj = objCode;
     IRNode *p = ir->head;
@@ -60,6 +61,7 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
         currObj->next = (ObjectCode *) malloc(sizeof(ObjectCode));
         currObj = currObj->next;
         currObj->next = NULL;
+        currObj->include = 1;
         strcpy(currObj->assembly, "");
         currObj->binary = 0x20;
         switch (p->instruction) {
@@ -108,6 +110,7 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case COMMENT:
                 sprintf(currObj->assembly, "// %s", p->comment);
+                currObj->include = includeASMComments;
                 break;
             case JUMP:
                 if (p->sourceKind == CONSTANT_SOURCE)
@@ -132,8 +135,10 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
 
     currObj = objCode->next;
     while (currObj != NULL){
-        fprintf(f_asm, "%s\n", currObj->assembly);
-        fwrite(&currObj->binary, 4, 1, f_bin);
+        if (currObj->include) {
+            fprintf(f_asm, "%s\n", currObj->assembly);
+            fwrite(&currObj->binary, 4, 1, f_bin);
+        }
         currObj = currObj->next;
     }
 

@@ -4,5 +4,5 @@
 #include "../register_mapping.h"
 #include "../ir.h"
 
-void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm);
+void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm, int includeASMComments);
 #endif 

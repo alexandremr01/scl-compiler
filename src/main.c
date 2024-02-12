@@ -64,7 +64,7 @@ void lexic_parser_only(){
 
 int main(int argc, char *argv[]) {
     FILE *f_in, *f_asm, *f_bin;
-    int print_ast=0, print_symbolic_table=0;
+    int print_ast=0, print_symbolic_table=0, includeASMComments=0;
     if (argc < 3) {
         printf("Usage: scl src_file output_file [--lexical_only] [--print_ast] [--print_symbolic_table]\n");
         return 1;
@@ -80,10 +80,12 @@ int main(int argc, char *argv[]) {
     strcat(asmFileName, ".asm");
     if (!(f_asm = fopen(asmFileName,"w"))){
         printf("FATAL: Could not open %s \n", argv[2]);
+        free(asmFileName);
         return 1;
     }
     if (!(f_bin = fopen(argv[2],"wb"))){
         printf("FATAL: Could not open %s \n", argv[2]);
+        free(asmFileName);
         return 1;
     }
     for (int i=3; i < argc; i++){
@@ -96,8 +98,11 @@ int main(int argc, char *argv[]) {
             print_symbolic_table = 1;
         } else if (strcmp(argv[i], "--debug") == 0){
             yydebug=1;
+        } else if (strcmp(argv[i], "--asm_comments") == 0){
+            includeASMComments=1;
         } else {
             printf("FATAL: unrecognized command-line option \'%s\'\n", argv[i]);
+            free(asmFileName);
             return 1;
         }
     }
@@ -129,7 +134,7 @@ int main(int argc, char *argv[]) {
 
         RegisterMapping *rm = newRegisterMapping(ir);
 
-        printIR(ir, f_asm, f_bin, rm);
+        printIR(ir, f_asm, f_bin, rm, includeASMComments);
         freeIntermediateRepresentation(ir);
         freeRegisterMapping(rm);
         printf("Compilation successful\n");
