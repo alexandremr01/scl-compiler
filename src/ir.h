@@ -7,6 +7,11 @@
 #include "symbolic_table.h"
 #include "datatypes.h"
 
+#define SP_REGISTER -1
+#define A0_REGISTER -2
+#define X0_REGISTER -3
+#define FP_REGISTER -4
+
 typedef enum sourceKind {
     CONSTANT_SOURCE, REG_SOURCE, VARIABLE_SOURCE
 } SourceKind;
@@ -40,11 +45,12 @@ typedef struct intermediateRepresentation {
     int nextTempReg;
     SymbolicTableGlobals *globals;
     int lastAddress;
+    int lastStackAddress;
 } IntermediateRepresentation;
 
 IntermediateRepresentation *newIntermediateRepresentation();
 void freeIntermediateRepresentation(IntermediateRepresentation *ir);
-void addMovIR(IntermediateRepresentation *ir, int destination);
+void addMovIR(IntermediateRepresentation *ir, int destination, int source);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
 void addLoadImIR(IntermediateRepresentation *ir, int destination, int value);
 void addLoadAddressIR(IntermediateRepresentation *ir, int destination, SymbolicTableEntry *stEntry);

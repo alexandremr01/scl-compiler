@@ -5,6 +5,7 @@
 #include "ast.h"
 #include "ir.h"
 
+
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree);
 
 #endif 

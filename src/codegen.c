@@ -1,8 +1,4 @@
 #include "semantic_analysis.h"
-
-#define SP_REGISTER -1
-#define A0_REGISTER -2
-#define X0_REGISTER -3
 #define INITIAL_STACK 2000
 
 void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlobals *globals);
@@ -44,9 +40,10 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
     if (node == NULL) return;
     SymbolicTableEntry * stEntry;
     int address_register;
-
+    int bkp_stack = ir->lastStackAddress;
     ASTNode *aux = node->firstChild;
     if (node->kind == FUNCTION_DEFINITION_NODE){
+        ir->lastStackAddress = 0;
         addLabelIR(ir, node->stEntry);
     } 
     while (aux != NULL){
@@ -62,20 +59,23 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
                 new_node->next = next;
                 new_node->entry = node->stEntry;
                 globals->next = new_node;
+            } else {
+                node->stEntry->address = ir->lastStackAddress;
+                ir->lastStackAddress+=4;
             }
             break;
         case FUNCTION_DEFINITION_NODE:
-            // lw rx3, 0(sp)
-            // jr rx3
             address_register = ir->nextTempReg++;
             addLoadMemIR(ir, address_register, 0, -1);  
             addJumpRegisterIR(ir, address_register);
+            ir->lastStackAddress = bkp_stack;
             break;
         case IF_NODE: 
             break;
         case WHILE_NODE: 
             break;
         case RETURN_NODE: 
+            addMovIR(ir, A0_REGISTER, node->firstChild->tempRegResult);
             break;
         case SUM_NODE:
             node->tempRegResult = ir->nextTempReg++;
@@ -115,8 +115,14 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             address_register = ir->nextTempReg++;
             node->tempRegResult = ir->nextTempReg++;
             addCommentIR(ir, "var reference");
-            addLoadAddressIR(ir, address_register, node->stEntry);
-            addLoadMemIR(ir, node->tempRegResult, 0, address_register);      
+            if (node->stEntry->scope_level == 0) { 
+                //global variable: absolute address
+                addLoadAddressIR(ir, address_register, node->stEntry);
+                addLoadMemIR(ir, node->tempRegResult, 0, address_register);      
+            } else { 
+                // otherwise: wrt to SP
+                addLoadMemIR(ir, node->tempRegResult, node->stEntry->address, SP_REGISTER); 
+            }
             break;
     }
     return;

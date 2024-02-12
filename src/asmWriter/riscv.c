@@ -11,11 +11,11 @@ char *registerNames[7] = {
 };
 
 char *getReg(RegisterMapping *rm, int temporary){
-    if (temporary == -1)
+    if (temporary == SP_REGISTER)
         return "sp"; //sp or x2
-    else if (temporary == -2)
+    else if (temporary == A0_REGISTER)
         return "a0"; //a0 or x10
-    else if (temporary == -3)
+    else if (temporary == X0_REGISTER)
         return "x0"; 
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
@@ -63,9 +63,6 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
         strcpy(currObj->assembly, "");
         currObj->binary = 0x20;
         switch (p->instruction) {
-            case MOV:
-                sprintf(currObj->assembly, "mv %s", getReg(rm, p->dest));
-                break;
             case ADD:
                 if (p->sourceKind == CONSTANT_SOURCE)
                     sprintf(currObj->assembly, "add %s, %s, %d", 
@@ -99,17 +96,18 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                         p->varSource->address
                     );
                 } else {
-                    sprintf(currObj->assembly, "lw %s, 0(%s)", 
+                    sprintf(currObj->assembly, "lw %s, %d(%s)", 
                         getReg(rm, p->dest), 
+                        p->source2,
                         getReg(rm, p->source)
                     );
                 }
                 break;
             case STORE:
-                sprintf(currObj->assembly, "sw %s, 0(%s)", getReg(rm, p->source), getReg(rm, p->dest));
+                sprintf(currObj->assembly, "sw %s, %d(%s)", getReg(rm, p->source), p->source2, getReg(rm, p->dest));
                 break;
             case COMMENT:
-                sprintf(currObj->assembly, "//%s", p->comment);
+                sprintf(currObj->assembly, "// %s", p->comment);
                 break;
             case JUMP:
                 if (p->sourceKind == CONSTANT_SOURCE)
@@ -121,6 +119,9 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case JUMP_REGISTER:
                 sprintf(currObj->assembly, "jalr x0, 0(%s)", getReg(rm, p->dest));
+                break;
+            case MOV:
+                sprintf(currObj->assembly, "mv %s, %s", getReg(rm, p->dest), getReg(rm, p->source));
                 break;
             case NOP:
                 sprintf(currObj->assembly, "addi rx0, rx0, 0");

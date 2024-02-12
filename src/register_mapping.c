@@ -30,6 +30,26 @@ typedef struct intStack {
     struct intStack *next;
 } IntStack;
 
+void printColorMap(int *map, int number_temporaries){
+    printf("Color map: ");
+    for (int i=0; i<number_temporaries; i++) {
+        printf("%d ", map[i]);
+    }
+    printf("\n");
+}
+
+void printStack(IntStack *stack) {
+    printf("Stack: ");
+    IntStack *stackAux = stack;
+    while (stackAux!=NULL) {
+        printf("%d ", stackAux->value);
+        stackAux = stackAux->next;
+    }
+    printf("\n");
+}
+
+
+
 IntStack * pushStack(IntStack *stack, int v) {
     IntStack* el = (IntStack*) malloc(sizeof(IntStack));
     el->value = v;
@@ -69,37 +89,11 @@ int *colorGraph(DependenciesGraph *dg, int number_temporaries, int num_colors) {
             dg->num_neighbors[el->value]--;
             el = el->next;
         }
-
-        // AdjacencyListElement *el = dg->adjList[selected_node]->next;
-        // while(el != NULL){
-        //     AdjacencyListElement *el2 = dg->adjList[el->value]->next;
-        //     AdjacencyListElement *aux2 = dg->adjList[el->value];
-        //     while(el2 != NULL){
-        //         if (el2->value == selected_node) {
-        //             aux2->next = el2->next;
-        //             free(el2);
-        //             break;
-        //         }
-        //         el2 = el2->next;
-        //         aux2 = aux2->next;
-        //     }
-        //     AdjacencyListElement *aux = el->next;
-        //     free(el);
-        //     el = aux;
-        // }
-        // dg->adjList[selected_node]->next = NULL;
-
         num_nodes -= 1;
     }
-    printf("Stack: ");
-    IntStack *stackAux = stack;
-    while (stackAux!=NULL) {
-        printf("%d ", stackAux->value);
-        stackAux = stackAux->next;
-    }
-    printf("\n");
+    
     // pop and give colors
-    stackAux = stack;
+    IntStack *stackAux = stack;
     while (stackAux!=NULL) {
         // iterate colors
         //   iterate neighbors
@@ -127,12 +121,6 @@ int *colorGraph(DependenciesGraph *dg, int number_temporaries, int num_colors) {
         active[stackAux->value] = 1;
         stackAux = stackAux->next;
     }
-
-    printf("Color map: ");
-    for (int i=0; i<number_temporaries; i++) {
-        printf("%d ", map[i]);
-    }
-    printf("\n");
 
     freeIntStack(stack);
     free(active);
@@ -202,10 +190,6 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
     }
 
     for (int i=0; i<number_temporaries; i++){
-        printf("Register #%d: %d - %d\n", i, lifeStart[i], lifeEnd[i]);
-    }
-
-    for (int i=0; i<number_temporaries; i++){
         for (int j=i+1; j<number_temporaries; j++){
             if (lifeStart[i] <= lifeEnd[j] && lifeStart[j] <= lifeEnd[i]) {
                 addEdge(dg, i, j);
@@ -224,7 +208,7 @@ RegisterMapping *newRegisterMapping(IntermediateRepresentation *ir){
     RegisterMapping *rm = (RegisterMapping *) malloc(sizeof(RegisterMapping));
     int number_temporaries = ir->nextTempReg;
     DependenciesGraph *dg = buildDependencyGraph(ir);
-    printGraph(dg);
+    // printGraph(dg);
     rm->map = colorGraph(dg, number_temporaries, 10);
     deleteDependencyGraph(dg);
 

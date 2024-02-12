@@ -6,6 +6,7 @@ IntermediateRepresentation *newIntermediateRepresentation(){
     ir->tail = NULL;
     ir->nextTempReg = 0;
     ir->lastAddress = 0;
+    ir->lastStackAddress = 0;
     return ir;
 }
 
@@ -30,12 +31,6 @@ IRNode *newIRNode(Instruction instruction){
     return node;
 }
 
-void addMovIR(IntermediateRepresentation *ir, int destination) {
-    IRNode * node = newIRNode(MOV);
-    node->dest = destination;
-    addNode(ir, node);
-}
-
 void addLoadImIR(IntermediateRepresentation *ir, int destination, int value) {
     IRNode * node = newIRNode(LOAD);
     node->dest = destination;
@@ -58,8 +53,8 @@ void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shi
     node->dest = destination_address;
     node->sourceKind = REG_SOURCE;
     node->source = register_source;
+    node->source2 = shift;
     addNode(ir, node);
-    // TODO: Store shift
 }
 
 void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source){
@@ -67,8 +62,8 @@ void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int s
     node->dest = destination_address;
     node->sourceKind = REG_SOURCE;
     node->source = register_source;
+    node->source2 = shift;
     addNode(ir, node);
-    // TODO: Store shift
 }
 
 void addCommentIR(IntermediateRepresentation *ir, char *comment){
@@ -153,4 +148,12 @@ void addJumpImIR(IntermediateRepresentation *ir, int imm) {
 void addNopIR(IntermediateRepresentation *ir) {
     IRNode * node = newIRNode(NOP);
     addNode(ir, node); 
+}
+
+void addMovIR(IntermediateRepresentation *ir, int dest, int src) {
+    IRNode * node = newIRNode(MOV);
+    node->sourceKind = REG_SOURCE;
+    node->source = src;
+    node->dest = dest;
+    addNode(ir, node);
 }
