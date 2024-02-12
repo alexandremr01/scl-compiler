@@ -142,6 +142,8 @@ int main(int argc, char *argv[]) {
  
     freeSymbolicTable(table);
     free(asmFileName);  
+    fclose(f_asm);
+    fclose(f_bin);
 
     return code;
 }

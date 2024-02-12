@@ -11,6 +11,10 @@ char *registerNames[7] = {
     "t0", "t1", "t2", "t3", "t4", "t5", "t6"
 };
 
+int registerCodes[7] = {
+    5, 6, 7, 28, 29, 30, 31
+};
+
 char *getReg(RegisterMapping *rm, int temporary){
     if (temporary == SP_REGISTER)
         return "sp"; //sp or x2
@@ -21,6 +25,18 @@ char *getReg(RegisterMapping *rm, int temporary){
     else if (temporary == RA_REGISTER)
         return "ra"; 
     return registerNames[getRegisterAssignment(rm, temporary)];
+}
+
+int getRegBin(RegisterMapping *rm, int temporary){
+    if (temporary == SP_REGISTER)
+        return 2; //sp or x2
+    else if (temporary == A0_REGISTER)
+        return 10; //a0 or x10
+    else if (temporary == X0_REGISTER)
+        return 0; 
+    else if (temporary == RA_REGISTER)
+        return 1; 
+    return registerCodes[getRegisterAssignment(rm, temporary)];
 }
 
 int getSize(DataType d){
@@ -68,12 +84,18 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
         currObj->binary = 0x20;
         switch (p->instruction) {
             case ADD:
-                if (p->sourceKind == CONSTANT_SOURCE)
+                if (p->sourceKind == CONSTANT_SOURCE){
                     sprintf(currObj->assembly, "addi %s, %s, %d", 
                         getReg(rm, p->dest),
                         getReg(rm, p->source),
                         p->source2
                     );
+                    currObj->binary = 0b0 << 20 
+                                | getRegBin(rm, p->source) << 15 
+                                | 0b000 << 12 
+                                | getRegBin(rm, p->dest) << 7
+                                | 0b0010011;
+                }
                 else sprintf(currObj->assembly, "add %s, %s, %s", 
                     getReg(rm, p->dest),
                     getReg(rm, p->source),
@@ -124,6 +146,7 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case LABEL:
                 sprintf(currObj->assembly, "\n%s:\naddi zero, zero, 0", p->varSource->name);
+                currObj->binary = 0b0 << 20 | 0b00000 << 15 | 0b000 << 12 | 0b00000 << 7 | 0b0010011;
                 break;
             case JUMP_REGISTER:
                 sprintf(currObj->assembly, "jalr %s, 0(%s)", getReg(rm, RA_REGISTER), getReg(rm, p->dest));
@@ -133,6 +156,11 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case NOP:
                 sprintf(currObj->assembly, "addi zero, zero, 0");
+                currObj->binary = 0b0 << 20 
+                                | 0 << 15 
+                                | 0b000 << 12 
+                                | 0 << 7
+                                | 0b0010011;
                 break;
         }
         p = p->next;
@@ -142,7 +170,7 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
     while (currObj != NULL){
         if (currObj->include) {
             fprintf(f_asm, "%s\n", currObj->assembly);
-            fwrite(&currObj->binary, 4, 1, f_bin);
+            fwrite(&currObj->binary, sizeof(currObj->binary), 1, f_bin);
         }
         currObj = currObj->next;
     }
