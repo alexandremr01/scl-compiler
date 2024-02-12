@@ -61,5 +61,5 @@ void addJumpRegisterIR(IntermediateRepresentation *ir, int destinationRegister);
 void addAdditionImIR(IntermediateRepresentation *ir, int dest, int src, int imm);
 void addJumpImIR(IntermediateRepresentation *ir, int imm);
 void addNopIR(IntermediateRepresentation *ir);
-
+                                                                                                     
 #endif

@@ -7,6 +7,12 @@
 
 void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlobals *globals);
 
+void call(IntermediateRepresentation *ir, SymbolicTableEntry *fn) {
+    int address_register = ir->nextTempReg++;
+    addLoadAddressIR(ir, address_register, fn);
+    addJumpRegisterIR(ir, address_register);
+}
+
 void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     for (int i=0; i<2; i++)
         addNopIR(ir);
@@ -15,11 +21,12 @@ void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
         X0_REGISTER,
         INITIAL_STACK
     );
-    addJumpIR(ir, main);
+    call(ir, main);
     for (int i=0; i<4; i++)
         addNopIR(ir);
     addJumpImIR(ir, ir->lastAddress);
 }
+
 
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree){
     IntermediateRepresentation *ir = newIntermediateRepresentation();
@@ -102,7 +109,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             ir->nextTempReg++;
             return;
         case CALL_NODE:
-            addJumpIR(ir, node->stEntry);
+            call(ir, node->stEntry);
             break;
         case VAR_REFERENCE_NODE:
             address_register = ir->nextTempReg++;

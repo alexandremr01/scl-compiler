@@ -120,7 +120,7 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 sprintf(currObj->assembly, "\n%s: addi rx0, rx0, 0", p->varSource->name);
                 break;
             case JUMP_REGISTER:
-                sprintf(currObj->assembly, "jr %s", getReg(rm, p->dest));
+                sprintf(currObj->assembly, "jalr x0, 0(%s)", getReg(rm, p->dest));
                 break;
             case NOP:
                 sprintf(currObj->assembly, "addi rx0, rx0, 0");
