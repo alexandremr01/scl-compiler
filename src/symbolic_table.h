@@ -24,6 +24,7 @@ typedef struct symbtabEntry {
     int definition_line_number;
     int scope_level;
     int address;
+    int hasReturn;
 
     DataTypeList *parameterTypes;
     struct symbtabEntry *next;

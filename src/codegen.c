@@ -20,7 +20,7 @@ void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     call(ir, main);
     for (int i=0; i<4; i++)
         addNopIR(ir);
-    addJumpImIR(ir, ir->lastAddress);
+    addJumpImIR(ir, -2);
 }
 
 

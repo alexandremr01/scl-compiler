@@ -7,15 +7,16 @@ SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTa
     entry->kind = kind;
     entry->definition_line_number = line_number;
     entry->scope_level = scope_level;
-    entry->address = 0x15;
+    entry->address = -1;
     entry->next = NULL;
+    entry->hasReturn = 0;
     return entry;
 }
 
 
 SymbolicTableEntry *insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKind kind, DataType type, int line_number, int scope_level){
     SymbolicTableEntry *newEntry = newSymbolicTableEntry(name, type, kind, line_number, scope_level);
-    
+    newEntry->type = type;
     SymbolicTableEntry *entry = NULL;
     HASH_FIND_STR(table->entries, name, entry);
     if (entry == NULL){

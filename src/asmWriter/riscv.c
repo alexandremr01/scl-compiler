@@ -65,7 +65,7 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
         switch (p->instruction) {
             case ADD:
                 if (p->sourceKind == CONSTANT_SOURCE)
-                    sprintf(currObj->assembly, "add %s, %s, %d", 
+                    sprintf(currObj->assembly, "addi %s, %s, %d", 
                         getReg(rm, p->dest),
                         getReg(rm, p->source),
                         p->source2
@@ -111,8 +111,8 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case JUMP:
                 if (p->sourceKind == CONSTANT_SOURCE)
-                    sprintf(currObj->assembly, "j %d", p->source);
-                else sprintf(currObj->assembly, "j %d", p->varSource->address);
+                    sprintf(currObj->assembly, "jal x0, %d", p->source);
+                else sprintf(currObj->assembly, "jal x0, %d", p->varSource->address);
                 break;
             case LABEL:
                 sprintf(currObj->assembly, "\n%s: addi rx0, rx0, 0", p->varSource->name);

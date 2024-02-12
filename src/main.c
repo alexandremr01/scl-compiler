@@ -121,23 +121,22 @@ int main(int argc, char *argv[]) {
     }
 
     int errors = syntaxErrors + semanticErrors;
+    int code = errors>0;
     if (errors > 0) {
         printf("\n%d compile errors\n", errors);
-        return 1;
+    } else {
+        IntermediateRepresentation *ir = codeGen(tree);
+
+        RegisterMapping *rm = newRegisterMapping(ir);
+
+        printIR(ir, f_asm, f_bin, rm);
+        freeIntermediateRepresentation(ir);
+        freeRegisterMapping(rm);
+        printf("Compilation successful\n");
     }
-
-    IntermediateRepresentation *ir = codeGen(tree);
-
-    RegisterMapping *rm = newRegisterMapping(ir);
-
-    printIR(ir, f_asm, f_bin, rm);
-
-    freeIntermediateRepresentation(ir);
-    freeRegisterMapping(rm);
+ 
     freeSymbolicTable(table);
-    free(asmFileName);
-   
-    printf("Compilation successful\n");
+    free(asmFileName);  
 
-    return 0;
+    return code;
 }
