@@ -71,7 +71,7 @@ void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry);
 void addJumpRegisterIR(IntermediateRepresentation *ir, int destinationRegister);
 
 void addAdditionImIR(IntermediateRepresentation *ir, int dest, int src, int imm);
-void addJumpImIR(IntermediateRepresentation *ir, int imm);
+IRNode *addJumpImIR(IntermediateRepresentation *ir, int imm);
 void addNopIR(IntermediateRepresentation *ir);
 
 void addBEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);

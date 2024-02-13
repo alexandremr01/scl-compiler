@@ -138,11 +138,12 @@ void addAdditionImIR(IntermediateRepresentation *ir, int dest, int src, int imm)
     addNode(ir, node);
 }
 
-void addJumpImIR(IntermediateRepresentation *ir, int imm) {
+IRNode *addJumpImIR(IntermediateRepresentation *ir, int imm) {
     IRNode * node = newIRNode(JUMP);
     node->sourceKind = CONSTANT_SOURCE;
     node->source = imm;
     addNode(ir, node);
+    return node;
 }
 
 void addNopIR(IntermediateRepresentation *ir) {

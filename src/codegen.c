@@ -52,7 +52,17 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             0
         );
         codeGenNode(node->firstChild->sibling, ir, globals);
-        addNode(ir, endif);
+        
+        // if there is an else
+        ASTNode *elseNode = node->firstChild->sibling->sibling;
+        if (elseNode != NULL) {
+            IRNode *endelse = newIRNode(NOP);
+            IRNode *jumpelse = addJumpImIR(ir, 4);
+            addNode(ir, endif);
+            codeGenNode(elseNode, ir, globals);
+            addNode(ir, endelse);
+            jumpelse->source = endelse->address - jumpelse->address;
+        } else addNode(ir, endif);
         bneq->imm = endif->address - bneq->address;
         return;
     }
