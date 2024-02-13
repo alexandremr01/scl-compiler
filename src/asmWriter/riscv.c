@@ -160,6 +160,18 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
             case BNEQ:
                 sprintf(currObj->assembly, "bne %s, %s, %d", getReg(rm, p->source), getReg(rm, p->source2), p->imm);
                 break;
+            case BLE:
+                sprintf(currObj->assembly, "bge %s, %s, %d", getReg(rm, p->source2),  getReg(rm, p->source), p->imm);
+                break;
+            case BGE:
+                sprintf(currObj->assembly, "bge %s, %s, %d", getReg(rm, p->source), getReg(rm, p->source2), p->imm);
+                break;
+            case BLT:
+                sprintf(currObj->assembly, "blt %s, %s, %d", getReg(rm, p->source), getReg(rm, p->source2), p->imm);
+                break;
+            case BGT:
+                sprintf(currObj->assembly, "blt %s, %s, %d", getReg(rm, p->source2), getReg(rm, p->source), p->imm);
+                break;
             case NOP:
                 sprintf(currObj->assembly, "addi zero, zero, 0");
                 currObj->binary = 0b0 << 20 

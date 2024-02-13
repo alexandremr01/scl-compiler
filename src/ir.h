@@ -18,7 +18,8 @@ typedef enum sourceKind {
 } SourceKind;
 
 typedef enum instruction {
-    MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP, BEQ, BNEQ
+    MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP,
+    BEQ, BNEQ, BLE, BLT, BGE, BGQ, BGT
 } Instruction;
 
 typedef struct irNode {
@@ -74,14 +75,11 @@ void addAdditionImIR(IntermediateRepresentation *ir, int dest, int src, int imm)
 IRNode *addJumpImIR(IntermediateRepresentation *ir, int imm);
 void addNopIR(IntermediateRepresentation *ir);
 
-void addBEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addBEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
 IRNode* addBNEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-
-void addLTIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-void addGTIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-void addLEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-void addGEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-void addEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-void addDiffIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addBLEIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addBGEIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addBLTIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addBGTIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
                                                                                                
 #endif

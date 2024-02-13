@@ -23,6 +23,28 @@ void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     addJumpImIR(ir, -2);
 }
 
+typedef IRNode* (*comparisonFunction)(IntermediateRepresentation*, int, int, int);
+
+// Function that takes an int and returns a pointer to a function with the signature of addBEQIR
+comparisonFunction getComparisonFunction(NodeKind instruction) {
+    switch (instruction) {
+        case LT_NODE:
+            return addBLTIR;
+        case GT_NODE:
+            return addBGTIR;
+        case LEQ_NODE:
+            return addBLEIR;
+        case GEQ_NODE:
+            return addBGEIR;
+        case EQ_NODE:
+            return addBEQIR;
+        case DIFF_NODE:
+            return addBNEQIR;
+        default:
+            return NULL;
+    }
+}
+
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree){
     IntermediateRepresentation *ir = newIntermediateRepresentation();
     SymbolicTableGlobals *globals = (SymbolicTableGlobals *) malloc(sizeof(SymbolicTableGlobals));
@@ -158,38 +180,11 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             return;
         // TODO: refactor all relational to use same function
         case LT_NODE:
-            node->tempRegResult = ir->nextTempReg++;
-            addLTIR(ir, 
-                node->firstChild->tempRegResult, 
-                node->firstChild->sibling->tempRegResult,
-                node->tempRegResult
-            );
-            break;
         case GT_NODE:
-            node->tempRegResult = ir->nextTempReg++;
-            addGTIR(ir, 
-                node->firstChild->tempRegResult, 
-                node->firstChild->sibling->tempRegResult,
-                node->tempRegResult
-            );
-            break;
         case LEQ_NODE:
-            node->tempRegResult = ir->nextTempReg++;
-            addLEQIR(ir, 
-                node->firstChild->tempRegResult, 
-                node->firstChild->sibling->tempRegResult,
-                node->tempRegResult
-            );
-            break;
         case GEQ_NODE:
-            node->tempRegResult = ir->nextTempReg++;
-            addGEQIR(ir, 
-                node->firstChild->tempRegResult, 
-                node->firstChild->sibling->tempRegResult,
-                node->tempRegResult
-            );
-            break;
         case EQ_NODE:
+        case DIFF_NODE:
             node->tempRegResult = ir->nextTempReg++;
             int auxReg = ir->nextTempReg++;
             addSubtractionIR(ir, 
@@ -197,22 +192,15 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
                 node->firstChild->sibling->tempRegResult,
                 auxReg
             );
-            addBEQIR(ir, 
+            getComparisonFunction(node->kind)(
+                ir, 
                 auxReg, 
                 X0_REGISTER,
-                8
+                12
             );
             addLoadImIR(ir, node->tempRegResult, 1);
             addJumpImIR(ir, 8);
             addLoadImIR(ir, node->tempRegResult, 0);
-            break;
-        case DIFF_NODE:
-            node->tempRegResult = ir->nextTempReg++;
-            addDiffIR(ir, 
-                node->firstChild->tempRegResult, 
-                node->firstChild->sibling->tempRegResult,
-                node->tempRegResult
-            );
             break;
         case CALL_NODE:
             parameter = node->firstChild;

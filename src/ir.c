@@ -159,58 +159,47 @@ void addMovIR(IntermediateRepresentation *ir, int dest, int src) {
     addNode(ir, node);
 }
 
-void addLTIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
-    IRNode * node = newIRNode(ADD);
-    node->dest = destination;
+IRNode* addBLTIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(BLT);
+    node->imm = destination;
     node->sourceKind = REG_SOURCE;
     node->source = src1;
     node->source2 = src2;
+    node->dest = X0_REGISTER;
     addNode(ir, node);
 }
 
-void addGTIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
-    IRNode * node = newIRNode(ADD);
-    node->dest = destination;
+IRNode* addBGTIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(BGT);
+    node->imm = destination;
     node->sourceKind = REG_SOURCE;
     node->source = src1;
     node->source2 = src2;
+    node->dest = X0_REGISTER;
     addNode(ir, node);
 }
 
-void addLEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
-    IRNode * node = newIRNode(ADD);
-    node->dest = destination;
+IRNode* addBLEIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(BLE);
+    node->imm = destination;
     node->sourceKind = REG_SOURCE;
     node->source = src1;
     node->source2 = src2;
+    node->dest = X0_REGISTER;
     addNode(ir, node);
 }
 
-void addGEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
-    IRNode * node = newIRNode(ADD);
-    node->dest = destination;
+IRNode* addBGEIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(BGE);
+    node->imm = destination;
     node->sourceKind = REG_SOURCE;
     node->source = src1;
     node->source2 = src2;
+    node->dest = X0_REGISTER;
     addNode(ir, node);
 }
 
-void addEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
-    IRNode * node = newIRNode(ADD);
-    node->dest = destination;
-    node->sourceKind = REG_SOURCE;
-    node->source = src1;
-    node->source2 = src2;
-    addNode(ir, node);
-}
-
-void addDiffIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
-
-}
-
-
-
-void addBEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+IRNode* addBEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
     IRNode * node = newIRNode(BEQ);
     node->imm = destination;
     node->sourceKind = REG_SOURCE;
