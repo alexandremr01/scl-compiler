@@ -157,3 +157,76 @@ void addMovIR(IntermediateRepresentation *ir, int dest, int src) {
     node->dest = dest;
     addNode(ir, node);
 }
+
+void addLTIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(ADD);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    addNode(ir, node);
+}
+
+void addGTIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(ADD);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    addNode(ir, node);
+}
+
+void addLEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(ADD);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    addNode(ir, node);
+}
+
+void addGEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(ADD);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    addNode(ir, node);
+}
+
+void addEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(ADD);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    addNode(ir, node);
+}
+
+void addDiffIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+
+}
+
+
+
+void addBEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(BEQ);
+    node->imm = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    node->dest = X0_REGISTER;
+    addNode(ir, node);
+}
+
+
+IRNode* addBNEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(BNEQ);
+    node->imm = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    node->dest = X0_REGISTER;
+    addNode(ir, node);
+    return node;
+}

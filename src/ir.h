@@ -18,7 +18,7 @@ typedef enum sourceKind {
 } SourceKind;
 
 typedef enum instruction {
-    MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP
+    MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP, BEQ, BNEQ
 } Instruction;
 
 typedef struct irNode {
@@ -29,6 +29,7 @@ typedef struct irNode {
 
     int source;
     int source2;
+    int imm;
     SymbolicTableEntry *varSource;
 
     char *comment;
@@ -50,6 +51,10 @@ typedef struct intermediateRepresentation {
 } IntermediateRepresentation;
 
 IntermediateRepresentation *newIntermediateRepresentation();
+
+IRNode *newIRNode(Instruction instruction);
+void addNode(IntermediateRepresentation *ir, IRNode *node);
+
 void freeIntermediateRepresentation(IntermediateRepresentation *ir);
 void addMovIR(IntermediateRepresentation *ir, int destination, int source);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
@@ -68,5 +73,15 @@ void addJumpRegisterIR(IntermediateRepresentation *ir, int destinationRegister);
 void addAdditionImIR(IntermediateRepresentation *ir, int dest, int src, int imm);
 void addJumpImIR(IntermediateRepresentation *ir, int imm);
 void addNopIR(IntermediateRepresentation *ir);
-                                                                                                     
+
+void addBEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addBNEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+
+void addLTIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+void addGTIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+void addLEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+void addGEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+void addEQIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+void addDiffIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+                                                                                               
 #endif

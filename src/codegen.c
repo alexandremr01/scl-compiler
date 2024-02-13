@@ -23,7 +23,6 @@ void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     addJumpImIR(ir, -2);
 }
 
-
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree){
     IntermediateRepresentation *ir = newIntermediateRepresentation();
     SymbolicTableGlobals *globals = (SymbolicTableGlobals *) malloc(sizeof(SymbolicTableGlobals));
@@ -44,6 +43,19 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
     ASTNode *aux = node->firstChild;
     int returnStackPosition = 0;
     int localsSize = 0;
+    if (node->kind == IF_NODE) {
+        codeGenNode(node->firstChild, ir, globals);
+        IRNode *endif = newIRNode(NOP);
+        IRNode *bneq = addBNEQIR(ir, 
+            node->firstChild->tempRegResult, 
+            X0_REGISTER,
+            0
+        );
+        codeGenNode(node->firstChild->sibling, ir, globals);
+        addNode(ir, endif);
+        bneq->imm = endif->address - bneq->address;
+        return;
+    }
     if (node->kind == FUNCTION_DEFINITION_NODE){
         ir->lastStackAddress = 0;
         addLabelIR(ir, node->stEntry);
@@ -65,7 +77,6 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
         // now, iterate over parameters to give their addresses
         local = node->stEntry->locals;
         while(local != NULL) {
-            printf("Seeing local %s from %s, %d\n", local->name, node->stEntry->name, local->isParameter);
             if (local->isParameter) {
                 local->address = localsSize;
                 localsSize += 4;
@@ -94,8 +105,6 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, localsSize);
             addJumpRegisterIR(ir, RA_REGISTER);
             ir->lastStackAddress = bkp_stack;
-            break;
-        case IF_NODE: 
             break;
         case WHILE_NODE: 
             break;
@@ -137,6 +146,64 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             addLoadImIR(ir, node->tempRegResult, atoi(node->name));
             ir->nextTempReg++;
             return;
+        // TODO: refactor all relational to use same function
+        case LT_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            addLTIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                node->tempRegResult
+            );
+            break;
+        case GT_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            addGTIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                node->tempRegResult
+            );
+            break;
+        case LEQ_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            addLEQIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                node->tempRegResult
+            );
+            break;
+        case GEQ_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            addGEQIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                node->tempRegResult
+            );
+            break;
+        case EQ_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            int auxReg = ir->nextTempReg++;
+            addSubtractionIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                auxReg
+            );
+            addBEQIR(ir, 
+                auxReg, 
+                X0_REGISTER,
+                8
+            );
+            addLoadImIR(ir, node->tempRegResult, 1);
+            addJumpImIR(ir, 8);
+            addLoadImIR(ir, node->tempRegResult, 0);
+            break;
+        case DIFF_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            addDiffIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                node->tempRegResult
+            );
+            break;
         case CALL_NODE:
             parameter = node->firstChild;
             while (parameter != NULL){
@@ -156,7 +223,6 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
                 addLoadMemIR(ir, node->tempRegResult, 0, address_register);      
             } else { 
                 // otherwise: wrt to SP
-                printf("Getting variable %s at %d\n", node->stEntry->name, node->stEntry->address);
                 addLoadMemIR(ir, node->tempRegResult, node->stEntry->address, SP_REGISTER); 
             }
             break;

@@ -217,6 +217,12 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
         case MULTIPLICATION_NODE:
             node->type = INTEGER_TYPE;
             break;
+        case LT_NODE:
+        case GT_NODE:
+        case LEQ_NODE:
+        case GEQ_NODE:
+        case EQ_NODE:
+        case DIFF_NODE:
         case CONSTANT_NODE:
             node->type = INTEGER_TYPE;
             return;

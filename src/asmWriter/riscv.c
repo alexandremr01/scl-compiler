@@ -112,12 +112,12 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case LOAD:
                 if (p->sourceKind == CONSTANT_SOURCE)
-                    sprintf(currObj->assembly, "li %s, %d", 
+                    sprintf(currObj->assembly, "addi %s, zero, %d", 
                         getReg(rm, p->dest), 
                         p->source
                     );
                 else if  (p->sourceKind == VARIABLE_SOURCE) {
-                    sprintf(currObj->assembly, "li %s, %d", 
+                    sprintf(currObj->assembly, "addi %s, zero, %d", 
                         getReg(rm, p->dest), 
                         p->varSource->address
                     );
@@ -153,6 +153,12 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case MOV:
                 sprintf(currObj->assembly, "mv %s, %s", getReg(rm, p->dest), getReg(rm, p->source));
+                break;
+            case BEQ:
+                sprintf(currObj->assembly, "beq %s, %s, %d", getReg(rm, p->source), getReg(rm, p->source2), p->imm);
+                break;
+            case BNEQ:
+                sprintf(currObj->assembly, "bne %s, %s, %d", getReg(rm, p->source), getReg(rm, p->source2), p->imm);
                 break;
             case NOP:
                 sprintf(currObj->assembly, "addi zero, zero, 0");

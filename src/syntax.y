@@ -20,7 +20,7 @@
 %type <node> declaration declaration_list compound_statement statement_list expression
 %type <node> statement expression_statement selection_statement iteration_statement jump_statement
 %type <node> simple_exp sum_exp term factor call var args arg_list
-%type <node> parameters parameter_list parameter sum
+%type <node> parameters parameter_list parameter sum relational
 
 %token ERROR NEWLINE // internal
 %token IF ELSE WHILE // control
@@ -29,7 +29,7 @@
 %token PLUS MINUS TIMES OVER ASSIGN EQ LT GT LEQ GEQ DIFFERENT 
 %token SEMICOLON COMMA
 %token LPAREN RPAREN
-%token LBRACKET RBRACKET
+%token LBRACKET RBRACKET 
 %token LBRACES RBRACES
 %token <string> ID NUM 
 
@@ -160,12 +160,19 @@ var:        ID {
                 // TODO: how to treat vector access??
             }
 simple_exp: sum_exp relational sum_exp {
-                $$ = newASTNode(EXPRESSION_NODE);
+                $$ = $2;
                 $$->firstChild = $1;
                 $1->sibling = $3;
                 $$->line_number = yylineno;
             } | sum_exp {$$ = $1;}
-relational: LT | GT | LEQ | GEQ | EQ | DIFFERENT
+
+relational: LT {$$=newASTNode(LT_NODE);}
+                | GT {$$=newASTNode(GT_NODE);}
+                | LEQ  {$$=newASTNode(LEQ_NODE);}
+                | GEQ {$$=newASTNode(GEQ_NODE);}
+                | EQ {$$=newASTNode(EQ_NODE);}
+                | DIFFERENT {$$=newASTNode(DIFF_NODE);}
+
 sum_exp:    sum_exp sum term {
                 $$ = $2;
                 $$->firstChild = $1;

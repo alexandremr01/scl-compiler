@@ -55,6 +55,9 @@ void printTree(ASTNode *node, int level){
         case EXPRESSION_NODE:
             printf("Expression: TBD\n");
             break;
+        case EQ_NODE:
+            printf("Equality\n");
+            break;
         case ASSIGNMENT_NODE:
             printf("Assignment\n");
             break;
