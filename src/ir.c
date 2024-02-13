@@ -28,6 +28,7 @@ IRNode *newIRNode(Instruction instruction){
     IRNode * node = (IRNode *) malloc(sizeof(IRNode));
     node->instruction = instruction;
     node->next = NULL;
+    node->dest = X0_REGISTER;
     return node;
 }
 
@@ -74,6 +75,15 @@ void addCommentIR(IntermediateRepresentation *ir, char *comment){
 
 void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
     IRNode * node = newIRNode(ADD);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    addNode(ir, node);
+}
+
+void addMultiplicationIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(MUL);
     node->dest = destination;
     node->sourceKind = REG_SOURCE;
     node->source = src1;

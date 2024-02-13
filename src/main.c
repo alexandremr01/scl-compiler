@@ -64,7 +64,7 @@ void lexic_parser_only(){
 
 int main(int argc, char *argv[]) {
     FILE *f_in, *f_asm, *f_bin;
-    int print_ast=0, print_symbolic_table=0, includeASMComments=0;
+    int print_ast=0, print_symbolic_table=0, includeASMComments=0, keepTemporaries=0;
     if (argc < 3) {
         printf("Usage: scl src_file output_file [--lexical_only] [--print_ast] [--print_symbolic_table]\n");
         return 1;
@@ -100,6 +100,8 @@ int main(int argc, char *argv[]) {
             yydebug=1;
         } else if (strcmp(argv[i], "--asm_comments") == 0){
             includeASMComments=1;
+        } else if (strcmp(argv[i], "--keep_temporaries") == 0){
+            keepTemporaries=1;
         } else {
             printf("FATAL: unrecognized command-line option \'%s\'\n", argv[i]);
             free(asmFileName);
@@ -132,11 +134,11 @@ int main(int argc, char *argv[]) {
     } else {
         IntermediateRepresentation *ir = codeGen(tree);
 
-        RegisterMapping *rm = newRegisterMapping(ir);
+        RegisterMapping *rm = keepTemporaries ? NULL : newRegisterMapping(ir);
 
         printIR(ir, f_asm, f_bin, rm, includeASMComments);
         freeIntermediateRepresentation(ir);
-        freeRegisterMapping(rm);
+        if (!keepTemporaries) freeRegisterMapping(rm);
         printf("Compilation successful\n");
     }
  

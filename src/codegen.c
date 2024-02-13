@@ -88,10 +88,36 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
         bneq->imm = endif->address - bneq->address;
         return;
     }
+    if (node->kind == WHILE_NODE) {
+        IRNode *startWhile = newIRNode(NOP);
+        addNode(ir, startWhile);
+        addCommentIR(ir, "condition");
+
+        codeGenNode(node->firstChild, ir, globals);
+
+        IRNode *endwhile = newIRNode(JUMP);
+        endwhile->sourceKind = CONSTANT_SOURCE;
+        addCommentIR(ir, "jump if false");
+
+        IRNode *bneq = addBNEQIR(ir, 
+            node->firstChild->tempRegResult, 
+            X0_REGISTER,
+            0
+        );
+        addCommentIR(ir, "while body");
+
+        codeGenNode(node->firstChild->sibling, ir, globals);
+        addCommentIR(ir, "return to condition");
+        addNode(ir, endwhile);
+        // goes to next instruction after the endwhile
+        bneq->imm = endwhile->address - bneq->address + 4;
+        endwhile->source = startWhile->address - endwhile->address; // problem: has to go back to beggining of comparison
+
+        return;
+    }
     if (node->kind == FUNCTION_DEFINITION_NODE){
         ir->lastStackAddress = 0;
         addLabelIR(ir, node->stEntry);
-        
         addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4);
         addStoreIR(ir, SP_REGISTER, 0, RA_REGISTER); 
         // first, iterate over non-parameter locals
@@ -138,11 +164,18 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             addJumpRegisterIR(ir, RA_REGISTER);
             ir->lastStackAddress = bkp_stack;
             break;
-        case WHILE_NODE: 
-            break;
         case RETURN_NODE: 
             addMovIR(ir, A0_REGISTER, node->firstChild->tempRegResult);
             break;
+        case MULTIPLICATION_NODE:
+            node->tempRegResult = ir->nextTempReg++;
+            addMultiplicationIR(ir, 
+                node->firstChild->tempRegResult, 
+                node->firstChild->sibling->tempRegResult,
+                node->tempRegResult
+            );
+            break;
+
         case SUM_NODE:
             node->tempRegResult = ir->nextTempReg++;
             addAdditionIR(ir, 
@@ -178,7 +211,6 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             addLoadImIR(ir, node->tempRegResult, atoi(node->name));
             ir->nextTempReg++;
             return;
-        // TODO: refactor all relational to use same function
         case LT_NODE:
         case GT_NODE:
         case LEQ_NODE:

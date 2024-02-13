@@ -7,12 +7,12 @@ typedef struct objectCode {
     int include;
 } ObjectCode; 
 
-char *registerNames[7] = {
-    "t0", "t1", "t2", "t3", "t4", "t5", "t6"
+char *registerNames[13] = {
+    "t0", "t1", "t2", "t3", "t4", "t5", "t6", "a2", "a3", "a4", "a5", "a6", "a7"
 };
 
-int registerCodes[7] = {
-    5, 6, 7, 28, 29, 30, 31
+int registerCodes[13] = {
+    5, 6, 7, 28, 29, 30, 31, 12, 13, 14, 15, 16, 17
 };
 
 char *getReg(RegisterMapping *rm, int temporary){
@@ -26,6 +26,20 @@ char *getReg(RegisterMapping *rm, int temporary){
         return "ra"; 
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
+
+// char *getReg(RegisterMapping *rm, int temporary){
+//     if (temporary == SP_REGISTER)
+//         return "sp"; //sp or x2
+//     else if (temporary == A0_REGISTER)
+//         return "a0"; //a0 or x10
+//     else if (temporary == X0_REGISTER)
+//         return "zero"; 
+//     else if (temporary == RA_REGISTER)
+//         return "ra"; 
+//     char *testString = (char *)malloc(10*sizeof(char));
+//     sprintf(testString, "#%d", temporary);
+//     return testString;
+// }
 
 int getRegBin(RegisterMapping *rm, int temporary){
     if (temporary == SP_REGISTER)
@@ -97,6 +111,14 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                                 | 0b0010011;
                 }
                 else sprintf(currObj->assembly, "add %s, %s, %s", 
+                    getReg(rm, p->dest),
+                    getReg(rm, p->source),
+                    getReg(rm, p->source2)
+                );
+                
+                break;
+            case MUL:
+                sprintf(currObj->assembly, "mul %s, %s, %s", 
                     getReg(rm, p->dest),
                     getReg(rm, p->source),
                     getReg(rm, p->source2)
