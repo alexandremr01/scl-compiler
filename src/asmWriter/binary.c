@@ -30,7 +30,7 @@ int get_funct3(const char* opcode) {
 }
 
 // Function to get the funct7 code
-int get_funct7(const char* opcode) {
+        int get_funct7(const char* opcode) {
     static const char* funct7_map[FUNCT7_MAP_SIZE][2] = {
         {"SRAI", "0100000"}, {"SUB", "0100000"}, {"SRA", "0100000"}
     };

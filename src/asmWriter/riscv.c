@@ -3,7 +3,6 @@
 
 typedef struct objectCode {
     char assembly[25];
-    int binary; 
     struct objectCode *next;
     int include;
 } ObjectCode; 
@@ -96,7 +95,6 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
         currObj->next = NULL;
         currObj->include = 1;
         strcpy(currObj->assembly, "");
-        currObj->binary = 0x20;
         switch (p->instruction) {
             case ADD:
                 if (p->sourceKind == CONSTANT_SOURCE){
@@ -105,11 +103,6 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                         getReg(rm, p->source),
                         p->source2
                     );
-                    currObj->binary = 0b0 << 20 
-                                | getRegBin(rm, p->source) << 15 
-                                | 0b000 << 12 
-                                | getRegBin(rm, p->dest) << 7
-                                | 0b0010011;
                 }
                 else sprintf(currObj->assembly, "add %s, %s, %s", 
                     getReg(rm, p->dest),
@@ -169,7 +162,6 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case LABEL:
                 sprintf(currObj->assembly, "\n%s:\naddi zero, zero, 0", p->varSource->name);
-                currObj->binary = 0b0 << 20 | 0b00000 << 15 | 0b000 << 12 | 0b00000 << 7 | 0b0010011;
                 break;
             case JUMP_REGISTER:
                 sprintf(currObj->assembly, "jalr %s, 0(%s)", getReg(rm, RA_REGISTER), getReg(rm, p->dest));
@@ -197,11 +189,6 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
                 break;
             case NOP:
                 sprintf(currObj->assembly, "addi zero, zero, 0");
-                currObj->binary = 0b0 << 20 
-                                | 0 << 15 
-                                | 0b000 << 12 
-                                | 0 << 7
-                                | 0b0010011;
                 break;
         }
         p = p->next;
