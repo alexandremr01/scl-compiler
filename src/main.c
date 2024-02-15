@@ -3,11 +3,12 @@
 #include <string.h>
 
 #include "semantic_analysis.h"
-#include "register_mapping.h"
 #include "asmWriter/riscv.h"
 #include "ast.h"
 #include "syntax.tab.h"
-#include "codegen.h"
+
+#include "backend/codegen.h"
+#include "backend/register_mapping.h"
 
 extern FILE *yyin;
 extern int yylex (void);

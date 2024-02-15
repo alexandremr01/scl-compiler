@@ -5,9 +5,9 @@ BUILD     := ./bin
 
 SOURCEDIR := $(CURDIR)/src
 
-SOURCEFILES    := main.c ast.c ir.c	codegen.c symbolic_table.c \
+SOURCEFILES    := main.c ast.c ir.c	symbolic_table.c \
 					semantic_analysis.c datatypes.c \
-					register_mapping.c asmWriter/riscv.c \
+					backend/codegen.c backend/register_mapping.c asmWriter/riscv.c \
 					lex.yy.c syntax.tab.c 
 
 GENERATEDFILES := *.yy.c *.tab.* *.output

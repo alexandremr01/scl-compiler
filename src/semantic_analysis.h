@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include "ast.h"
-#include "ir.h"
 
 int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug);
 

@@ -1,4 +1,4 @@
-#include "semantic_analysis.h"
+#include "codegen.h"
 #define INITIAL_STACK 2000
 
 void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlobals *globals);
