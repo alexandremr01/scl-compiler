@@ -5,7 +5,7 @@
 #include "semantic_analysis.h"
 #include "asmWriter/riscv.h"
 #include "ast.h"
-#include "syntax.tab.h"
+#include "generated/syntax.tab.h"
 
 #include "backend/codegen.h"
 #include "backend/register_mapping.h"

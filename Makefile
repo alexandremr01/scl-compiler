@@ -4,11 +4,12 @@ LDFLAGS   := -lfl
 BUILD     := ./bin
 
 SOURCEDIR := $(CURDIR)/src
+GENERATEDDIR := $(SOURCEDIR)/generated
 
 SOURCEFILES    := main.c ast.c ir.c	symbolic_table.c \
 					semantic_analysis.c datatypes.c \
 					backend/codegen.c backend/register_mapping.c asmWriter/riscv.c \
-					lex.yy.c syntax.tab.c 
+					generated/lex.yy.c generated/syntax.tab.c 
 
 GENERATEDFILES := *.yy.c *.tab.* *.output
 
@@ -26,16 +27,16 @@ run-docker:
 all: build
 
 build:
-	@mkdir -p $(BUILD)
-	flex -o $(SOURCEDIR)/lex.yy.c $(SOURCEDIR)/lex.l
-	bison --debug -o $(SOURCEDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/syntax.y
+	@mkdir -p $(BUILD) $(GENERATEDDIR)
+	flex -o $(GENERATEDDIR)/lex.yy.c $(SOURCEDIR)/lex.l
+	bison --debug -o $(GENERATEDDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/syntax.y
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/sclc
 
 debug: CFLAGS += -g -fsanitize=address
 debug: all
 
 clean:
-	-@rm -rvf $(BUILD) $(GEN) test/*.out
+	-@rm -rvf $(BUILD) $(GEN) $(GENERATEDDIR) test/*.out
 
 test:
 	sh test/1-test-al.sh

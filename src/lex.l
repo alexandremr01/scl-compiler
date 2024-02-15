@@ -7,7 +7,8 @@ whitespace  [ \t]+
 single_line_comment    \/\/.*
 multi_line_comment     \/\*.+\*\/
 %{
-#include "ast.h"
+// include with respect to generated dir
+#include "../ast.h"
 #include "syntax.tab.h"
 %}
 %option yylineno

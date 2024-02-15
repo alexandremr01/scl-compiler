@@ -1,7 +1,8 @@
 %start program
 %debug
 %{
-    #include "ast.h"
+    // include with respect to generated dir
+    #include "../ast.h" 
     static int yyerror(char*);
     extern int yylex();
     extern int yylineno;
