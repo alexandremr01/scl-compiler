@@ -1,4 +1,5 @@
 #include "riscv.h"
+#include "binary.h"
 
 typedef struct objectCode {
     char assembly[25];
@@ -210,7 +211,8 @@ void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterM
     while (currObj != NULL){
         if (currObj->include) {
             fprintf(f_asm, "%s\n", currObj->assembly);
-            fwrite(&currObj->binary, sizeof(currObj->binary), 1, f_bin);
+            int bytecode = asmToBinary(currObj->assembly);
+            fwrite(&bytecode, sizeof(bytecode), 1, f_bin);
         }
         currObj = currObj->next;
     }

@@ -10,7 +10,7 @@ SOURCEFILES    := main.c frontend/semantic_analysis.c \
 					datastructures/ast.c datastructures/ir.c datastructures/symbolic_table.c \
 					datastructures/datatypes.c \
 					backend/codegen.c backend/register_mapping.c \
-					asmWriter/riscv.c \
+					asmWriter/riscv.c asmWriter/binary.c \
 					generated/lex.yy.c generated/syntax.tab.c 
 
 GENERATEDFILES := *.yy.c *.tab.* *.output
@@ -33,6 +33,7 @@ build:
 	flex -o $(GENERATEDDIR)/lex.yy.c $(SOURCEDIR)/frontend/lex.l
 	bison --debug -o $(GENERATEDDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/frontend/syntax.y
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/sclc
+	$(CC) $(CFLAGS) $(SOURCEDIR)/bin2vhdl.c -o $(BUILD)/bin2vhdl
 
 debug: CFLAGS += -g -fsanitize=address
 debug: all
