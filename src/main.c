@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "semantic_analysis.h"
+#include "frontend/semantic_analysis.h"
 #include "asmWriter/riscv.h"
-#include "ast.h"
+#include "datastructures/ast.h"
 #include "generated/syntax.tab.h"
 
 #include "backend/codegen.h"

@@ -2,8 +2,8 @@
 #define CODEGEN_H_
 
 #include <stdio.h>
-#include "../ast.h"
-#include "../ir.h"
+#include "../datastructures/ast.h"
+#include "../datastructures/ir.h"
 
 
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree);

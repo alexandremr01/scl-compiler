@@ -6,9 +6,11 @@ BUILD     := ./bin
 SOURCEDIR := $(CURDIR)/src
 GENERATEDDIR := $(SOURCEDIR)/generated
 
-SOURCEFILES    := main.c ast.c ir.c	symbolic_table.c \
-					semantic_analysis.c datatypes.c \
-					backend/codegen.c backend/register_mapping.c asmWriter/riscv.c \
+SOURCEFILES    := main.c frontend/semantic_analysis.c \
+					datastructures/ast.c datastructures/ir.c datastructures/symbolic_table.c \
+					datastructures/datatypes.c \
+					backend/codegen.c backend/register_mapping.c \
+					asmWriter/riscv.c \
 					generated/lex.yy.c generated/syntax.tab.c 
 
 GENERATEDFILES := *.yy.c *.tab.* *.output
@@ -28,8 +30,8 @@ all: build
 
 build:
 	@mkdir -p $(BUILD) $(GENERATEDDIR)
-	flex -o $(GENERATEDDIR)/lex.yy.c $(SOURCEDIR)/lex.l
-	bison --debug -o $(GENERATEDDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/syntax.y
+	flex -o $(GENERATEDDIR)/lex.yy.c $(SOURCEDIR)/frontend/lex.l
+	bison --debug -o $(GENERATEDDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/frontend/syntax.y
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/sclc
 
 debug: CFLAGS += -g -fsanitize=address

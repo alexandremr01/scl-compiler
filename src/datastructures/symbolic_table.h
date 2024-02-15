@@ -1,7 +1,7 @@
 #ifndef SYMBOLIC_TABLE_H_
 #define SYMBOLIC_TABLE_H_
 
-#include "external/uthash.h"
+#include "../external/uthash.h"
 
 #include "datatypes.h"
 

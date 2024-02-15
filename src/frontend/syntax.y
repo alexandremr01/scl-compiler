@@ -1,8 +1,7 @@
 %start program
 %debug
 %{
-    // include with respect to generated dir
-    #include "../ast.h" 
+    #include "../datastructures/ast.h" 
     static int yyerror(char*);
     extern int yylex();
     extern int yylineno;

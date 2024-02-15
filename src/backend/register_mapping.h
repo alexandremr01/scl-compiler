@@ -2,7 +2,7 @@
 #define REGISTER_MAPPING_H_
 
 #include <stdio.h>
-#include "../ir.h"
+#include "../datastructures/ir.h"
 
 typedef struct registerMapping {
     int *map;
