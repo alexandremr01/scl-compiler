@@ -93,6 +93,12 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                     getReg(rm, p->source2)
                 );
                 break;
+            case AUIPC:
+                sprintf(currObj->assembly, "auipc %s, %d", 
+                    getReg(rm, p->dest),
+                    p->imm
+                );
+                break;            
             case LOAD:
                 if (p->sourceKind == CONSTANT_SOURCE)
                     sprintf(currObj->assembly, "addi %s, zero, %d", 
@@ -100,9 +106,10 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                         p->source
                     );
                 else if  (p->sourceKind == VARIABLE_SOURCE) {
-                    sprintf(currObj->assembly, "addi %s, zero, %d", 
+                    sprintf(currObj->assembly, "lw %s, %d(%s)", 
                         getReg(rm, p->dest), 
-                        p->varSource->address
+                        p->varSource->address-p->address,
+                        getReg(rm, p->source)
                     );
                 } else {
                     sprintf(currObj->assembly, "lw %s, %d(%s)", 
@@ -113,7 +120,14 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 }
                 break;
             case STORE:
-                sprintf(currObj->assembly, "sw %s, %d(%s)", getReg(rm, p->source), p->source2, getReg(rm, p->dest));
+                if  (p->sourceKind == VARIABLE_SOURCE) {
+                    sprintf(currObj->assembly, "sw %s, %d(%s)", 
+                        getReg(rm, p->dest), 
+                        p->varSource->address-p->address,
+                        getReg(rm, p->source)
+                    );
+                }
+                else sprintf(currObj->assembly, "sw %s, %d(%s)", getReg(rm, p->source), p->source2, getReg(rm, p->dest));
                 break;
             case COMMENT:
                 sprintf(currObj->assembly, "// %s", p->comment);

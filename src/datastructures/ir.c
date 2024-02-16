@@ -29,6 +29,8 @@ IRNode *newIRNode(Instruction instruction){
     node->instruction = instruction;
     node->next = NULL;
     node->dest = X0_REGISTER;
+    node->source = X0_REGISTER;
+    node->source2 = X0_REGISTER;
     return node;
 }
 
@@ -130,6 +132,31 @@ void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry) {
     IRNode * node = newIRNode(JUMP);
     node->sourceKind = VARIABLE_SOURCE;
     node->varSource = entry;
+    addNode(ir, node);
+}
+
+void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm) {
+    IRNode * node = newIRNode(AUIPC);
+    node->dest = destinationRegister;
+    node->imm = imm;
+    addNode(ir, node);
+}
+
+void addLoadVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry) {
+    IRNode * node = newIRNode(LOAD);
+    node->sourceKind = VARIABLE_SOURCE;
+    node->varSource = entry;
+    node->dest = destinationRegister;
+    node->source = sourceRegister;
+    addNode(ir, node);
+}
+
+void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry) {
+    IRNode * node = newIRNode(STORE);
+    node->sourceKind = VARIABLE_SOURCE;
+    node->varSource = entry;
+    node->dest = destinationRegister;
+    node->source = sourceRegister;
     addNode(ir, node);
 }
 

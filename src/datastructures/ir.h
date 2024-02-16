@@ -19,7 +19,7 @@ typedef enum sourceKind {
 
 typedef enum instruction {
     MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP,
-    BEQ, BNEQ, BLE, BLT, BGE, BGQ, BGT, MUL
+    BEQ, BNEQ, BLE, BLT, BGE, BGQ, BGT, MUL, AUIPC
 } Instruction;
 
 typedef struct irNode {
@@ -67,6 +67,9 @@ void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int de
 void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
 void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
 void addCommentIR(IntermediateRepresentation *ir, char *comment);
+void addLoadVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry);
+void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm);
+void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry);
 
 void addLabelIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry); 
 void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry); 
