@@ -6,4 +6,6 @@ typedef enum dataType {
 } DataType;
 
 const char *printType(DataType d);
+int getSize(DataType d);
+
 #endif

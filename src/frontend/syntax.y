@@ -46,14 +46,21 @@ units: external_declaration { $$ = $1; }
 external_declaration: function_definition { $$ = $1; }
                     | declaration { $$ = $1; }
 
-function_definition: type_specifier ID LPAREN parameters RPAREN compound_statement {
-    $$ = newASTNode(FUNCTION_DEFINITION_NODE);
-    $$->type = $1;
-    $$->name = $2; 
-    $$->firstChild = $6;
-    $6->sibling = $4;
-    $$->line_number = yylineno;
-}
+function_definition: type_specifier ID LPAREN parameters RPAREN SEMICOLON {
+        $$ = newASTNode(FUNCTION_DECLARATION_NODE);
+        $$->type = $1;
+        $$->name = $2; 
+        $$->firstChild = $4;
+        $$->line_number = yylineno;
+    }
+                    | type_specifier ID LPAREN parameters RPAREN compound_statement {
+        $$ = newASTNode(FUNCTION_DEFINITION_NODE);
+        $$->type = $1;
+        $$->name = $2; 
+        $$->firstChild = appendSibling($4, $6);
+        $$->line_number = yylineno;
+    }
+    
 parameters: parameter_list {$$=$1;} | %empty {$$=NULL;}
 parameter_list: parameter_list COMMA parameter {$$ = appendSibling($1, $3);}| parameter {$$=$1;} 
 parameter: type_specifier ID  { 

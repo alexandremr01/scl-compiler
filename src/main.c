@@ -8,6 +8,7 @@
 #include "generated/syntax.tab.h"
 
 #include "backend/codegen.h"
+#include "backend/linker.h"
 #include "backend/register_mapping.h"
 
 extern FILE *yyin;
@@ -132,21 +133,37 @@ int main(int argc, char *argv[]) {
     int code = errors>0;
     if (errors > 0) {
         printf("\n%d compile errors\n", errors);
-    } else {
-        IntermediateRepresentation *ir = codeGen(tree);
+        freeSymbolicTable(table);
+        free(asmFileName);  
+        fclose(f_asm);
+        fclose(f_bin);
+        return 1;
+    } 
 
-        RegisterMapping *rm = keepTemporaries ? NULL : newRegisterMapping(ir);
+    IntermediateRepresentation *ir = codeGen(tree);
 
-        printIR(ir, f_asm, f_bin, rm, includeASMComments);
-        freeIntermediateRepresentation(ir);
-        if (!keepTemporaries) freeRegisterMapping(rm);
-        printf("Compilation successful\n");
+    int linkError = link(ir);
+    if (linkError) {
+        printf("Linking errors\n");
+        freeIntermediateRepresentation(ir); 
+        freeSymbolicTable(table);
+        free(asmFileName);  
+        fclose(f_asm);
+        fclose(f_bin);
+        return 1;
     }
- 
+
+    RegisterMapping *rm = keepTemporaries ? NULL : newRegisterMapping(ir);
+
+    printIR(ir, f_asm, f_bin, rm, includeASMComments);
+    printf("Compilation successful\n");
+
+    freeIntermediateRepresentation(ir); 
     freeSymbolicTable(table);
     free(asmFileName);  
     fclose(f_asm);
     fclose(f_bin);
+    if (!keepTemporaries) freeRegisterMapping(rm);
 
     return code;
 }

@@ -7,5 +7,6 @@
 
 
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree);
+void call(IntermediateRepresentation *ir, SymbolicTableEntry *fn);
 
 #endif 

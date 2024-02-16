@@ -53,42 +53,11 @@ int getRegBin(RegisterMapping *rm, int temporary){
     return registerCodes[getRegisterAssignment(rm, temporary)];
 }
 
-int getSize(DataType d){
-    switch(d){
-        case NONE_TYPE:
-            return 0;
-        case INTEGER_TYPE:
-            return 4;
-        case VOID_TYPE:
-            return 0;
-        case FLOAT_TYPE:
-            return 4;
-    }
-    return 0;
-}
-
 void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm, int includeASMComments){
     ObjectCode *currObj = NULL, *objCode = (ObjectCode *) malloc(sizeof(ObjectCode));
     currObj = objCode;
     IRNode *p = ir->head;
 
-    // give address to globals
-    SymbolicTableGlobals *g = ir->globals->next;
-    while (g!=NULL) {
-        g->entry->address = ir->lastAddress;
-        ir->lastAddress += getSize(g->entry->type);
-        g = g->next;
-    }
-
-    // give label address to variables
-    while (p != NULL) {
-        if (p->instruction == LABEL){
-            p->varSource->address = p->address;
-        }
-        p = p->next;
-    }
-
-    p = ir->head;
     while (p != NULL) {
         currObj->next = (ObjectCode *) malloc(sizeof(ObjectCode));
         currObj = currObj->next;

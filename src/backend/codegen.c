@@ -65,6 +65,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
     ASTNode *aux = node->firstChild;
     int returnStackPosition = 0;
     int localsSize = 0;
+    if (node->kind == FUNCTION_DECLARATION_NODE) return;
     if (node->kind == IF_NODE) {
         codeGenNode(node->firstChild, ir, globals);
         IRNode *endif = newIRNode(NOP);
@@ -122,7 +123,9 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
         addStoreIR(ir, SP_REGISTER, 0, RA_REGISTER); 
         // first, iterate over non-parameter locals
         SymbolicTableEntry *local = node->stEntry->locals;
+        printf("Analise da funcao %s %d\n", node->name, localsSize);
         while(local != NULL) {
+            printf("Adicionando local parametro %s\n", local->name);
             if (!local->isParameter) {
                 local->address = localsSize;
                 localsSize += 4;

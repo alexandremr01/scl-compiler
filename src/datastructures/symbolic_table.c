@@ -12,6 +12,7 @@ SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTa
     entry->hasReturn = 0;
     entry->locals = NULL;
     entry->isParameter = 0;
+    entry->hasBody = 0;
     return entry;
 }
 
