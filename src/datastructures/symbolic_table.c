@@ -50,6 +50,15 @@ SymbolicTable* newSymbolicTable(){
     return table;
 }
 
+void freeDTList(DataTypeList *dtList) {
+    DataTypeList *curr = dtList;
+    while (curr != NULL){
+        dtList = dtList->next;
+        free(curr);
+        curr = dtList;
+    }
+}
+
 void freeSymbolicTable(SymbolicTable *table) {
     SymbolicTableEntry *entry;
     for (entry = table->entries; entry != NULL; entry = entry->hh.next) {

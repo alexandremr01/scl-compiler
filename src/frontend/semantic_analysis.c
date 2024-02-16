@@ -92,12 +92,19 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
                 head
             );
         } else {
-            // list = head;
-            // while (list != NULL) {
-            //     if (list->type != previousL)
-            //     list = list->next;
+            // DataTypeList *dtListDeclaration = head;
+            // DataTypeList *dtListPrev = stEntry->;
+            // while (parameter != NULL && auxDTList != NULL){
+            //     if (dtypes->type != parameter->type) {
+            //         printf("Line %d: Parameter #%d of incorrect type. Has type %s, expected %s.\n", parameter->line_number, num_parameters, printType(parameter->type), printType(dtypes->type));
+            //         *errors += 1;
+            //         callErrors += 1;
+            //     }
+            //     dtypes = dtypes->next;
+            //     parameter = parameter->sibling;
+            //     num_parameters++; num_expected++;
             // }
-            // stEntry->
+            freeDTList(head);
         }
         
         addDeleteStack(stack, node->name);

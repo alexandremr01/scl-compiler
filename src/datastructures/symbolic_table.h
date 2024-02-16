@@ -49,5 +49,6 @@ void removeSymbolicTableEntry(SymbolicTable *table, char *name);
 SymbolicTable * newSymbolicTable();
 void freeSymbolicTable(SymbolicTable *table);
 void printSymbolicTable(SymbolicTable *table);
+void freeDTList(DataTypeList *dtList);
 
 #endif

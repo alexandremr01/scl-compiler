@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "frontend/semantic_analysis.h"
-#include "asmWriter/riscv.h"
+#include "translator/riscv.h"
 #include "datastructures/ast.h"
 #include "generated/syntax.tab.h"
 
@@ -134,22 +134,22 @@ int main(int argc, char *argv[]) {
         printf("\n\n");
     }
 
-    int linkErrors = 0;
     int compileErrors = syntaxErrors + semanticErrors;
-    IntermediateRepresentation *ir = NULL;
     if (compileErrors > 0) {
         printf("\n%d compile errors\n", compileErrors);
-    } else {
-        // if no compiler errors, runs backend: code generation + linking
-        ir = codeGen(tree);
-        linkErrors = link(ir);
-        if (linkErrors > 0) 
-            printf("\n%d linker errors\n", linkErrors);
-    }
-    
-    // any error in the previous steps: free everything that was used and quit
-    if (linkErrors || compileErrors) {
-        if (ir!=NULL) freeIntermediateRepresentation(ir); 
+        freeSymbolicTable(table);
+        fclose(f_asm);
+        fclose(f_bin);
+        fclose(f_in);
+        return 1;
+    } 
+
+    // Backend
+    IntermediateRepresentation *ir = codeGen(tree);
+    int linkErrors = link(ir);
+    if (linkErrors > 0) {
+        printf("\n%d linker errors\n", linkErrors);
+        freeIntermediateRepresentation(ir); 
         freeSymbolicTable(table);
         fclose(f_asm);
         fclose(f_bin);
@@ -157,14 +157,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    RegisterAssignment *RegisterAssignment = keepTemporaries ? NULL : newRegisterAssignment(ir);
-    wirteIR(ir, f_asm, f_bin, RegisterAssignment, includeASMComments);
+    RegisterAssignment *registerAssignment = keepTemporaries ? NULL : newRegisterAssignment(ir);
+    ObjectCode *obj = translateIRToObj(ir, registerAssignment, includeASMComments);
+    writeAssembly(obj, f_asm);
+    writeBinary(obj, f_bin);
 
     printf("Compilation successful\n");
 
+    freeObjectCode(obj);
     freeIntermediateRepresentation(ir); 
     freeSymbolicTable(table);
-    freeRegisterAssignment(RegisterAssignment);
+    freeRegisterAssignment(registerAssignment);
 
     fclose(f_asm);
     fclose(f_bin);

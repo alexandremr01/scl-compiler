@@ -54,8 +54,11 @@ int int2signedbin(int number, int digits) {
 }
 
 int asmToBinary(char *line) {
+    char auxLine[MAX_LINE_LENGTH];
+    strcpy(auxLine, line);
+
     // Remove leading/trailing whitespace and convert to uppercase
-    char *p = line;
+    char *p = auxLine;
     while (*p && isspace(*p)) p++;
     size_t len = strlen(p);
     while (len > 0 && isspace(p[len - 1])) len--;

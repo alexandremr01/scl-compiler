@@ -1,12 +1,6 @@
 #include "riscv.h"
 #include "binary.h"
 
-typedef struct objectCode {
-    char assembly[25];
-    struct objectCode *next;
-    int include;
-} ObjectCode; 
-
 char *registerNames[13] = {
     "t0", "t1", "t2", "t3", "t4", "t5", "t6", "a2", "a3", "a4", "a5", "a6", "a7"
 };
@@ -53,17 +47,21 @@ int getRegBin(RegisterAssignment *rm, int temporary){
     return registerCodes[getRegisterAssignment(rm, temporary)];
 }
 
-void wirteIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterAssignment *rm, int includeASMComments){
-    ObjectCode *currObj = NULL, *objCode = (ObjectCode *) malloc(sizeof(ObjectCode));
+ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment *rm, int includeASMComments){
+    ObjectCode *currObj = NULL, *objCode = NULL;
     currObj = objCode;
     IRNode *p = ir->head;
 
     while (p != NULL) {
-        currObj->next = (ObjectCode *) malloc(sizeof(ObjectCode));
-        currObj = currObj->next;
-        currObj->next = NULL;
-        currObj->include = 1;
-        strcpy(currObj->assembly, "");
+        // printf()
+        if (objCode != NULL) {
+            currObj->next = newObjectCode();
+            currObj = currObj->next;
+        } else {
+            objCode = newObjectCode();
+            currObj = objCode;
+        }
+
         switch (p->instruction) {
             case ADD:
                 if (p->sourceKind == CONSTANT_SOURCE){
@@ -160,23 +158,10 @@ void wirteIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterA
                 sprintf(currObj->assembly, "addi zero, zero, 0");
                 break;
         }
+        currObj->binary = asmToBinary(currObj->assembly);
         p = p->next;
     }
 
-    currObj = objCode->next;
-    while (currObj != NULL){
-        if (currObj->include) {
-            fprintf(f_asm, "%s\n", currObj->assembly);
-            int bytecode = asmToBinary(currObj->assembly);
-            fwrite(&bytecode, sizeof(bytecode), 1, f_bin);
-        }
-        currObj = currObj->next;
-    }
-
-    currObj = objCode;
-    while (currObj != NULL){
-        objCode = currObj;
-        currObj = currObj->next;
-        free(objCode);
-    }
+    return objCode;
 }
+
