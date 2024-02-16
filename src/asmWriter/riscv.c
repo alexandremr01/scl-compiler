@@ -53,7 +53,7 @@ int getRegBin(RegisterMapping *rm, int temporary){
     return registerCodes[getRegisterAssignment(rm, temporary)];
 }
 
-void printIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm, int includeASMComments){
+void wirteIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm, int includeASMComments){
     ObjectCode *currObj = NULL, *objCode = (ObjectCode *) malloc(sizeof(ObjectCode));
     currObj = objCode;
     IRNode *p = ir->head;

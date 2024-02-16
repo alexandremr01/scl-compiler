@@ -64,40 +64,53 @@ void lexic_parser_only(){
     return;
 }
 
+char *appendAsm(char *filename){
+    int filenameLength = strlen(filename);
+    int newLength = filenameLength + 5;
+    char *asmFileName = (char *) malloc(newLength*sizeof(char));
+    strcpy(asmFileName, filename);
+    strcat(asmFileName, ".asm");
+    return asmFileName;
+}
+
 int main(int argc, char *argv[]) {
-    FILE *f_in, *f_asm, *f_bin;
-    int print_ast=0, print_symbolic_table=0, includeASMComments=0, keepTemporaries=0;
+    int print_ast=0, includeASMComments=0, keepTemporaries=0;
     if (argc < 3) {
-        printf("Usage: scl src_file output_file [--lexical_only] [--print_ast] [--print_symbolic_table]\n");
+        printf("Usage: scl src_file output_file [--lexical_only] [--print_ast]\n");
         return 1;
     }
-    if (f_in = fopen(argv[1],"r")) 
-        yyin = f_in;
-    else {
+
+    // open files
+    FILE *f_in = fopen(argv[1],"r");
+    if (f_in == NULL) {
         printf("FATAL: Could not open %s \n", argv[1]);
         return 1;
     }
-    char *asmFileName = (char *) malloc((strlen(argv[2]) + 5)*sizeof(char));
-    strcpy(asmFileName, argv[2]);
-    strcat(asmFileName, ".asm");
-    if (!(f_asm = fopen(asmFileName,"w"))){
+    else yyin = f_in;
+
+    FILE *f_bin = fopen(argv[2],"wb");
+    if (f_bin == NULL){
+        printf("FATAL: Could not open %s \n", argv[2]);
+        fclose(f_in);
+        return 1;
+    }
+
+    char *asmFileName = appendAsm(argv[2]);
+    FILE *f_asm = fopen(asmFileName,"w");
+    if (f_asm == NULL){
         printf("FATAL: Could not open %s \n", argv[2]);
         free(asmFileName);
         return 1;
     }
-    if (!(f_bin = fopen(argv[2],"wb"))){
-        printf("FATAL: Could not open %s \n", argv[2]);
-        free(asmFileName);
-        return 1;
-    }
+    free(asmFileName);
+    
+    // parse command line arguments
     for (int i=3; i < argc; i++){
         if (strcmp(argv[i], "--lexical_only") == 0){
             lexic_parser_only();
             return 0;
         } else if (strcmp(argv[i], "--print_ast") == 0){
             print_ast = 1;
-        } else if (strcmp(argv[i], "--print_symbolic_table") == 0){
-            print_symbolic_table = 1;
         } else if (strcmp(argv[i], "--debug") == 0){
             yydebug=1;
         } else if (strcmp(argv[i], "--asm_comments") == 0){
@@ -106,64 +119,56 @@ int main(int argc, char *argv[]) {
             keepTemporaries=1;
         } else {
             printf("FATAL: unrecognized command-line option \'%s\'\n", argv[i]);
-            free(asmFileName);
             return 1;
         }
     }
 
+    // Frontend
     AbstractSyntaxTree *tree = parse();
-
     SymbolicTable* table = newSymbolicTable();
-
     int semanticErrors = semanticAnalysis(tree, table, 0);
 
-    // Debug utilities
     if (print_ast) {
         printf("\nAbstract Syntax Tree:\n");
         printTree(tree->root, 0);
         printf("\n\n");
     }
-    if (print_symbolic_table) {
-        printf("Symbolic Table:\n");
-        printSymbolicTable(table);
-        printf("\n\n");
+
+    int linkErrors = 0;
+    int compileErrors = syntaxErrors + semanticErrors;
+    IntermediateRepresentation *ir = NULL;
+    if (compileErrors > 0) {
+        printf("\n%d compile errors\n", compileErrors);
+    } else {
+        // if no compiler errors, runs backend: code generation + linking
+        ir = codeGen(tree);
+        linkErrors = link(ir);
+        if (linkErrors > 0) 
+            printf("\n%d linker errors\n", linkErrors);
     }
-
-    int errors = syntaxErrors + semanticErrors;
-    int code = errors>0;
-    if (errors > 0) {
-        printf("\n%d compile errors\n", errors);
+    
+    // any error in the previous steps: free everything that was used and quit
+    if (linkErrors || compileErrors) {
+        if (ir!=NULL) freeIntermediateRepresentation(ir); 
         freeSymbolicTable(table);
-        free(asmFileName);  
         fclose(f_asm);
         fclose(f_bin);
-        return 1;
-    } 
-
-    IntermediateRepresentation *ir = codeGen(tree);
-
-    int linkError = link(ir);
-    if (linkError) {
-        printf("Linking errors\n");
-        freeIntermediateRepresentation(ir); 
-        freeSymbolicTable(table);
-        free(asmFileName);  
-        fclose(f_asm);
-        fclose(f_bin);
+        fclose(f_in);
         return 1;
     }
 
-    RegisterMapping *rm = keepTemporaries ? NULL : newRegisterMapping(ir);
+    RegisterMapping *registerMapping = keepTemporaries ? NULL : newRegisterMapping(ir);
+    wirteIR(ir, f_asm, f_bin, registerMapping, includeASMComments);
 
-    printIR(ir, f_asm, f_bin, rm, includeASMComments);
     printf("Compilation successful\n");
 
     freeIntermediateRepresentation(ir); 
     freeSymbolicTable(table);
-    free(asmFileName);  
+    freeRegisterMapping(registerMapping);
+
     fclose(f_asm);
     fclose(f_bin);
-    if (!keepTemporaries) freeRegisterMapping(rm);
+    fclose(f_in);
 
-    return code;
+    return 0;
 }
