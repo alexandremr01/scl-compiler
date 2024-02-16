@@ -9,7 +9,7 @@ GENERATEDDIR := $(SOURCEDIR)/generated
 SOURCEFILES    := main.c frontend/semantic_analysis.c \
 					datastructures/ast.c datastructures/ir.c datastructures/symbolic_table.c \
 					datastructures/datatypes.c \
-					backend/codegen.c backend/register_mapping.c backend/linker.c \
+					backend/codegen.c backend/register_assignment.c backend/linker.c \
 					asmWriter/riscv.c asmWriter/binary.c \
 					generated/lex.yy.c generated/syntax.tab.c 
 

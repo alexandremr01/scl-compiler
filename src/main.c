@@ -9,7 +9,7 @@
 
 #include "backend/codegen.h"
 #include "backend/linker.h"
-#include "backend/register_mapping.h"
+#include "backend/register_assignment.h"
 
 extern FILE *yyin;
 extern int yylex (void);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
     // Frontend
     AbstractSyntaxTree *tree = parse();
     SymbolicTable* table = newSymbolicTable();
-    int semanticErrors = semanticAnalysis(tree, table, 0);
+    int semanticErrors = semanticAnalysis(tree, table);
 
     if (print_ast) {
         printf("\nAbstract Syntax Tree:\n");
@@ -157,14 +157,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    RegisterMapping *registerMapping = keepTemporaries ? NULL : newRegisterMapping(ir);
-    wirteIR(ir, f_asm, f_bin, registerMapping, includeASMComments);
+    RegisterAssignment *RegisterAssignment = keepTemporaries ? NULL : newRegisterAssignment(ir);
+    wirteIR(ir, f_asm, f_bin, RegisterAssignment, includeASMComments);
 
     printf("Compilation successful\n");
 
     freeIntermediateRepresentation(ir); 
     freeSymbolicTable(table);
-    freeRegisterMapping(registerMapping);
+    freeRegisterAssignment(RegisterAssignment);
 
     fclose(f_asm);
     fclose(f_bin);

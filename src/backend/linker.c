@@ -1,7 +1,5 @@
 #include "linker.h"
 
-// The Linker has two responsabilities:
-// link with the standard library
 // assert that all function calls have a destination
 int link(IntermediateRepresentation *ir) {
     // give address to globals

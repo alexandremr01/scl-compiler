@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "../datastructures/ast.h"
 
-int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug);
+int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable);
 
 
 #endif 

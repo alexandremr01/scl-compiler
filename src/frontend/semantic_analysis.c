@@ -28,13 +28,13 @@ void freeStack(DeleteStack* curr) {
     }
 }
 
-void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors, int scope_level, DeleteStack *stack, SymbolicTableEntry *fn);
+void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *errors, int scope_level, DeleteStack *stack, SymbolicTableEntry *fn);
 
-int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int debug){
+int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable){
     int errors = 0;
 
     DeleteStack *stack = newDeleteStack();
-    semanticAnalysisNode(tree, tree->root, symbolicTable, debug, &errors, 0, stack, NULL);
+    semanticAnalysisNode(tree->root, symbolicTable, &errors, 0, stack, NULL);
     freeStack(stack);
 
     SymbolicTableEntry *mainFunction = getSymbolicTableEntry(symbolicTable, "main");
@@ -47,34 +47,11 @@ int semanticAnalysis(AbstractSyntaxTree *tree, SymbolicTable* symbolicTable, int
 }
 
 
-void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable* symbolicTable, int debug, int *errors, int scope_level, DeleteStack *stack, SymbolicTableEntry *fn){
+void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *errors, int scope_level, DeleteStack *stack, SymbolicTableEntry *fn){
     if (node == NULL) return;
     SymbolicTableEntry * stEntry;
-    // if (node->kind == FUNCTION_DECLARATION_NODE) {
-    //     // TODO: extract repeated code
-    //     // validates if is new
-    //     stEntry = getSymbolicTableEntry(symbolicTable, node->name);
-    //     if (stEntry != NULL && stEntry->scope_level == scope_level){
-    //         printf("Line %d: Name \'%s\' already in use. First defined in line %d.\n", node->line_number, node->name, stEntry->definition_line_number);
-    //         *errors += 1;
-    //     }
-    //     if (stEntry == NULL || stEntry->scope_level < scope_level){
-    //         insertFunction(symbolicTable, node->name, node->type, node->line_number, scope_level);
-    //         addDeleteStack(stack, node->name);
-    //         node->stEntry = getSymbolicTableEntry(symbolicTable, node->name);
-    //         if (fn != NULL){
-    //             node->stEntry->locals = fn->locals;
-    //             fn->locals = node->stEntry;
-    //         }
-    //     }
 
-
-    //     return;
-    // }
-
-    if (node->kind == FUNCTION_DEFINITION_NODE || node->kind == FUNCTION_DECLARATION_NODE) {
-        if (debug) printf("Declaration: function %s with return type %d\n", node->name, node->type);
-        
+    if (node->kind == FUNCTION_DEFINITION_NODE || node->kind == FUNCTION_DECLARATION_NODE) {        
         // iterate over parameters and add them to datatypelist
         ASTNode *p = node->firstChild; 
         DataTypeList *head=NULL, *list = NULL;
@@ -141,13 +118,13 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
             stack = newDeleteStack();
             p = node->firstChild; 
             while (p!= NULL && p->kind == DECLARATION_NODE){
-                semanticAnalysisNode(tree, p, symbolicTable, debug, errors, scope_level, stack, stEntry);
+                semanticAnalysisNode(p, symbolicTable, errors, scope_level, stack, stEntry);
                 p->stEntry->isParameter = 1;
                 p = p->sibling;
             }
             
             stEntry->hasBody = 1;
-            semanticAnalysisNode(tree, p, symbolicTable, debug, errors, scope_level, stack, stEntry);
+            semanticAnalysisNode(p, symbolicTable, errors, scope_level, stack, stEntry);
             if (!stEntry->hasReturn && node->type != VOID_TYPE) {
                 printf("Line %d: Reached end of non-void function \'%s\' without a return value.\n", node->line_number, node->name);
                 *errors += 1;
@@ -165,7 +142,6 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
     }
 
     if (node->kind == CALL_NODE) {
-        if (debug) printf("Call %s\n", node->name);
         stEntry = getSymbolicTableEntry(symbolicTable, node->name);
         if (stEntry == NULL){
             printf("Line %d: Name \'%s\' does not exist.\n", node->line_number,node->name);
@@ -185,7 +161,7 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
 
         int callErrors = 0, num_parameters=0, num_expected=0;
         while (parameter != NULL && dtypes != NULL){
-            semanticAnalysisNode(tree, parameter, symbolicTable, debug, errors, scope_level, stack, fn);
+            semanticAnalysisNode(parameter, symbolicTable, errors, scope_level, stack, fn);
             if (dtypes->type != parameter->type) {
                 printf("Line %d: Parameter #%d of incorrect type. Has type %s, expected %s.\n", parameter->line_number, num_parameters, printType(parameter->type), printType(dtypes->type));
                 *errors += 1;
@@ -224,7 +200,7 @@ void semanticAnalysisNode(AbstractSyntaxTree *tree, ASTNode *node, SymbolicTable
     }
     ASTNode *aux = node->firstChild;
     while (aux != NULL){
-        semanticAnalysisNode(tree, aux, symbolicTable, debug, errors, scope_level, stack, fn);
+        semanticAnalysisNode(aux, symbolicTable, errors, scope_level, stack, fn);
         aux = aux->sibling;
     }
     switch (node->kind){

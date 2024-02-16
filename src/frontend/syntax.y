@@ -92,7 +92,6 @@ declaration: type_specifier ID SEMICOLON  {
                 // TODO: treat array
             }
             | error SEMICOLON {yyerrok; $$ = NULL;}
-/* expression_list: expression_list expression_statement | expression_statement */
 
 statement_list: statement_list statement { $$ = appendSibling($1, $2);}
                 | %empty {$$=NULL;}
@@ -120,7 +119,7 @@ statement: expression_statement {$$=$1;}
             | jump_statement {$$=$1;}
             | error SEMICOLON {yyerrok; $$ = NULL;}
 expression_statement: expression SEMICOLON {$$=$1;} | SEMICOLON {$$ = newASTNode(EMPTY_NODE);}
-// TODO: for now, if and while only accept statements
+
 selection_statement: IF LPAREN expression RPAREN statement {
                     $$ = newASTNode(IF_NODE);
                     $$->firstChild = $3;

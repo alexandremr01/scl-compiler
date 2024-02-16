@@ -1,4 +1,4 @@
-#include "register_mapping.h"
+#include "register_assignment.h"
 
 #define MAX_REGISTER_NAME 13
 
@@ -209,8 +209,8 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
     return dg;
 }
 
-RegisterMapping *newRegisterMapping(IntermediateRepresentation *ir){
-    RegisterMapping *rm = (RegisterMapping *) malloc(sizeof(RegisterMapping));
+RegisterAssignment *newRegisterAssignment(IntermediateRepresentation *ir){
+    RegisterAssignment *rm = (RegisterAssignment *) malloc(sizeof(RegisterAssignment));
     int number_temporaries = ir->nextTempReg;
     DependenciesGraph *dg = buildDependencyGraph(ir);
     // printGraph(dg);
@@ -220,12 +220,12 @@ RegisterMapping *newRegisterMapping(IntermediateRepresentation *ir){
     return rm;
 }
 
-void freeRegisterMapping(RegisterMapping *rm) {
+void freeRegisterAssignment(RegisterAssignment *rm) {
     free(rm->map);
     free(rm);
 }
 
-int getRegisterAssignment(RegisterMapping *rm, int temporary){
+int getRegisterAssignment(RegisterAssignment *rm, int temporary){
     return rm->map[temporary];
 }
 

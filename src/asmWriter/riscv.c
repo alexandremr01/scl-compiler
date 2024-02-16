@@ -15,7 +15,7 @@ int registerCodes[13] = {
     5, 6, 7, 28, 29, 30, 31, 12, 13, 14, 15, 16, 17
 };
 
-char *getReg(RegisterMapping *rm, int temporary){
+char *getReg(RegisterAssignment *rm, int temporary){
     if (temporary == SP_REGISTER)
         return "sp"; //sp or x2
     else if (temporary == A0_REGISTER)
@@ -27,7 +27,7 @@ char *getReg(RegisterMapping *rm, int temporary){
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
 
-// char *getReg(RegisterMapping *rm, int temporary){
+// char *getReg(RegisterAssignment *rm, int temporary){
 //     if (temporary == SP_REGISTER)
 //         return "sp"; //sp or x2
 //     else if (temporary == A0_REGISTER)
@@ -41,7 +41,7 @@ char *getReg(RegisterMapping *rm, int temporary){
 //     return testString;
 // }
 
-int getRegBin(RegisterMapping *rm, int temporary){
+int getRegBin(RegisterAssignment *rm, int temporary){
     if (temporary == SP_REGISTER)
         return 2; //sp or x2
     else if (temporary == A0_REGISTER)
@@ -53,7 +53,7 @@ int getRegBin(RegisterMapping *rm, int temporary){
     return registerCodes[getRegisterAssignment(rm, temporary)];
 }
 
-void wirteIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterMapping *rm, int includeASMComments){
+void wirteIR(IntermediateRepresentation *ir, FILE *f_asm, FILE *f_bin, RegisterAssignment *rm, int includeASMComments){
     ObjectCode *currObj = NULL, *objCode = (ObjectCode *) malloc(sizeof(ObjectCode));
     currObj = objCode;
     IRNode *p = ir->head;
