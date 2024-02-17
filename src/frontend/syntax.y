@@ -160,12 +160,11 @@ var:        ID {
                 $$->name = $1;
                 $$->line_number = yylineno;
             }
-            | ID LBRACKET NUM RBRACKET {
+            | ID LBRACKET expression RBRACKET {
                 $$ = newASTNode(VAR_REFERENCE_NODE);
                 $$->name = $1;
                 $$->line_number = yylineno;
-                $$->firstChild = newASTNode(VAR_INDEXING_NODE);
-                $$->firstChild->name = $3;
+                $$->firstChild = $3;
             }
 simple_exp: sum_exp relational sum_exp {
                 $$ = $2;

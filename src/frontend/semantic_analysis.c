@@ -269,16 +269,13 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             return;
         case VAR_REFERENCE_NODE:
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);
-            int numElement = 1;
-            if (node->firstChild != NULL && node->firstChild->kind == VAR_INDEXING_NODE) 
-                numElement = atoi(node->firstChild->name);
-            
+
             if (stEntry == NULL){
                 printf("Line %d: Name \'%s\' is not defined.\n", node->line_number, node->name);
                 *errors += 1;
                 node->type = VOID_TYPE;
-            } else if (numElement >= stEntry->numElements) {
-                printf("Line %d: Index %d out of range for variable of size %d.\n", node->line_number, numElement, stEntry->numElements);
+            } else if (node->firstChild != NULL && node->firstChild->type != INTEGER_TYPE){
+                printf("Line %d: Index expression must be of integer type.\n", node->line_number);
                 *errors += 1;
                 node->type = VOID_TYPE;
             } else {

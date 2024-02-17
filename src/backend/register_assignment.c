@@ -184,6 +184,8 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
             if (irNode->dest >= 0) lifeEnd[irNode->dest] = instruction;
             if (irNode->source >= 0)
                 lifeEnd[irNode->source] = instruction;
+            if (irNode->source2 >= 0)
+                lifeEnd[irNode->source2] = instruction;
         }
         irNode = irNode->next;
         instruction++;

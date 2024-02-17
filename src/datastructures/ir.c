@@ -56,7 +56,7 @@ void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shi
     node->dest = destination_address;
     node->sourceKind = REG_SOURCE;
     node->source = register_source;
-    node->source2 = shift;
+    node->imm = shift;
     addNode(ir, node);
 }
 
@@ -65,7 +65,7 @@ void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int s
     node->dest = destination_address;
     node->sourceKind = REG_SOURCE;
     node->source = register_source;
-    node->source2 = shift;
+    node->imm = shift;
     addNode(ir, node);
 }
 
@@ -163,7 +163,7 @@ void addAdditionImIR(IntermediateRepresentation *ir, int dest, int src, int imm)
     node->dest = dest;
     node->sourceKind = CONSTANT_SOURCE;
     node->source = src;
-    node->source2 = imm;
+    node->imm = imm;
     addNode(ir, node);
 }
 

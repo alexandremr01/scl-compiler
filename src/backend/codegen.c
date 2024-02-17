@@ -52,6 +52,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
     if (node == NULL) return;
     SymbolicTableEntry * stEntry;
     int address_register;
+    int aux_register;
     int numElement = 1;
     int offset = 0;
     int bkp_stack = ir->lastStackAddress;
@@ -185,21 +186,40 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
                 numElement = atoi(node->firstChild->firstChild->name);
             offset = (numElement-1)*getSize(node->firstChild->stEntry->type);
 
-            if (node->firstChild->stEntry->scope_level == 0){
-                int address_register = ir->nextTempReg++;
+            int address_register = ir->nextTempReg++;
+            aux_register = ir->nextTempReg++;
+
+            if (node->firstChild->stEntry->scope_level == 0 && node->firstChild->firstChild == NULL) { 
+                // global non array variable 
                 addGetPC(ir, address_register, 0);
-                addAdditionImIR(ir, address_register, address_register, 8+offset);
+                addAdditionImIR(ir, address_register, address_register, 8);
                 addStoreVarAddress(ir, result_register, address_register, node->firstChild->stEntry);
-            } else {
+            } else if (node->firstChild->stEntry->scope_level == 0 && node->firstChild->firstChild != NULL) { 
+                // global array
+                addLoadImIR(ir, address_register, 0);
+                for (int i=0; i<getSize(node->firstChild->stEntry->type); i++)
+                    addAdditionIR(ir, address_register, node->firstChild->firstChild->tempRegResult, address_register);
+                addGetPC(ir, aux_register, 0);
+                addAdditionImIR(ir, aux_register, aux_register, 12);
+                addAdditionIR(ir, address_register, aux_register, address_register);
+                addStoreVarAddress(ir, result_register, address_register, node->firstChild->stEntry);
+            } else if (node->firstChild->stEntry->scope_level > 0 && node->firstChild->firstChild != NULL) { 
+                // local array
+                addLoadImIR(ir, address_register, node->firstChild->stEntry->address);
+                for (int i=0; i<getSize(node->firstChild->stEntry->type); i++)
+                    addAdditionIR(ir, address_register, node->firstChild->firstChild->tempRegResult, address_register);
+                addAdditionIR(ir, address_register, SP_REGISTER, address_register);
+                addStoreIR(ir, address_register, 0, result_register);
+            } else { 
+                // local non array
                 addStoreIR(ir, SP_REGISTER, node->firstChild->stEntry->address+offset, result_register); 
             }
             
             break;
         case CONSTANT_NODE:
-            node->tempRegResult = ir->nextTempReg;
+            node->tempRegResult = ir->nextTempReg++;
             addCommentIR(ir, "constant");
             addLoadImIR(ir, node->tempRegResult, atoi(node->name));
-            ir->nextTempReg++;
             return;
         case LT_NODE:
         case GT_NODE:
@@ -241,17 +261,37 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
             
             address_register = ir->nextTempReg++;
             node->tempRegResult = ir->nextTempReg++;
+            aux_register = ir->nextTempReg++;
             addCommentIR(ir, "var reference");
-            if (node->stEntry->scope_level == 0) { 
-                //global variable: absolute address
+            if (node->stEntry->scope_level == 0 && node->firstChild == NULL) { 
+                // global non array variable 
                 addGetPC(ir, address_register, 0);
-                addAdditionImIR(ir, address_register, address_register, 8+offset);
+                addAdditionImIR(ir, address_register, address_register, 8);
                 addLoadVarAddress(ir, node->tempRegResult, address_register, node->stEntry);
+            } else if (node->stEntry->scope_level == 0 && node->firstChild != NULL) { 
+                // global array
+                addLoadImIR(ir, address_register, 0);
+                for (int i=0; i<getSize(node->stEntry->type); i++)
+                    addAdditionIR(ir, address_register, node->firstChild->tempRegResult, address_register);
+                addGetPC(ir, aux_register, 0);
+                addAdditionImIR(ir, aux_register, aux_register, 12);
+                addAdditionIR(ir, address_register, aux_register, address_register);
+                addLoadVarAddress(ir, node->tempRegResult, address_register, node->stEntry);
+            } else if (node->stEntry->scope_level > 0 && node->firstChild != NULL) { 
+                // local array
+                addLoadImIR(ir, address_register, node->stEntry->address);
+                for (int i=0; i<getSize(node->stEntry->type); i++)
+                    addAdditionIR(ir, address_register, node->firstChild->tempRegResult, address_register);
+                addAdditionIR(ir, address_register, SP_REGISTER, address_register);
+                addLoadMemIR(ir, node->tempRegResult, 0, address_register);
             } else { 
-                // otherwise: wrt to SP
-                addLoadMemIR(ir, node->tempRegResult, node->stEntry->address+offset, SP_REGISTER); 
+                // local non array
+                addLoadMemIR(ir, node->tempRegResult, node->stEntry->address, SP_REGISTER); 
             }
             break;
     }
     return;
 }
+
+
+                

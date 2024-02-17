@@ -68,7 +68,7 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                     sprintf(currObj->assembly, "addi %s, %s, %d", 
                         getReg(rm, p->dest),
                         getReg(rm, p->source),
-                        p->source2
+                        p->imm
                     );
                 }
                 else sprintf(currObj->assembly, "add %s, %s, %s", 
@@ -114,7 +114,7 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 } else {
                     sprintf(currObj->assembly, "lw %s, %d(%s)", 
                         getReg(rm, p->dest), 
-                        p->source2,
+                        p->imm,
                         getReg(rm, p->source)
                     );
                 }
@@ -127,7 +127,7 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                         getReg(rm, p->source)
                     );
                 }
-                else sprintf(currObj->assembly, "sw %s, %d(%s)", getReg(rm, p->source), p->source2, getReg(rm, p->dest));
+                else sprintf(currObj->assembly, "sw %s, %d(%s)", getReg(rm, p->source), p->imm, getReg(rm, p->dest));
                 break;
             case COMMENT:
                 sprintf(currObj->assembly, "// %s", p->comment);
