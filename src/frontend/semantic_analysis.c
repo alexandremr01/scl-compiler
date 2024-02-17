@@ -221,8 +221,12 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
                 printf("Line %d: Name \'%s\' already in use. First defined in line %d.\n", node->line_number, node->name, stEntry->definition_line_number);
                 *errors += 1;
             }
+            int arraySize = 1;
+            if (node->firstChild != NULL && node->firstChild->kind == VAR_INDEXING_NODE) {
+                arraySize = atoi(node->firstChild->name);
+            }
             if (node->type != VOID_TYPE && (stEntry == NULL || stEntry->scope_level < scope_level)){
-                insertVariable(symbolicTable, node->name, node->type, node->line_number, scope_level);
+                insertVariable(symbolicTable, node->name, node->type, node->line_number, scope_level, arraySize);
                 addDeleteStack(stack, node->name);
                 node->stEntry = getSymbolicTableEntry(symbolicTable, node->name);
                 if (fn != NULL){
@@ -265,8 +269,16 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             return;
         case VAR_REFERENCE_NODE:
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);
+            int numElement = 1;
+            if (node->firstChild != NULL && node->firstChild->kind == VAR_INDEXING_NODE) 
+                numElement = atoi(node->firstChild->name);
+            
             if (stEntry == NULL){
                 printf("Line %d: Name \'%s\' is not defined.\n", node->line_number, node->name);
+                *errors += 1;
+                node->type = VOID_TYPE;
+            } else if (numElement >= stEntry->numElements) {
+                printf("Line %d: Index %d out of range for variable of size %d.\n", node->line_number, numElement, stEntry->numElements);
                 *errors += 1;
                 node->type = VOID_TYPE;
             } else {

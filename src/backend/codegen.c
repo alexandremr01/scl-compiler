@@ -52,6 +52,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
     if (node == NULL) return;
     SymbolicTableEntry * stEntry;
     int address_register;
+    int numElement = 1;
+    int offset = 0;
     int bkp_stack = ir->lastStackAddress;
     ASTNode *aux = node->firstChild;
     int returnStackPosition = 0;
@@ -117,7 +119,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
         while(local != NULL) {
             if (!local->isParameter) {
                 local->address = localsSize;
-                localsSize += 4;
+                localsSize += getSize(local->type)*local->numElements;
             }
             local = local->locals;
         }
@@ -129,7 +131,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
         while(local != NULL) {
             if (local->isParameter) {
                 local->address = localsSize;
-                localsSize += 4;
+                localsSize += getSize(local->type)*local->numElements;
             }
             local = local->locals;
         }
@@ -178,14 +180,18 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
         case ASSIGNMENT_NODE:
             addCommentIR(ir, "assignment");
             int result_register  =  node->firstChild->sibling->tempRegResult;
-            
+            numElement = 1;
+            if (node->firstChild->firstChild != NULL && node->firstChild->firstChild->kind == VAR_INDEXING_NODE) 
+                numElement = atoi(node->firstChild->firstChild->name);
+            offset = (numElement-1)*getSize(node->firstChild->stEntry->type);
+
             if (node->firstChild->stEntry->scope_level == 0){
                 int address_register = ir->nextTempReg++;
                 addGetPC(ir, address_register, 0);
-                addAdditionImIR(ir, address_register, address_register, 8);
+                addAdditionImIR(ir, address_register, address_register, 8+offset);
                 addStoreVarAddress(ir, result_register, address_register, node->firstChild->stEntry);
             } else {
-                addStoreIR(ir, SP_REGISTER, node->firstChild->stEntry->address, result_register); 
+                addStoreIR(ir, SP_REGISTER, node->firstChild->stEntry->address+offset, result_register); 
             }
             
             break;
@@ -228,17 +234,22 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
             addJumpIR(ir, node->stEntry);
             break;
         case VAR_REFERENCE_NODE:
+            numElement = 1;
+            if (node->firstChild != NULL && node->firstChild->kind == VAR_INDEXING_NODE) 
+                numElement = atoi(node->firstChild->name);
+            offset = (numElement-1)*getSize(node->stEntry->type);
+            
             address_register = ir->nextTempReg++;
             node->tempRegResult = ir->nextTempReg++;
             addCommentIR(ir, "var reference");
             if (node->stEntry->scope_level == 0) { 
                 //global variable: absolute address
                 addGetPC(ir, address_register, 0);
-                addAdditionImIR(ir, address_register, address_register, 8);
+                addAdditionImIR(ir, address_register, address_register, 8+offset);
                 addLoadVarAddress(ir, node->tempRegResult, address_register, node->stEntry);
             } else { 
                 // otherwise: wrt to SP
-                addLoadMemIR(ir, node->tempRegResult, node->stEntry->address, SP_REGISTER); 
+                addLoadMemIR(ir, node->tempRegResult, node->stEntry->address+offset, SP_REGISTER); 
             }
             break;
     }

@@ -27,7 +27,7 @@ typedef struct symbtabEntry {
     int hasReturn;
     int hasBody;
     int offset;
-    int size;
+    int numElements;
 
     DataTypeList *parameterTypes;
     struct symbtabEntry *next;
@@ -41,7 +41,7 @@ typedef struct symbtab {
     SymbolicTableEntry *entries;
 } SymbolicTable;
 
-void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level);
+void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, int numElements);
 void insertFunction(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, DataTypeList *list);
 
 SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name);

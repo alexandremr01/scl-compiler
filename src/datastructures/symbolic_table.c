@@ -13,7 +13,7 @@ SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTa
     entry->locals = NULL;
     entry->isParameter = 0;
     entry->hasBody = 0;
-    entry->size = 0;
+    entry->numElements = 0;
     entry->offset = 0;
     return entry;
 }
@@ -34,8 +34,9 @@ SymbolicTableEntry *insertSymbolicTable(SymbolicTable *table, char *name, Symbol
     return newEntry;
 }
 
-void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level){
-    insertSymbolicTable(table, name, VARIABLE_ENTRY, type, line_number, scope_level);
+void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, int numElements){
+    SymbolicTableEntry *newEntry = insertSymbolicTable(table, name, VARIABLE_ENTRY, type, line_number, scope_level);
+    newEntry->numElements = numElements;
 }
 
 void insertFunction(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, DataTypeList *list){

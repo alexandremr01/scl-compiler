@@ -7,7 +7,7 @@ int link(IntermediateRepresentation *ir, SymbolicTable *table) {
     for (entry = table->entries; entry != NULL; entry = entry->hh.next) {
         if (entry->scope_level == 0) {
             entry->address = ir->lastAddress;
-            ir->lastAddress += getSize(entry->type);
+            ir->lastAddress += getSize(entry->type)*entry->numElements;
         }
     }
 

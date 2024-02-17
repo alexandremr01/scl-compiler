@@ -89,7 +89,8 @@ declaration: type_specifier ID SEMICOLON  {
                 $$->type = $1;
                 $$->name = $2; 
                 $$->line_number = yylineno;
-                // TODO: treat array
+                $$->firstChild = newASTNode(VAR_INDEXING_NODE);
+                $$->firstChild->name = $4;
             }
             | error SEMICOLON {yyerrok; $$ = NULL;}
 
@@ -163,7 +164,8 @@ var:        ID {
                 $$ = newASTNode(VAR_REFERENCE_NODE);
                 $$->name = $1;
                 $$->line_number = yylineno;
-                // TODO: how to treat vector access??
+                $$->firstChild = newASTNode(VAR_INDEXING_NODE);
+                $$->firstChild->name = $3;
             }
 simple_exp: sum_exp relational sum_exp {
                 $$ = $2;
