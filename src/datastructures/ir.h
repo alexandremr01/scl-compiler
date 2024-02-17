@@ -37,16 +37,10 @@ typedef struct irNode {
     int address;
 } IRNode;
 
-typedef struct symbolicTableGlobals {
-    SymbolicTableEntry *entry;
-    struct symbolicTableGlobals *next;
-} SymbolicTableGlobals;
-
 typedef struct intermediateRepresentation {
     struct irNode *head;
     struct irNode *tail;
     int nextTempReg;
-    SymbolicTableGlobals *globals;
     int lastAddress;
     int lastStackAddress;
 } IntermediateRepresentation;

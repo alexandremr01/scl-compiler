@@ -111,14 +111,6 @@ void freeIntermediateRepresentation(IntermediateRepresentation *ir) {
         node = next;
     }
 
-    SymbolicTableGlobals *g = ir->globals;
-    SymbolicTableGlobals *nextGlobal = NULL;
-    while(g != NULL){
-        nextGlobal = g->next;
-        free(g);
-        g = nextGlobal;
-    }
-
     free(ir);
 }
 

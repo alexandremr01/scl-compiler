@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
 
     // Backend
     IntermediateRepresentation *ir = codeGen(tree);
-    int linkErrors = link(ir);
+    int linkErrors = link(ir, table);
     if (linkErrors > 0) {
         printf("\n%d linker errors\n", linkErrors);
         freeIntermediateRepresentation(ir); 

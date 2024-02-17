@@ -1,13 +1,14 @@
 #include "linker.h"
 
 // assert that all function calls have a destination
-int link(IntermediateRepresentation *ir) {
+int link(IntermediateRepresentation *ir, SymbolicTable *table) {
     // give address to globals
-    SymbolicTableGlobals *g = ir->globals->next;
-    while (g!=NULL) {
-        g->entry->address = ir->lastAddress;
-        ir->lastAddress += getSize(g->entry->type);
-        g = g->next;
+    SymbolicTableEntry *entry;
+    for (entry = table->entries; entry != NULL; entry = entry->hh.next) {
+        if (entry->scope_level == 0) {
+            entry->address = ir->lastAddress;
+            ir->lastAddress += getSize(entry->type);
+        }
     }
 
     IRNode *p = ir->head;

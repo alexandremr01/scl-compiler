@@ -6,6 +6,6 @@
 #include "../datastructures/ir.h"
 
 
-int link(IntermediateRepresentation *ir);
+int link(IntermediateRepresentation *ir, SymbolicTable *table);
 
 #endif 

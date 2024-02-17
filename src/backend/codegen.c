@@ -1,7 +1,7 @@
 #include "codegen.h"
 #define INITIAL_STACK 2000
 
-void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlobals *globals);
+void codeGenNode(ASTNode *node, IntermediateRepresentation *ir);
 
 void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     for (int i=0; i<2; i++)
@@ -41,17 +41,14 @@ comparisonFunction getComparisonFunction(NodeKind instruction) {
 
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree){
     IntermediateRepresentation *ir = newIntermediateRepresentation();
-    SymbolicTableGlobals *globals = (SymbolicTableGlobals *) malloc(sizeof(SymbolicTableGlobals));
-    globals->next = NULL;
+ 
     genHeader(ir, tree->root->stEntry);
-    codeGenNode(tree->root, ir, globals);
-
-    ir->globals = globals;
+    codeGenNode(tree->root, ir);
 
     return ir;
 }
 
-void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlobals *globals){
+void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
     if (node == NULL) return;
     SymbolicTableEntry * stEntry;
     int address_register;
@@ -61,14 +58,14 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
     int localsSize = 0;
     if (node->kind == FUNCTION_DECLARATION_NODE) return;
     if (node->kind == IF_NODE) {
-        codeGenNode(node->firstChild, ir, globals);
+        codeGenNode(node->firstChild, ir);
         IRNode *endif = newIRNode(NOP);
         IRNode *bneq = addBNEQIR(ir, 
             node->firstChild->tempRegResult, 
             X0_REGISTER,
             0
         );
-        codeGenNode(node->firstChild->sibling, ir, globals);
+        codeGenNode(node->firstChild->sibling, ir);
         
         // if there is an else
         ASTNode *elseNode = node->firstChild->sibling->sibling;
@@ -76,7 +73,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
             IRNode *endelse = newIRNode(NOP);
             IRNode *jumpelse = addJumpImIR(ir, 4);
             addNode(ir, endif);
-            codeGenNode(elseNode, ir, globals);
+            codeGenNode(elseNode, ir);
             addNode(ir, endelse);
             jumpelse->source = endelse->address - jumpelse->address;
         } else addNode(ir, endif);
@@ -88,7 +85,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
         addNode(ir, startWhile);
         addCommentIR(ir, "condition");
 
-        codeGenNode(node->firstChild, ir, globals);
+        codeGenNode(node->firstChild, ir);
 
         IRNode *endwhile = newIRNode(JUMP);
         endwhile->sourceKind = CONSTANT_SOURCE;
@@ -101,7 +98,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
         );
         addCommentIR(ir, "while body");
 
-        codeGenNode(node->firstChild->sibling, ir, globals);
+        codeGenNode(node->firstChild->sibling, ir);
         addCommentIR(ir, "return to condition");
         addNode(ir, endwhile);
         // goes to next instruction after the endwhile
@@ -138,20 +135,11 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, SymbolicTableGlo
         }
     } 
     while (aux != NULL){
-        codeGenNode(aux, ir, globals);
+        codeGenNode(aux, ir);
         aux = aux->sibling;
     }
     ASTNode *parameter;
     switch (node->kind){
-        case DECLARATION_NODE:
-            if (node->stEntry->scope_level == 0){
-                SymbolicTableGlobals *next = globals->next;
-                SymbolicTableGlobals *new_node = (SymbolicTableGlobals *) malloc(sizeof(SymbolicTableGlobals));
-                new_node->next = next;
-                new_node->entry = node->stEntry;
-                globals->next = new_node;
-            } 
-            break;
         case FUNCTION_DEFINITION_NODE:
             address_register = ir->nextTempReg++;
             addLoadMemIR(ir, RA_REGISTER, returnStackPosition, SP_REGISTER); 
