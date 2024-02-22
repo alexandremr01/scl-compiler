@@ -129,6 +129,9 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 }
                 else sprintf(currObj->assembly, "sw %s, %d(%s)", getReg(rm, p->source), p->imm, getReg(rm, p->dest));
                 break;
+            case RAW:
+                sprintf(currObj->assembly, "%s", p->comment);
+                break;
             case COMMENT:
                 sprintf(currObj->assembly, "// %s", p->comment);
                 currObj->include = includeASMComments;

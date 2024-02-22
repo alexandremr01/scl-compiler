@@ -17,8 +17,8 @@
 }
 %type  <data_type>  type_specifier
 %type <node> program units external_declaration function_definition
-%type <node> declaration declaration_list compound_statement statement_list expression
-%type <node> statement expression_statement selection_statement iteration_statement jump_statement
+%type <node> declaration declaration_list compound_statement statement_list expression 
+%type <node> statement expression_statement selection_statement iteration_statement jump_statement assembly_statement
 %type <node> simple_exp sum_exp term factor call var args arg_list
 %type <node> parameters parameter_list parameter sum relational
 
@@ -26,12 +26,13 @@
 %token IF ELSE WHILE // control
 %token VOID INT // types
 %token RETURN // others
+%token ASM
 %token PLUS MINUS TIMES OVER ASSIGN EQ LT GT LEQ GEQ DIFFERENT 
 %token SEMICOLON COMMA
 %token LPAREN RPAREN
 %token LBRACKET RBRACKET 
 %token LBRACES RBRACES
-%token <string> ID NUM 
+%token <string> ID NUM STRING
 
 %%
 program: units { 
@@ -118,8 +119,14 @@ statement: expression_statement {$$=$1;}
             | selection_statement {$$=$1;}
             | iteration_statement {$$=$1;}
             | jump_statement {$$=$1;}
+            | assembly_statement {$$=$1;}
             | error SEMICOLON {yyerrok; $$ = NULL;}
 expression_statement: expression SEMICOLON {$$=$1;} | SEMICOLON {$$ = newASTNode(EMPTY_NODE);}
+assembly_statement: ASM STRING SEMICOLON {
+    $$ = newASTNode(ASM_NODE);
+    $$->name = $2;
+    $$->line_number = yylineno;
+}
 
 selection_statement: IF LPAREN expression RPAREN statement {
                     $$ = newASTNode(IF_NODE);

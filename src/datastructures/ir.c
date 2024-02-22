@@ -75,6 +75,12 @@ void addCommentIR(IntermediateRepresentation *ir, char *comment){
     addNode(ir, node);
 }
 
+void addRawIR(IntermediateRepresentation *ir, char *instruction){
+    IRNode * node = newIRNode(RAW);
+    node->comment = instruction;
+    addNode(ir, node);
+}
+
 void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
     IRNode * node = newIRNode(ADD);
     node->dest = destination;

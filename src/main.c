@@ -46,6 +46,8 @@ void printToken(yytoken_kind_t token) {
         case RBRACES: printf("Symbol: }\n"); break;
         case ID: printf("Identifier\n"); break;
         case NUM: printf("Number\n"); break;
+        case ASM: printf("Operator: asm\n"); break;
+        case STRING: printf("String\n"); break;
         default: printf("Unknown token\n"); break;
     }
 }

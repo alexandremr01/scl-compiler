@@ -1,6 +1,7 @@
 digit       [0-9]
 number      {digit}+
 letter      [a-zA-Z]
+string      \".*\"
 identifier  {letter}+
 newline     \n
 whitespace  [ \t]+
@@ -18,6 +19,7 @@ multi_line_comment     \/\*.+\*\/
 "void"          {return VOID;}
 "int"           {return INT;}
 "return"        {return RETURN;}
+"asm"           {return ASM;}
 "+"             {return PLUS;}
 "-"             {return MINUS;}
 "*"             {return TIMES;}
@@ -37,6 +39,14 @@ multi_line_comment     \/\*.+\*\/
 "{"             {return LBRACES;}
 "}"             {return RBRACES;}
 ","             {return COMMA;}
+{string}        {
+    // remove quotes: yyleng-2 characters + null terminator
+    yylval.string = malloc(yyleng-1);
+    // start from second character and copy all yyleng-1 from it
+    memcpy(yylval.string, yytext+1, yyleng-2); 
+    *(yylval.string+yyleng-2) = '\0';
+    return STRING;
+}
 {number}       {
     yylval.string = malloc(yyleng + 1);   
     memcpy(yylval.string, yytext, yyleng + 1); 

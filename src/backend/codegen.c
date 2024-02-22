@@ -253,6 +253,9 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
             }
             addJumpIR(ir, node->stEntry);
             break;
+        case ASM_NODE:
+            addRawIR(ir, node->name);
+            break;
         case VAR_REFERENCE_NODE:
             numElement = 1;
             if (node->firstChild != NULL && node->firstChild->kind == VAR_INDEXING_NODE) 
