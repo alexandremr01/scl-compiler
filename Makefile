@@ -39,7 +39,7 @@ debug: CFLAGS += -g -fsanitize=address
 debug: all
 
 clean:
-	-@rm -rvf $(BUILD) $(GEN) $(GENERATEDDIR) test/*.out
+	-@rm -rvf $(BUILD) $(GEN) $(GENERATEDDIR) test/*.out**
 
 test:
 	sh test/1-test-al.sh

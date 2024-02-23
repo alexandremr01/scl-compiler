@@ -2,6 +2,8 @@
 **.tab.*
 **.output
 **.out
+**.out.txt
+**.out.asm
 
 bin/
 src/generated/

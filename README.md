@@ -19,3 +19,7 @@ An util to load in the processor memory is provided. Run `./bin/bin2vhdl output 
 - `--asm` outputs the assembly file
 - `--asm_comments` adds comments to the assebly file
 - `--print_ast` outputs the symbolic tree 
+
+### Experiments
+
+The experiments from the report are reproducible with `./test/run-experiments.sh`.
