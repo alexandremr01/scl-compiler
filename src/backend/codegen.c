@@ -125,7 +125,6 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             local = local->locals;
         }
         addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -localsSize);
-        printf("Function %s return stack position %d\n", node->name, localsSize);
         returnStackPosition = localsSize;
         localsSize += 4; // skip return address
         // now, iterate over parameters to give their addresses
