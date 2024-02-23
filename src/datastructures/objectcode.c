@@ -35,7 +35,7 @@ void writeBinary(ObjectCode *objCode, FILE *f) {
     ObjectCode *currObj = objCode;
     while (currObj != NULL){
         if (currObj->include) 
-            fwrite(&objCode->binary, sizeof(objCode->binary), 1, f);
+            fwrite(&currObj->binary, sizeof(currObj->binary), 1, f);
         currObj = currObj->next;
     }
 }
