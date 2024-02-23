@@ -1,0 +1,12 @@
+int mul(int a, int b) {
+    if (a == 1) {
+        return b;
+    }
+    return mul(a-1, b) + b;
+}
+
+int main() {
+    int i;
+    i = mul(5, 3);
+    return i;
+}
