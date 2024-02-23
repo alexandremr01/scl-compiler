@@ -63,6 +63,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             } else {
                 list->next = (DataTypeList *)malloc(sizeof(DataTypeList));
                 list = list->next;
+                list->next = NULL;
             }
             list->type = p->type;
             p = p->sibling;

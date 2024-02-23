@@ -174,6 +174,9 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
             case NOP:
                 sprintf(currObj->assembly, "addi zero, zero, 0");
                 break;
+            case RELATIVE_JUMP:
+                sprintf(currObj->assembly, "jal %s, %d", getReg(rm, RA_REGISTER), p->target->address-p->address);
+                break;
         }
         currObj->binary = asmToBinary(currObj->assembly);
         p = p->next;

@@ -5,7 +5,7 @@ string      \".*\"
 identifier  {letter}+
 newline     \n
 whitespace  [ \t]+
-single_line_comment    \/\/.*
+single_line_comment    \/\/.*\n
 multi_line_comment     \/\*.+\*\/
 %{
 #include "../datastructures/ast.h"

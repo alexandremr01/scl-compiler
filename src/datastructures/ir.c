@@ -133,6 +133,13 @@ void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry) {
     addNode(ir, node);
 }
 
+void addRelativeJump(IntermediateRepresentation *ir, IRNode *target) {
+    IRNode * node = newIRNode(RELATIVE_JUMP);
+    node->target = target;
+    addNode(ir, node);
+}
+
+
 void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm) {
     IRNode * node = newIRNode(AUIPC);
     node->dest = destinationRegister;

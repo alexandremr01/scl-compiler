@@ -1,7 +1,7 @@
 #include "codegen.h"
 #define INITIAL_STACK 2000
 
-void codeGenNode(ASTNode *node, IntermediateRepresentation *ir);
+void codeGenNode(ASTNode*, IntermediateRepresentation*, IRNode*);
 
 void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     for (int i=0; i<2; i++)
@@ -43,12 +43,12 @@ IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree){
     IntermediateRepresentation *ir = newIntermediateRepresentation();
  
     genHeader(ir, tree->root->stEntry);
-    codeGenNode(tree->root, ir);
+    codeGenNode(tree->root, ir, 0);
 
     return ir;
 }
 
-void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
+void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *functionEnd){
     if (node == NULL) return;
     SymbolicTableEntry * stEntry;
     int address_register;
@@ -61,14 +61,14 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
     int localsSize = 0;
     if (node->kind == FUNCTION_DECLARATION_NODE) return;
     if (node->kind == IF_NODE) {
-        codeGenNode(node->firstChild, ir);
+        codeGenNode(node->firstChild, ir, functionEnd);
         IRNode *endif = newIRNode(NOP);
         IRNode *bneq = addBNEQIR(ir, 
             node->firstChild->tempRegResult, 
             X0_REGISTER,
             0
         );
-        codeGenNode(node->firstChild->sibling, ir);
+        codeGenNode(node->firstChild->sibling, ir, functionEnd);
         
         // if there is an else
         ASTNode *elseNode = node->firstChild->sibling->sibling;
@@ -76,7 +76,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
             IRNode *endelse = newIRNode(NOP);
             IRNode *jumpelse = addJumpImIR(ir, 4);
             addNode(ir, endif);
-            codeGenNode(elseNode, ir);
+            codeGenNode(elseNode, ir, functionEnd);
             addNode(ir, endelse);
             jumpelse->source = endelse->address - jumpelse->address;
         } else addNode(ir, endif);
@@ -88,7 +88,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
         addNode(ir, startWhile);
         addCommentIR(ir, "condition");
 
-        codeGenNode(node->firstChild, ir);
+        codeGenNode(node->firstChild, ir, functionEnd);
 
         IRNode *endwhile = newIRNode(JUMP);
         endwhile->sourceKind = CONSTANT_SOURCE;
@@ -101,7 +101,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
         );
         addCommentIR(ir, "while body");
 
-        codeGenNode(node->firstChild->sibling, ir);
+        codeGenNode(node->firstChild->sibling, ir, functionEnd);
         addCommentIR(ir, "return to condition");
         addNode(ir, endwhile);
         // goes to next instruction after the endwhile
@@ -125,6 +125,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
             local = local->locals;
         }
         addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -localsSize);
+        printf("Function %s return stack position %d\n", node->name, localsSize);
         returnStackPosition = localsSize;
         localsSize += 4; // skip return address
         // now, iterate over parameters to give their addresses
@@ -136,15 +137,17 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
             }
             local = local->locals;
         }
+        functionEnd = newIRNode(NOP);
     } 
     while (aux != NULL){
-        codeGenNode(aux, ir);
+        codeGenNode(aux, ir, functionEnd);
         aux = aux->sibling;
     }
     ASTNode *parameter;
     switch (node->kind){
         case FUNCTION_DEFINITION_NODE:
             address_register = ir->nextTempReg++;
+            addNode(ir, functionEnd);
             addLoadMemIR(ir, RA_REGISTER, returnStackPosition, SP_REGISTER); 
             addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, localsSize);
             addJumpRegisterIR(ir, RA_REGISTER);
@@ -152,6 +155,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir){
             break;
         case RETURN_NODE: 
             addMovIR(ir, A0_REGISTER, node->firstChild->tempRegResult);
+            addRelativeJump(ir, functionEnd);
             break;
         case MULTIPLICATION_NODE:
             node->tempRegResult = ir->nextTempReg++;
