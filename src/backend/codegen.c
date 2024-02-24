@@ -14,7 +14,7 @@ void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     addJumpIR(ir, main);
     for (int i=0; i<4; i++)
         addNopIR(ir);
-    addJumpImIR(ir, -2);
+    addJumpImIR(ir, -8);
 }
 
 typedef IRNode* (*comparisonFunction)(IntermediateRepresentation*, int, int, int);

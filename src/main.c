@@ -107,6 +107,7 @@ int main(int argc, char *argv[]) {
     free(asmFileName);
     
     // parse command line arguments
+    int asmDialect = 1;
     for (int i=3; i < argc; i++){
         if (strcmp(argv[i], "--lexical_only") == 0){
             lexic_parser_only();
@@ -119,6 +120,10 @@ int main(int argc, char *argv[]) {
             includeASMComments=1;
         } else if (strcmp(argv[i], "--keep_temporaries") == 0){
             keepTemporaries=1;
+        } else if (strcmp(argv[i], "--dialect=2") == 0){
+            asmDialect=2;
+        } else if (strcmp(argv[i], "--dialect=1") == 0){
+            asmDialect=1;
         } else {
             printf("FATAL: unrecognized command-line option \'%s\'\n", argv[i]);
             return 1;
@@ -160,7 +165,7 @@ int main(int argc, char *argv[]) {
     }
 
     RegisterAssignment *registerAssignment = keepTemporaries ? NULL : newRegisterAssignment(ir);
-    ObjectCode *obj = translateIRToObj(ir, registerAssignment, includeASMComments);
+    ObjectCode *obj = translateIRToObj(ir, registerAssignment, includeASMComments, asmDialect);
     writeAssembly(obj, f_asm);
     writeBinary(obj, f_bin);
 

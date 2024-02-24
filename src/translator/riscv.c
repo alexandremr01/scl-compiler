@@ -1,19 +1,33 @@
 #include "riscv.h"
 #include "binary.h"
 
-char *registerNames[13] = {
-    "t0", "t1", "t2", "t3", "t4", "t5", "t6", "a2", "a3", "a4", "a5", "a6", "a7"
-};
-
 int registerCodes[13] = {
     5, 6, 7, 28, 29, 30, 31, 12, 13, 14, 15, 16, 17
 };
 
-char *getReg(RegisterAssignment *rm, int temporary){
+char *getRegisterDialect1(RegisterAssignment *rm, int temporary){
+    char *registerNames[13] = {
+        "x5", "x6", "x7", "x28", "x29", "x30", "x31", "x12", "x13", "x14", "x15", "x16", "x17"
+    };
     if (temporary == SP_REGISTER)
-        return "sp"; //sp or x2
+        return "x2"; //sp or x2
     else if (temporary == A0_REGISTER)
-        return "a0"; //a0 or x10
+        return "x10"; //a0 or x10
+    else if (temporary == X0_REGISTER)
+        return "x0"; 
+    else if (temporary == RA_REGISTER)
+        return "x1"; 
+    return registerNames[getRegisterAssignment(rm, temporary)];
+}
+
+char *getRegisterDialect2(RegisterAssignment *rm, int temporary){
+    char *registerNames[13] = {
+        "t0", "t1", "t2", "t3", "t4", "t5", "t6", "a2", "a3", "a4", "a5", "a6", "a7"
+    };
+    if (temporary == SP_REGISTER)
+        return "sp";
+    else if (temporary == A0_REGISTER)
+        return "a0";
     else if (temporary == X0_REGISTER)
         return "zero"; 
     else if (temporary == RA_REGISTER)
@@ -21,19 +35,15 @@ char *getReg(RegisterAssignment *rm, int temporary){
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
 
-// char *getReg(RegisterAssignment *rm, int temporary){
-//     if (temporary == SP_REGISTER)
-//         return "sp"; //sp or x2
-//     else if (temporary == A0_REGISTER)
-//         return "a0"; //a0 or x10
-//     else if (temporary == X0_REGISTER)
-//         return "zero"; 
-//     else if (temporary == RA_REGISTER)
-//         return "ra"; 
-//     char *testString = (char *)malloc(10*sizeof(char));
-//     sprintf(testString, "#%d", temporary);
-//     return testString;
-// }
+typedef char* (*getRegisterFunction)(RegisterAssignment*, int);
+
+getRegisterFunction getRegisterGenerator(int dialect) {
+    if (dialect == 1) {
+        return getRegisterDialect1;
+    } else if (dialect == 2) {
+        return getRegisterDialect2;
+    }
+}
 
 int getRegBin(RegisterAssignment *rm, int temporary){
     if (temporary == SP_REGISTER)
@@ -47,10 +57,11 @@ int getRegBin(RegisterAssignment *rm, int temporary){
     return registerCodes[getRegisterAssignment(rm, temporary)];
 }
 
-ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment *rm, int includeASMComments){
+ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment *rm, int includeASMComments, int asmDialect){
     ObjectCode *currObj = NULL, *objCode = NULL;
     currObj = objCode;
     IRNode *p = ir->head;
+    getRegisterFunction getReg = getRegisterGenerator(asmDialect);
 
     while (p != NULL) {
         // printf()
@@ -101,8 +112,9 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 break;            
             case LOAD:
                 if (p->sourceKind == CONSTANT_SOURCE)
-                    sprintf(currObj->assembly, "addi %s, zero, %d", 
+                    sprintf(currObj->assembly, "addi %s, %s, %d", 
                         getReg(rm, p->dest), 
+                        getReg(rm, X0_REGISTER), 
                         p->source
                     );
                 else if  (p->sourceKind == VARIABLE_SOURCE) {
@@ -145,7 +157,7 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 );
                 break;
             case LABEL:
-                sprintf(currObj->assembly, "\n%s:\naddi zero, zero, 0", p->varSource->name);
+                sprintf(currObj->assembly, "\n%s:\naddi %s, %s, 0", p->varSource->name, getReg(rm, X0_REGISTER), getReg(rm, X0_REGISTER));
                 break;
             case JUMP_REGISTER:
                 sprintf(currObj->assembly, "jalr %s, 0(%s)", getReg(rm, RA_REGISTER), getReg(rm, p->dest));
@@ -172,13 +184,16 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 sprintf(currObj->assembly, "blt %s, %s, %d", getReg(rm, p->source2), getReg(rm, p->source), p->imm);
                 break;
             case NOP:
-                sprintf(currObj->assembly, "addi zero, zero, 0");
+                sprintf(currObj->assembly, "addi %s, %s, 0", getReg(rm, X0_REGISTER), getReg(rm, X0_REGISTER));
                 break;
             case RELATIVE_JUMP:
                 sprintf(currObj->assembly, "jal %s, %d", getReg(rm, RA_REGISTER), p->target->address-p->address);
                 break;
         }
-        currObj->binary = asmToBinary(currObj->assembly);
+        if (p->instruction == LABEL || p->instruction == COMMENT)
+            currObj->binary = asmToBinary("NOP");
+        else currObj->binary = asmToBinary(currObj->assembly);
+        // printf("%s was translated to %d\n", currObj->assembly, currObj->binary);
         p = p->next;
     }
 

@@ -47,7 +47,7 @@ int int2signedbin(int number, int digits) {
     if (number >= 0) {
         return number;
     } else {
-        int xor_mask = (1 << (digits - 1)) - 1; // mask with ones for bit inversion
+        int xor_mask = (1 << (digits)) - 1; // mask with ones for bit inversion
         int two_complement = (labs(number) ^ xor_mask) + 1; // 2's complements
         return two_complement;
     }
@@ -69,11 +69,11 @@ int asmToBinary(char *line) {
 
     // Split the line into words
     char *words[MAX_LINE_LENGTH];
-    char *token = strtok(p, " ");
+    char *token = strtok(p, "  ()");
     int word_count = 0;
     while (token != NULL) {
         words[word_count++] = token;
-        token = strtok(NULL, " ");
+        token = strtok(NULL, " ()");
     }
 
     // Get the opcode
@@ -105,7 +105,6 @@ int asmToBinary(char *line) {
     }
 
     int bytecode;
-
     if (strcmp(opcode, "") == 0) {
         return -1;
     } else if (opcode[strlen(opcode) - 1] == ':') {
@@ -135,8 +134,8 @@ int asmToBinary(char *line) {
 
         } else if (strcmp(opcode, "JALR") == 0) {
             int rd = atoi(&words[1][1]);
-            int rs1 = atoi(&words[2][1]);
-            int imm = atoi(words[3]);
+            int rs1 = atoi(&words[3][1]);
+            int imm = atoi(words[2]);
             imm = int2signedbin(imm, 12);
             int opcode_number = 0b1100111;
             bytecode = ((imm & 0xFFF) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
@@ -144,8 +143,8 @@ int asmToBinary(char *line) {
         } else if (strcmp(opcode, "BEQ") == 0 || strcmp(opcode, "BNE") == 0 ||
                     strcmp(opcode, "BLT") == 0 || strcmp(opcode, "BGE") == 0 ||
                     strcmp(opcode, "BLTU") == 0 || strcmp(opcode, "BGEU") == 0) {
-            int rs1 = atoi(&words[1][1]);
-            int rs2 = atoi(&words[2][1]);
+            int rs2 = atoi(&words[1][1]);
+            int rs1 = atoi(&words[2][1]);
             int imm = atoi(words[3]);
             imm = int2signedbin(imm, 30);
             int opcode_number = 0b1100011;
@@ -157,21 +156,22 @@ int asmToBinary(char *line) {
                     strcmp(opcode, "LW") == 0 || strcmp(opcode, "LBU") == 0 ||
                     strcmp(opcode, "LHU") == 0) {
             int rd = atoi(&words[1][1]);
-            int rs1 = atoi(&words[2][1]);
-            int imm = atoi(words[3]);
+            int rs1 = atoi(&words[3][1]);
+            int imm = atoi(words[2]);
             imm = int2signedbin(imm, 12);
             int opcode_number = 0b0000011;
             bytecode = ((imm & 0xFFF) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
 
         } else if (strcmp(opcode, "SB") == 0 || strcmp(opcode, "SH") == 0 ||
                     strcmp(opcode, "SW") == 0) {
-            int rs1 = atoi(&words[1][1]);
-            int rs2 = atoi(&words[2][1]);
-            int imm = atoi(words[3]);
+        
+            int rs2 = atoi(&words[1][1]);
+            int rs1 = atoi(&words[3][1]);
+            int imm = atoi(words[2]);
             imm = int2signedbin(imm, 12);
             int opcode_number = 0b0100011;
-            bytecode = ((imm & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((imm & 0x1F) << 7) | (opcode_number & 0x7F);
-
+            bytecode = (((imm >> 5) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((imm & 0x1F) << 7) | (opcode_number & 0x7F);
+        
         } else if (strcmp(opcode, "ADDI") == 0 || strcmp(opcode, "SLTI") == 0 ||
                     strcmp(opcode, "SLTIU") == 0 || strcmp(opcode, "XORI") == 0 ||
                     strcmp(opcode, "ORI") == 0 || strcmp(opcode, "ANDI") == 0) {
@@ -198,8 +198,8 @@ int asmToBinary(char *line) {
                     strcmp(opcode, "SRL") == 0 || strcmp(opcode, "SRA") == 0 ||
                     strcmp(opcode, "OR") == 0 || strcmp(opcode, "AND") == 0) {
             int rd = atoi(&words[1][1]);
-            int rs1 = atoi(&words[2][1]);
-            int rs2 = atoi(&words[3][1]);
+            int rs2 = atoi(&words[2][1]);
+            int rs1 = atoi(&words[3][1]);
             int opcode_number = 0b0110011;
             bytecode = (get_funct7(opcode) & 0x7F) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
         }
