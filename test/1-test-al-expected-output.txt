@@ -1,24 +1,25 @@
-Line 0
+
+Line 1
 Type: void
 Identifier
 Symbol: (
 Symbol: )
 
-Line 1
+Line 2
 Symbol: {
 
-Line 2
+Line 3
 Type: int
 Identifier
 Symbol: ;
 
-Line 3
+Line 4
 Identifier
 Operator: =
 Number
 Symbol: ;
 
-Line 4
+Line 5
 Keyword: while
 Symbol: (
 Identifier
@@ -27,14 +28,14 @@ Number
 Symbol: )
 Symbol: {
 
-Line 5
+Line 6
 Identifier
 Symbol: (
 Identifier
 Symbol: )
 Symbol: ;
 
-Line 6
+Line 7
 Identifier
 Operator: =
 Identifier
@@ -42,12 +43,12 @@ Operator: +
 Number
 Symbol: ;
 
-Line 7
+Line 8
 Symbol: }
 
-Line 8
+Line 9
 Keyword: return
 Symbol: ;
 
-Line 9
+Line 10
 Symbol: }

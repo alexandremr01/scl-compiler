@@ -15,56 +15,7 @@ extern FILE *yyin;
 extern int yylex (void);
 extern AbstractSyntaxTree* parse();
 int syntaxErrors = 0;
-
-void printToken(yytoken_kind_t token) {
-    switch (token) {
-        case ERROR: printf("Error\n"); break;
-        case NEWLINE: break;
-        case IF: printf("Keyword: if\n"); break;
-        case ELSE: printf("Keyword: else\n"); break;
-        case WHILE: printf("Keyword: while\n"); break;
-        case VOID: printf("Type: void\n"); break;
-        case INT: printf("Type: int\n"); break;
-        case RETURN: printf("Keyword: return\n"); break;
-        case PLUS: printf("Operator: +\n"); break;
-        case MINUS: printf("Operator: -\n"); break;
-        case TIMES: printf("Operator: *\n"); break;
-        case OVER: printf("Operator: /\n"); break;
-        case ASSIGN: printf("Operator: =\n"); break;
-        case EQ: printf("Operator: ==\n"); break;
-        case LT: printf("Operator: <\n"); break;
-        case GT: printf("Operator: >\n"); break;
-        case LEQ: printf("Operator: <=\n"); break;
-        case GEQ: printf("Operator: >=\n"); break;
-        case DIFFERENT: printf("Operator: !=\n"); break;
-        case SEMICOLON: printf("Symbol: ;\n"); break;
-        case LPAREN: printf("Symbol: (\n"); break;
-        case RPAREN: printf("Symbol: )\n"); break;
-        case LBRACKET: printf("Symbol: [\n"); break;
-        case RBRACKET: printf("Symbol: ]\n"); break;
-        case LBRACES: printf("Symbol: {\n"); break;
-        case RBRACES: printf("Symbol: }\n"); break;
-        case ID: printf("Identifier\n"); break;
-        case NUM: printf("Number\n"); break;
-        case ASM: printf("Operator: asm\n"); break;
-        case STRING: printf("String\n"); break;
-        default: printf("Unknown token\n"); break;
-    }
-}
-
-void lexic_parser_only(){
-    int i=0;
-    int line_number=0;
-    printf("Line 0\n");
-    while ((i = yylex ())){
-        if (i == NEWLINE) {
-            line_number += 1;
-            printf("\nLine %d\n", line_number);
-        }
-        printToken(i);
-    }
-    return;
-}
+extern void lexic_parser_only();
 
 char *appendAsm(char *filename){
     int filenameLength = strlen(filename);
@@ -134,9 +85,9 @@ int main(int argc, char *argv[]) {
     AbstractSyntaxTree *tree = parse();
     SymbolicTable* table = newSymbolicTable();
 
-    int semanticErrors = 0;
-    if (tree != NULL) {
-        semanticErrors = semanticAnalysis(tree, table);
+    int compileErrors = syntaxErrors;
+    if (compileErrors == 0 && tree != NULL) {
+        compileErrors += semanticAnalysis(tree, table);
 
         if (print_ast) {
             printf("\nAbstract Syntax Tree:\n");
@@ -145,7 +96,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    int compileErrors = syntaxErrors + semanticErrors;
     // if tree=NULL should only happen if there is syntaxErrors>0. 
     // the second condition is only to double check
     if (compileErrors > 0 || tree == NULL) {
