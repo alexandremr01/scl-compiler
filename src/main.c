@@ -133,16 +133,22 @@ int main(int argc, char *argv[]) {
     // Frontend
     AbstractSyntaxTree *tree = parse();
     SymbolicTable* table = newSymbolicTable();
-    int semanticErrors = semanticAnalysis(tree, table);
 
-    if (print_ast) {
-        printf("\nAbstract Syntax Tree:\n");
-        printTree(tree->root, 0);
-        printf("\n\n");
+    int semanticErrors = 0;
+    if (tree != NULL) {
+        semanticErrors = semanticAnalysis(tree, table);
+
+        if (print_ast) {
+            printf("\nAbstract Syntax Tree:\n");
+            printTree(tree->root, 0);
+            printf("\n\n");
+        }
     }
 
     int compileErrors = syntaxErrors + semanticErrors;
-    if (compileErrors > 0) {
+    // if tree=NULL should only happen if there is syntaxErrors>0. 
+    // the second condition is only to double check
+    if (compileErrors > 0 || tree == NULL) {
         printf("\n%d compile errors\n", compileErrors);
         freeSymbolicTable(table);
         fclose(f_asm);
