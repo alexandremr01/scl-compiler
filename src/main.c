@@ -71,9 +71,9 @@ int main(int argc, char *argv[]) {
             includeASMComments=1;
         } else if (strcmp(argv[i], "--keep_temporaries") == 0){
             keepTemporaries=1;
-        } else if (strcmp(argv[i], "--dialect=2") == 0){
+        } else if (strcmp(argv[i], "--dialect=ABI") == 0){
             asmDialect=2;
-        } else if (strcmp(argv[i], "--dialect=1") == 0){
+        } else if (strcmp(argv[i], "--dialect=raw") == 0){
             asmDialect=1;
         } else {
             printf("FATAL: unrecognized command-line option \'%s\'\n", argv[i]);

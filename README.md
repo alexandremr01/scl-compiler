@@ -19,7 +19,7 @@ An util to load in the processor memory is provided. Run `./bin/bin2vhdl output 
 - `--asm` outputs the assembly file
 - `--asm_comments` adds comments to the assebly file
 - `--print_ast` outputs the symbolic tree 
-- `--dialect=1` or `--dialect=2` change the RISCV dialect. Dialect 1 (default) uses only x0-x31. Dialect 2 uses pseudo names such as ra, zero, sp, etc.. 
+- `--dialect=raw` or `--dialect=ABI` change the register naming. Raw (default) uses only x0-x31. ABI uses names such as ra, zero, sp, etc.. The RISC-V Simulator used only accepts Assembly in ABI naming.
 
 ### Experiments
 
