@@ -156,7 +156,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             *errors += 1;
             return;
         } else if (stEntry->kind != FUNCTION_ENTRY){
-            printf("Line %d: Name \'%s\' is not a function.\n", node->line_number, node->name);
+            printf("Line %d: Trying to call non-callable entity \'%s\'.\n", node->line_number, node->name);
             *errors += 1;
             return;
         }
@@ -248,6 +248,18 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             fn->hasReturn = 1;
             break;
         case ASSIGNMENT_NODE:
+             if (node->firstChild->stEntry != NULL && node->firstChild->stEntry->kind != VARIABLE_ENTRY) {
+                printf("Line %d: incorrect assignment to non-assignable entity \'%s\'.\n", node->line_number, node->firstChild->stEntry->name);                                                                  
+                *errors += 1;
+            } else if (
+                node->firstChild->type != NONE_TYPE &&
+                node->firstChild->sibling->type != NONE_TYPE &&
+                node->firstChild->type != node->firstChild->sibling->type
+            ) {
+                // if one of the types is none, it is ok (e.g. undeclared variable)
+                printf("Line %d: incorrect assignment from type %s to variable of type %s.\n", node->line_number, printType(node->firstChild->sibling->type), printType(node->firstChild->type));                                                                  
+                *errors += 1;
+            }
             node->type = VOID_TYPE;
             break;
         case EXPRESSION_NODE:
@@ -277,7 +289,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             if (stEntry == NULL){
                 printf("Line %d: Name \'%s\' is not defined.\n", node->line_number, node->name);
                 *errors += 1;
-                node->type = VOID_TYPE;
+                node->type = NONE_TYPE;
             } else if (node->firstChild != NULL && node->firstChild->type != INTEGER_TYPE){
                 printf("Line %d: Index expression must be of integer type.\n", node->line_number);
                 *errors += 1;
