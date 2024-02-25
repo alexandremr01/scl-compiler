@@ -1,0 +1,19 @@
+void j(){
+
+}
+
+int j;          // name already in use
+
+void main2()    // no function named main
+{ 
+    int i;
+    int i;      // name already in use
+    void m;     // variable declared with type void
+
+    i = j();    // incorrect type assignment (void and int)
+    k = 0;      // undeclared variable
+    i = func(); // undeclared function
+    i();        // not callable
+
+    return;
+}
