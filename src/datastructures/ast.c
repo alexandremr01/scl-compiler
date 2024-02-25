@@ -30,6 +30,20 @@ ASTNode *appendSibling(ASTNode *reference, ASTNode *newSibling){
     return reference;
 }
 
+void freeASTNode(ASTNode *node) {
+    if (node == NULL) return;
+    ASTNode *curr = node->firstChild;
+    ASTNode *aux;
+    while (curr!=NULL) {
+        aux = curr->sibling;
+        freeASTNode(curr);
+        curr = aux;
+    }
+    if (node->name != NULL) 
+        free(node->name);
+    free(node);
+}
+
 void printTree(ASTNode *node, int level){
     if (node == NULL) return;
     for(int i=0; i<level;i++) printf("\t");

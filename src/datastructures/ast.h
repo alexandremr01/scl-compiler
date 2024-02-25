@@ -37,5 +37,6 @@ ASTNode *newASTNode(NodeKind nodeKind);
 ASTNode *newEmptyStatementNode();
 void printTree(ASTNode *node, int level);
 ASTNode *appendSibling(ASTNode *reference, ASTNode *newSibling);
+void freeASTNode(ASTNode *node);
 
 #endif
