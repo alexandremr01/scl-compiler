@@ -238,7 +238,10 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             
             break;
         case RETURN_NODE: 
-            if (node->firstChild->type != fn->type){
+            if (fn->type == VOID_TYPE && node->firstChild != NULL ) {
+                printf("Line %d: function of type void returning type %s.\n", node->line_number, printType(node->firstChild->type));                                                                  
+                *errors += 1;
+            } else if (node->firstChild != NULL && node->firstChild->type != fn->type){
                 printf("Line %d: function of type %s returning type %s.\n", node->line_number, printType(fn->type), printType(node->firstChild->type));                                                                  
                 *errors += 1;
             }
