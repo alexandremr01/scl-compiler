@@ -34,7 +34,7 @@
 %token LBRACES RBRACES
 %token <string> ID NUM STRING
 %destructor { free($$); } <string>
-%destructor { freeASTNode($$); } <node>
+%destructor { if(syntaxErrors>0) freeASTNode($$); } <node>
 
 %%
 program: units { 
