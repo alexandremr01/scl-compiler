@@ -153,7 +153,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             ir->lastStackAddress = bkp_stack;
             break;
         case RETURN_NODE: 
-            addMovIR(ir, A0_REGISTER, node->firstChild->tempRegResult);
+            if (node->firstChild != NULL)
+                addMovIR(ir, A0_REGISTER, node->firstChild->tempRegResult);
             addRelativeJump(ir, functionEnd);
             break;
         case MULTIPLICATION_NODE:
