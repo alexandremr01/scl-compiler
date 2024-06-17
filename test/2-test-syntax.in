@@ -1,11 +1,12 @@
 void main()
 { 
     int i;
-    i = 0;
-    
+    = 0 ; // incorrect line
+
     while (i < 10){
-        output(i)
+        output(i; // incorrect line
         i = i + 1;
     }
-    return
+
+    return // incorrect line
 }

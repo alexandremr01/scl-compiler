@@ -5,6 +5,8 @@ Line 13: incorrect assignment from type void to variable of type int.
 Line 14: Name 'k' is not defined.
 Line 15: Name 'func' does not exist.
 Line 16: Trying to call non-callable entity 'i'.
+Line 17: Expected 1 parameter, has 0.
+	Function signature: (int) declared at function at line 3
 Error: No function named main.
 
-8 compile errors
+9 compile errors
