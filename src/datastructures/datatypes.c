@@ -14,6 +14,14 @@ const char *printType(DataType d){
     return "void";
 }
 
+int canImplicitCast(DataType from, DataType to) {
+    // only allow certain implicit casts - all others are forbidden
+    if (from == INTEGER_TYPE && to == FLOAT_TYPE){
+        return 1;
+    }
+    return 0;
+}
+
 int getSize(DataType d){
     switch(d){
         case NONE_TYPE:

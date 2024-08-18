@@ -257,8 +257,12 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
                 node->firstChild->type != node->firstChild->sibling->type
             ) {
                 // if one of the types is none, it is ok (e.g. undeclared variable)
-                printf("Line %d: incorrect assignment from type %s to variable of type %s.\n", node->line_number, printType(node->firstChild->sibling->type), printType(node->firstChild->type));                                                                  
-                *errors += 1;
+                if (canImplicitCast(node->firstChild->sibling->type, node->firstChild->type)){
+                    node->firstChild->sibling->type = node->firstChild->type;
+                } else {
+                    printf("Line %d: incorrect assignment from type %s to variable of type %s.\n", node->line_number, printType(node->firstChild->sibling->type), printType(node->firstChild->type));                                                                  
+                    *errors += 1;
+                }
             }
             node->type = VOID_TYPE;
             break;
@@ -282,6 +286,8 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
         case DIFF_NODE:
         case CONSTANT_NODE:
             node->type = INTEGER_TYPE;
+            if (strchr(node->name, '.') != NULL)
+                node->type = FLOAT_TYPE;
             return;
         case VAR_REFERENCE_NODE:
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);

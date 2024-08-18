@@ -24,7 +24,7 @@
 
 %token ERROR NEWLINE // internal
 %token IF ELSE WHILE // control
-%token VOID INT // types
+%token VOID INT FLOAT// types
 %token RETURN // others
 %token ASM
 %token PLUS MINUS TIMES OVER ASSIGN EQ LT GT LEQ GEQ DIFFERENT 
@@ -80,7 +80,7 @@ parameter: type_specifier ID  {
         // TODO: treat array
     }
 
-type_specifier: INT {$$ = INTEGER_TYPE;} | VOID {$$ = VOID_TYPE;} 
+type_specifier: INT {$$ = INTEGER_TYPE;} | VOID {$$ = VOID_TYPE;} | FLOAT {$$ = FLOAT_TYPE;} 
 declaration: type_specifier ID SEMICOLON  { 
                 $$ = newASTNode(DECLARATION_NODE);
                 $$->type = $1;
@@ -209,7 +209,7 @@ factor:     LPAREN expression RPAREN {$$=$2;}
                 $$ = newASTNode(CONSTANT_NODE);
                 $$->name = $1;
                 $$->line_number = yylineno;
-                $$->type = INTEGER_TYPE;
+                // $$->type = INTEGER_TYPE;
             }
              | call {$$=$1;}
 call:       ID LPAREN args RPAREN {

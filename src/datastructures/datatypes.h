@@ -6,6 +6,7 @@ typedef enum dataType {
 } DataType;
 
 const char *printType(DataType d);
+int canImplicitCast(DataType from, DataType to);
 int getSize(DataType d);
 
 #endif

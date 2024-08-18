@@ -1,5 +1,5 @@
 digit       [0-9]
-number      {digit}+
+number      ({digit}*[.])?{digit}+
 string      \".*\"
 identifier  [a-zA-Z][0-9a-zA-Z_]*
 newline     \n
@@ -17,6 +17,7 @@ multi_line_comment     \/\*.+\*\/
 "while"         {return WHILE;}
 "void"          {return VOID;}
 "int"           {return INT;}
+"float"         {return FLOAT;}
 "return"        {return RETURN;}
 "asm"           {return ASM;}
 "+"             {return PLUS;}
