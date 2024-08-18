@@ -6,10 +6,14 @@ void codeGenNode(ASTNode*, IntermediateRepresentation*, IRNode*);
 void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     for (int i=0; i<2; i++)
         addNopIR(ir);
+    addGetPC(ir, 
+        SP_REGISTER, 
+        3
+    );
     addAdditionImIR(ir, 
         SP_REGISTER, 
-        X0_REGISTER,
-        INITIAL_STACK
+        SP_REGISTER,
+        -184
     );
     addJumpIR(ir, main);
     for (int i=0; i<4; i++)

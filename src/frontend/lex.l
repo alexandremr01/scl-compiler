@@ -65,7 +65,7 @@ multi_line_comment     \/\*.+\*\/
 %%
 
 
-void printToken(yytoken_kind_t token) {
+/* void printToken(yytoken_kind_t token) {
     switch (token) {
         case ERROR: printf("Error\n"); break;
         case NEWLINE: break;
@@ -99,7 +99,7 @@ void printToken(yytoken_kind_t token) {
         case STRING: printf("String\n"); break;
         default: printf("Unknown token\n"); break;
     }
-}
+} */
 
 void lexic_parser_only(){
     int i=0;
@@ -109,7 +109,7 @@ void lexic_parser_only(){
             line_number = yylineno;
             printf("\nLine %d\n", line_number);
         }
-        printToken(i);
+        /* printToken(i); */
         if (i == ID || i == NUM || i == STRING)
             free(yylval.string);
     }

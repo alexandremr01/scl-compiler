@@ -4,6 +4,8 @@
 **.out
 **.out.txt
 **.out.asm
+**.elf
+**.o
 
 bin/
 src/generated/

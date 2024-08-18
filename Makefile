@@ -21,7 +21,7 @@ GEN :=  $(foreach file, $(GENERATEDFILES), $(addprefix $(SOURCEDIR)/, $(file)))
 .PHONY: build-docker run-docker all build test
 
 build-docker:
-	docker build -t scl_compiler_docker .
+	docker build -t scl_compiler_docker -f Dockerfile.complete .
 
 run-docker:
 	docker run -it -v $(PWD):/app scl_compiler_docker
@@ -31,7 +31,7 @@ all: build
 build:
 	@mkdir -p $(BUILD) $(GENERATEDDIR)
 	flex -o $(GENERATEDDIR)/lex.yy.c $(SOURCEDIR)/frontend/lex.l
-	bison --debug -o $(GENERATEDDIR)/syntax.tab.c  -t -v -d -Wcounterexamples $(SOURCEDIR)/frontend/syntax.y
+	bison --debug -o $(GENERATEDDIR)/syntax.tab.c  -t -v -d $(SOURCEDIR)/frontend/syntax.y
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/sclc
 	$(CC) $(CFLAGS) $(SOURCEDIR)/bin2vhdl.c -o $(BUILD)/bin2vhdl
 

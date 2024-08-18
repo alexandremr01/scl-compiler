@@ -24,3 +24,14 @@ An util to load in the processor memory is provided. Run `./bin/bin2vhdl output 
 ### Experiments
 
 The experiments from the report are reproducible with `./test/run-experiments.sh`.
+
+### Simulating with Spike
+
+```
+../bin/sclc test/multiplication.in test/multiplication.out --dialect=ABI
+riscv64-unknown-linux-gnu-objcopy -I binary -O elf64-littleriscv -B riscv multiplication.out multiplication.o
+riscv64-unknown-linux-gnu-ld -T loader.ld -o multiplication.elf  multiplication.o
+spike -d --isa=RV64I -m0x10000:0x4000 --pc=0x100b0 multiplication.elf
+run 1000
+reg 0
+```

@@ -1,0 +1,17 @@
+FROM pwn2de4d/riscv-toolchain:latest
+
+WORKDIR /tmp 
+
+ENV PATH="$PATH:/opt/riscv64/bin"
+ENV RISCV="/opt/riscv64"
+
+RUN apt update && \
+    apt install -y device-tree-compiler libboost-regex-dev libboost-system-dev g++-8 gcc-8 build-essential &&\
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 20 && \
+    git clone --depth=1 https://github.com/riscv-software-src/riscv-isa-sim.git &&\
+    cd riscv-isa-sim && mkdir build && cd build && \
+    ../configure --prefix=$RISCV && \
+    make install && \
+    rm -rf /tmp/riscv-gnu-toolchain
+
+WORKDIR /app

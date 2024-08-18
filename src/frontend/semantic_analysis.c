@@ -290,7 +290,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
                     );
                     *errors += 1;
                 }
-            }
+            } else node->type = node->firstChild->type;
             break;
         case LT_NODE:
         case GT_NODE:
@@ -300,7 +300,7 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
         case DIFF_NODE:
         case CONSTANT_NODE:
             node->type = INTEGER_TYPE;
-            if (strchr(node->name, '.') != NULL)
+            if (node->name != NULL && strchr(node->name, '.') != NULL)
                 node->type = FLOAT_TYPE;
             return;
         case VAR_REFERENCE_NODE:
