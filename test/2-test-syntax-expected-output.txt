@@ -1,4 +1,5 @@
-Line 8: Error at token 'i'.
-Line 11: Error at token '}'.
+Line 4: Error at token '='.
+Line 7: Error at token ';'.
+Line 12: Error at token '}'.
 
-2 compile errors
+3 compile errors
