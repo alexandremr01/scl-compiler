@@ -267,16 +267,30 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             node->type = VOID_TYPE;
             break;
         case EXPRESSION_NODE:
-            node->type = INTEGER_TYPE;
+            node->type = node->firstChild->type;
             break;
         case SUM_NODE:
-            node->type = INTEGER_TYPE;
-            break;
         case SUBTRACTION_NODE:
-            node->type = INTEGER_TYPE;
-            break;
         case MULTIPLICATION_NODE:
-            node->type = INTEGER_TYPE;
+            if (node->firstChild->type != node->firstChild->sibling->type) {
+                DataType priorityType = implicitCastPriority(
+                    node->firstChild->type,
+                    node->firstChild->sibling->type
+                );
+                if (canImplicitCast(node->firstChild->type, priorityType) &&
+                    canImplicitCast(node->firstChild->sibling->type, priorityType)) {
+                    node->type = priorityType;
+                    node->firstChild->type = priorityType;
+                    node->firstChild->sibling->type = priorityType;
+                } else {
+                    printf("Line %d: Cannot cast %s and %s to the same type.\n", 
+                        node->line_number,
+                        printType(node->firstChild->type),
+                        printType(node->firstChild->sibling->type)
+                    );
+                    *errors += 1;
+                }
+            }
             break;
         case LT_NODE:
         case GT_NODE:

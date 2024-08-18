@@ -16,10 +16,17 @@ const char *printType(DataType d){
 
 int canImplicitCast(DataType from, DataType to) {
     // only allow certain implicit casts - all others are forbidden
-    if (from == INTEGER_TYPE && to == FLOAT_TYPE){
-        return 1;
+    return (from == to) || (from == INTEGER_TYPE && to == FLOAT_TYPE);
+}
+
+int implicitCastPriority(DataType a, DataType b) {
+    if ((a == INTEGER_TYPE && b == FLOAT_TYPE) || (b == INTEGER_TYPE && a == FLOAT_TYPE)) {
+        return FLOAT_TYPE;
     }
-    return 0;
+    if (a == b) {
+        return a;
+    }
+    return -1;
 }
 
 int getSize(DataType d){
