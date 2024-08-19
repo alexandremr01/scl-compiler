@@ -6,6 +6,9 @@
 **.out.asm
 **.elf
 **.o
+test/**.obj
+test/**.log.txt
+test/**.bin*
 
 bin/
 src/generated/
