@@ -17,6 +17,8 @@ char *getRegisterDialect1(RegisterAssignment *rm, int temporary){
         return "x0"; 
     else if (temporary == RA_REGISTER)
         return "x1"; 
+    else if (temporary >= T0_REGISTER && temporary <= T6_REGISTER)
+        return registerNames[temporary - T0_REGISTER]; 
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
 
@@ -32,6 +34,8 @@ char *getRegisterDialect2(RegisterAssignment *rm, int temporary){
         return "zero"; 
     else if (temporary == RA_REGISTER)
         return "ra"; 
+    else if (temporary >= T0_REGISTER && temporary <= T6_REGISTER)
+        return registerNames[temporary - T0_REGISTER]; 
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
 

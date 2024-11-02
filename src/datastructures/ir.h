@@ -13,6 +13,16 @@
 #define FP_REGISTER -4
 #define RA_REGISTER -5
 
+#define T0_REGISTER -12
+#define T1_REGISTER -11
+#define T2_REGISTER -10
+#define T3_REGISTER -9
+#define T4_REGISTER -8
+#define T5_REGISTER -7
+#define T6_REGISTER -6
+
+int get_tx_register(int x);
+
 typedef enum sourceKind {
     CONSTANT_SOURCE, REG_SOURCE, VARIABLE_SOURCE
 } SourceKind;

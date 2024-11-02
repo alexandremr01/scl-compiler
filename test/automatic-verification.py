@@ -50,6 +50,10 @@ TESTS = [
     {
         "file": "multiplication.in",
         "assertion": (lambda registers : ('a0' in registers and registers['a0'] == 15))
+    },
+    {
+        "file": "matrices.in",
+        "assertion": (lambda registers : ('a0' in registers and registers['a0'] == 18))
     }
 ]
 

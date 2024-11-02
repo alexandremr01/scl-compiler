@@ -117,8 +117,14 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
     if (node->kind == FUNCTION_DEFINITION_NODE){
         ir->lastStackAddress = 0;
         addLabelIR(ir, node->stEntry);
-        addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4);
-        addStoreIR(ir, SP_REGISTER, 0, RA_REGISTER); 
+        addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4*8);
+        addStoreIR(ir, SP_REGISTER, 4*7, RA_REGISTER); 
+        // store preserved registers
+        int reg = 0;
+        while (reg < 7) {
+            addStoreIR(ir, SP_REGISTER, 4*(6-reg), get_tx_register(reg));
+            reg += 1;
+        } 
         // first, iterate over non-parameter locals
         SymbolicTableEntry *local = node->stEntry->locals;
         while(local != NULL) {
@@ -130,7 +136,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
         }
         addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -localsSize);
         returnStackPosition = localsSize;
-        localsSize += 4; // skip return address
+        localsSize += 4*8; // skip return address and registers t0-t6
         // now, iterate over parameters to give their addresses
         local = node->stEntry->locals;
         while(local != NULL) {
@@ -151,7 +157,13 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
         case FUNCTION_DEFINITION_NODE:
             address_register = ir->nextTempReg++;
             addNode(ir, functionEnd);
-            addLoadMemIR(ir, RA_REGISTER, returnStackPosition, SP_REGISTER); 
+
+            int reg = 6;
+            while (reg >= 0) {
+                addLoadMemIR(ir, get_tx_register(reg), returnStackPosition + 4*(6-reg), SP_REGISTER); 
+                reg -= 1;
+            } 
+            addLoadMemIR(ir, RA_REGISTER, returnStackPosition + 4*7, SP_REGISTER); 
             addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, localsSize);
             addJumpRegisterIR(ir, RA_REGISTER);
             ir->lastStackAddress = bkp_stack;
@@ -260,6 +272,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 parameter = parameter->sibling;
             }
             addJumpIR(ir, node->stEntry);
+            node->tempRegResult = ir->nextTempReg++;
+            addMovIR(ir, node->tempRegResult, A0_REGISTER);
             break;
         case ASM_NODE:
             addRawIR(ir, node->name);

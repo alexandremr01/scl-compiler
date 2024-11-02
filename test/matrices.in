@@ -1,0 +1,29 @@
+int matrix[20]; // 4 columns, 5 rows
+
+int mul(int a, int b) {
+    if (a == 1) {
+        return b;
+    }
+    return mul(a-1, b) + b;
+}
+
+int get_value(int row, int column) {
+    return matrix[mul(4, row) + column]; // e.g. 0, 1 -> 1; 1, 0 -> 4; 4, 3 -> 19
+}
+
+int main(int argc) {
+    int i;
+
+    i = 0;
+    while (i < 20) {
+        matrix[i] = i;
+        i = i + 1;
+    }    
+    // 0 1 2 3
+    // 4 5 6 7
+    // 8 9 10 11
+    // 12 13 14 15
+    // 16 17 18 19
+
+    return get_value(0, 1) + get_value(4, 1); // 1 + 17 = 18
+}

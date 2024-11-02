@@ -1,5 +1,9 @@
 #include "ir.h"
 
+int get_tx_register(int x) {
+    return T0_REGISTER + x;
+}
+
 IntermediateRepresentation *newIntermediateRepresentation(){
     IntermediateRepresentation *ir = (IntermediateRepresentation *) malloc(sizeof(IntermediateRepresentation));
     ir->head = NULL;
