@@ -5,8 +5,8 @@
 #include <assert.h>
 
 #define FUNCT7_DEFAULT 0
-#define FUNCT3_MAP_SIZE 33
-#define FUNCT7_MAP_SIZE 3
+#define FUNCT3_MAP_SIZE 34
+#define FUNCT7_MAP_SIZE 4
 #define MAX_LINE_LENGTH 128
 
 // Function to get the funct3 code
@@ -18,7 +18,7 @@ int get_funct3(const char* opcode) {
         {"SLTI", "010"}, {"SLTIU", "011"}, {"XORI", "100"}, {"ORI", "110"}, {"ANDI", "111"},
         {"SLLI", "001"}, {"SRLI", "101"}, {"SRAI", "101"}, {"ADD", "000"}, {"SUB", "000"},
         {"SLL", "001"}, {"SLT", "010"}, {"SLTU", "011"}, {"XOR", "100"}, {"SRL", "101"},
-        {"SRA", "101"}, {"OR", "110"}, {"AND", "111"}
+        {"SRA", "101"}, {"OR", "110"}, {"AND", "111"}, {"MUL", "000"}
     };
 
     for (int i = 0; i < FUNCT3_MAP_SIZE; ++i) {
@@ -53,7 +53,7 @@ int get_register_number(const char* name) {
 // Function to get the funct7 code
 int get_funct7(const char* opcode) {
     static const char* funct7_map[FUNCT7_MAP_SIZE][2] = {
-        {"SRAI", "0100000"}, {"SUB", "0100000"}, {"SRA", "0100000"}
+        {"SRAI", "0100000"}, {"SUB", "0100000"}, {"SRA", "0100000"}, {"MUL", "0000001"}
     };
 
     for (int i = 0; i < FUNCT7_MAP_SIZE; ++i) {
@@ -217,7 +217,7 @@ int asmToBinary(char *line) {
                     strcmp(opcode, "SLL") == 0 || strcmp(opcode, "SLT") == 0 ||
                     strcmp(opcode, "SLTU") == 0 || strcmp(opcode, "XOR") == 0 ||
                     strcmp(opcode, "SRL") == 0 || strcmp(opcode, "SRA") == 0 ||
-                    strcmp(opcode, "OR") == 0 || strcmp(opcode, "AND") == 0) {
+                    strcmp(opcode, "OR") == 0 || strcmp(opcode, "AND") == 0 || strcmp(opcode, "MUL") == 0) {
             int rd = get_register_number(words[1]);
             int rs1 = get_register_number(words[2]);
             int rs2 = get_register_number(words[3]);
