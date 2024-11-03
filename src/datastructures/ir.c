@@ -158,7 +158,16 @@ void addRelativeJump(IntermediateRepresentation *ir, IRNode *target) {
 void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm) {
     IRNode * node = newIRNode(AUIPC);
     node->dest = destinationRegister;
+    node->sourceKind = CONSTANT_SOURCE;
     node->imm = imm;
+    addNode(ir, node);
+}
+
+void addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry) {
+    IRNode * node = newIRNode(AUIPC);
+    node->dest = destinationRegister;
+    node->sourceKind = VARIABLE_SOURCE;
+    node->varSource = entry;
     addNode(ir, node);
 }
 

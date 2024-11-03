@@ -221,7 +221,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
 
             if (node->firstChild->stEntry->scope_level == 0 && node->firstChild->firstChild == NULL) { 
                 // global non array variable 
-                addGetPC(ir, address_register, 0);
+                addGetPCVarAddress(ir, address_register, node->firstChild->stEntry);
                 addAdditionImIR(ir, address_register, address_register, 8);
                 addStoreVarAddress(ir, result_register, address_register, node->firstChild->stEntry);
             } else if (node->firstChild->stEntry->scope_level == 0 && node->firstChild->firstChild != NULL) { 
@@ -229,7 +229,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 addLoadImIR(ir, address_register, 0);
                 for (int i=0; i<getSize(node->firstChild->stEntry->type); i++)
                     addAdditionIR(ir, address_register, node->firstChild->firstChild->tempRegResult, address_register);
-                addGetPC(ir, aux_register, 0);
+                addGetPCVarAddress(ir, aux_register, node->firstChild->stEntry);
                 addAdditionImIR(ir, aux_register, aux_register, 12);
                 addAdditionIR(ir, address_register, aux_register, address_register);
                 addStoreVarAddress(ir, result_register, address_register, node->firstChild->stEntry);
@@ -300,15 +300,15 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             addCommentIR(ir, "var reference");
             if (node->stEntry->scope_level == 0 && node->firstChild == NULL) { 
                 // global non array variable 
-                addGetPC(ir, address_register, 0);
+                addGetPCVarAddress(ir, address_register, node->stEntry);
                 addAdditionImIR(ir, address_register, address_register, 8);
                 addLoadVarAddress(ir, node->tempRegResult, address_register, node->stEntry);
             } else if (node->stEntry->scope_level == 0 && node->firstChild != NULL) { 
                 // global array
-                addLoadImIR(ir, address_register, 0);
+                addLoadImIR(ir, address_register, 0); 
                 for (int i=0; i<getSize(node->stEntry->type); i++)
                     addAdditionIR(ir, address_register, node->firstChild->tempRegResult, address_register);
-                addGetPC(ir, aux_register, 0);
+                addGetPCVarAddress(ir, aux_register, node->stEntry);
                 addAdditionImIR(ir, aux_register, aux_register, 12);
                 addAdditionIR(ir, address_register, aux_register, address_register);
                 addLoadVarAddress(ir, node->tempRegResult, address_register, node->stEntry);

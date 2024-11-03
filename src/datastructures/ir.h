@@ -76,6 +76,7 @@ void addCommentIR(IntermediateRepresentation *ir, char *comment);
 void addLoadVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry);
 void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm);
 void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry);
+void addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry);
 
 void addLabelIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry); 
 void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry); 

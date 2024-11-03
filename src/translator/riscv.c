@@ -127,10 +127,16 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 );
                 break;
             case AUIPC:
-                sprintf(currObj->assembly, "auipc %s, %d", 
-                    getReg(rm, p->dest),
-                    p->imm
-                );
+                if (p->sourceKind == CONSTANT_SOURCE)
+                    sprintf(currObj->assembly, "auipc %s, %d", 
+                        getReg(rm, p->dest),
+                        p->imm
+                    );
+                else if  (p->sourceKind == VARIABLE_SOURCE) 
+                    sprintf(currObj->assembly, "auipc %s, %d", 
+                        getReg(rm, p->dest),
+                        (p->varSource->address-p->address) >> 11
+                    );
                 break;            
             case LOAD:
                 if (p->sourceKind == CONSTANT_SOURCE)
@@ -142,7 +148,7 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 else if  (p->sourceKind == VARIABLE_SOURCE) {
                     sprintf(currObj->assembly, "lw %s, %d(%s)", 
                         getReg(rm, p->dest), 
-                        p->varSource->address-p->address,
+                        (p->varSource->address-p->address) & ((1 << 11) - 1),
                         getReg(rm, p->source)
                     );
                 } else {
@@ -157,7 +163,7 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 if  (p->sourceKind == VARIABLE_SOURCE) {
                     sprintf(currObj->assembly, "sw %s, %d(%s)", 
                         getReg(rm, p->dest), 
-                        p->varSource->address-p->address,
+                        (p->varSource->address-p->address) & ((1 << 11) - 1),
                         getReg(rm, p->source)
                     );
                 }
