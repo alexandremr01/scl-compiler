@@ -1,7 +1,18 @@
 #include "ir.h"
+#include <stdio.h>
 
 int get_tx_register(int x) {
     return T0_REGISTER + x;
+}
+
+void printIR(IntermediateRepresentation *ir) {
+    IRNode *p = ir->head;
+    int i = 0;
+    while (p != NULL) {
+        printf("%d: %d\n", i, p->instruction);
+        p = p->next;
+        i += 1;
+    }
 }
 
 IntermediateRepresentation *newIntermediateRepresentation(){
@@ -172,6 +183,13 @@ void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister,
 void addJumpRegisterIR(IntermediateRepresentation *ir, int destinationRegister) {
     IRNode * node = newIRNode(JUMP_REGISTER);
     node->dest = destinationRegister;
+    addNode(ir, node);
+}
+
+void addNegIR(IntermediateRepresentation *ir, int dest, int src) {
+    IRNode * node = newIRNode(NEG);
+    node->dest = dest;
+    node->source = src;
     addNode(ir, node);
 }
 

@@ -303,6 +303,9 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             if (node->name != NULL && strchr(node->name, '.') != NULL)
                 node->type = FLOAT_TYPE;
             return;
+        case NEG_NODE:
+            node->type = node->firstChild->type;
+            break;
         case VAR_REFERENCE_NODE:
             stEntry = getSymbolicTableEntry(symbolicTable, node->name);
 

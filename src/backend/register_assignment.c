@@ -182,7 +182,7 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
             if (irNode->dest >= 0 && lifeStart[irNode->dest] == -1) 
                 lifeStart[irNode->dest] = instruction;
             if (irNode->dest >= 0) lifeEnd[irNode->dest] = instruction;
-            if (irNode->source >= 0)
+            if (irNode->source >= 0 && irNode->sourceKind != CONSTANT_SOURCE)
                 lifeEnd[irNode->source] = instruction;
             if (irNode->source2 >= 0)
                 lifeEnd[irNode->source2] = instruction;
@@ -192,7 +192,7 @@ DependenciesGraph *buildDependencyGraph(IntermediateRepresentation *ir) {
     }
 
     //  for (int i=0; i<number_temporaries; i++){
-    //     printf("%d: %d to %d\n", i, lifeStart[i], lifeEnd[i]);
+    //     printf("%d life: %d to %d\n", i, lifeStart[i], lifeEnd[i]);
     // }
 
     for (int i=0; i<number_temporaries; i++){
@@ -223,6 +223,7 @@ RegisterAssignment *newRegisterAssignment(IntermediateRepresentation *ir){
 }
 
 void freeRegisterAssignment(RegisterAssignment *rm) {
+    if (rm == NULL) return;
     free(rm->map);
     free(rm);
 }

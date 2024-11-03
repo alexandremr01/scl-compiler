@@ -33,6 +33,8 @@
 %token LBRACKET RBRACKET 
 %token LBRACES RBRACES
 %token <string> ID NUM STRING
+%precedence NEG_OP
+
 %destructor { free($$); } <string>
 %destructor { if(syntaxErrors>0) freeASTNode($$); } <node>
 
@@ -190,11 +192,13 @@ relational: LT {$$=newASTNode(LT_NODE);}
                 | DIFFERENT {$$=newASTNode(DIFF_NODE);}
 
 sum_exp:    sum_exp sum term {
-                $$ = $2;
-                $$->firstChild = $1;
-                $1->sibling = $3;
-                $$->line_number = yylineno;
-            }| term {$$ = $1;}
+                                $$ = $2;
+                                $$->firstChild = $1;
+                                $1->sibling = $3;
+                                $$->line_number = yylineno;
+                            }
+            | term                 {$$ = $1;} 
+            | MINUS term %prec NEG_OP {$$ = newASTNode(NEG_NODE); $$->firstChild = $2;}
 sum:        PLUS {$$=newASTNode(SUM_NODE);} | MINUS {$$=newASTNode(SUBTRACTION_NODE);}
 term:       term mult_op factor {
                 $$ = newASTNode(MULTIPLICATION_NODE);

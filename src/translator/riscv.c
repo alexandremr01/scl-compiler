@@ -23,6 +23,11 @@ char *getRegisterDialect1(RegisterAssignment *rm, int temporary){
 }
 
 char *getRegisterDialect2(RegisterAssignment *rm, int temporary){
+    if (rm == NULL) {
+        char *str = malloc(5); 
+        sprintf(str, "#%d", temporary);
+        return str;
+    }
     char *registerNames[13] = {
         "t0", "t1", "t2", "t3", "t4", "t5", "t6", "a2", "a3", "a4", "a5", "a6", "a7"
     };
@@ -36,7 +41,13 @@ char *getRegisterDialect2(RegisterAssignment *rm, int temporary){
         return "ra"; 
     else if (temporary >= T0_REGISTER && temporary <= T6_REGISTER)
         return registerNames[temporary - T0_REGISTER]; 
-    return registerNames[getRegisterAssignment(rm, temporary)];
+    int regIndex = getRegisterAssignment(rm, temporary);
+    if (regIndex < 0 || regIndex > 12) {
+        char *str = malloc(5); 
+        sprintf(str, "#%d", temporary);
+        return str;
+    }
+    return registerNames[regIndex];
 }
 
 typedef char* (*getRegisterFunction)(RegisterAssignment*, int);
@@ -66,6 +77,7 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
     currObj = objCode;
     IRNode *p = ir->head;
     getRegisterFunction getReg = getRegisterGenerator(asmDialect);
+    int i = 0;
 
     while (p != NULL) {
         // printf()
@@ -106,6 +118,12 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                     getReg(rm, p->dest),
                     getReg(rm, p->source),
                     getReg(rm, p->source2)
+                );
+                break;
+            case NEG:
+                sprintf(currObj->assembly, "neg %s, %s", 
+                    getReg(rm, p->dest),
+                    getReg(rm, p->source)
                 );
                 break;
             case AUIPC:
@@ -198,6 +216,9 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
             currObj->binary = asmToBinary("NOP");
         else currObj->binary = asmToBinary(currObj->assembly);
         // printf("%s was translated to %d\n", currObj->assembly, currObj->binary);
+        
+        // printf("%d: %s \n", i, currObj->assembly);
+        i = i+1;
         p = p->next;
     }
 

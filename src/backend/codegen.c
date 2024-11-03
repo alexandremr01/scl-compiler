@@ -64,6 +64,16 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
     int returnStackPosition = 0;
     int localsSize = 0;
     if (node->kind == FUNCTION_DECLARATION_NODE) return;
+    if (node->kind == NEG_NODE) {
+        node->tempRegResult = ir->nextTempReg++;
+        codeGenNode(node->firstChild, ir, functionEnd);
+        addSubtractionIR(ir, 
+            X0_REGISTER, 
+            node->firstChild->tempRegResult,
+            node->tempRegResult
+        );
+        return;
+    }
     if (node->kind == IF_NODE) {
         codeGenNode(node->firstChild, ir, functionEnd);
         IRNode *endif = newIRNode(NOP);

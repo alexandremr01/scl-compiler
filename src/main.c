@@ -5,6 +5,7 @@
 #include "frontend/semantic_analysis.h"
 #include "translator/riscv.h"
 #include "datastructures/ast.h"
+#include "datastructures/ir.h"
 #include "generated/syntax.tab.h"
 
 #include "backend/codegen.h"

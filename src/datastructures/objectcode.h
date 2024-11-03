@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 typedef struct objectCode {
-    char assembly[25];
+    char assembly[50];
     int include;
     int binary;
 
