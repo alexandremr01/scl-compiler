@@ -139,6 +139,7 @@ int main(int argc, char *argv[]) {
 
     printf("Compilation successful\n");
 
+    freeExternals(ext);
     freeObjectCode(obj);
     freeIntermediateRepresentation(ir); 
     freeSymbolicTable(table);

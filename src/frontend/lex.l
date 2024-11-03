@@ -20,6 +20,7 @@ multi_line_comment     \/\*.+\*\/
 "float"         {return FLOAT;}
 "return"        {return RETURN;}
 "asm"           {return ASM;}
+"extern"        {return EXTERN;}
 "+"             {return PLUS;}
 "-"             {return MINUS;}
 "*"             {return TIMES;}

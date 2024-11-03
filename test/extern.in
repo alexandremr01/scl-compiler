@@ -1,0 +1,5 @@
+extern int input[4];
+
+int main() {
+    return input[2];
+}

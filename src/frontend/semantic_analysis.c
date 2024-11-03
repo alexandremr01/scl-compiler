@@ -223,11 +223,17 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
                 *errors += 1;
             }
             int arraySize = 1;
-            if (node->firstChild != NULL && node->firstChild->kind == VAR_INDEXING_NODE) {
-                arraySize = atoi(node->firstChild->name);
+            int external = 0;
+            ASTNode *modifiers = node->firstChild;
+            while (modifiers != NULL) {
+                if (modifiers->kind == VAR_INDEXING_NODE) 
+                    arraySize = atoi(node->firstChild->name);
+                else if (modifiers->kind == EXTERN_STORAGE)
+                    external = 1;
+                modifiers = modifiers->sibling;
             }
             if (node->type != VOID_TYPE && (stEntry == NULL || stEntry->scope_level < scope_level)){
-                insertVariable(symbolicTable, node->name, node->type, node->line_number, scope_level, arraySize);
+                insertVariable(symbolicTable, node->name, node->type, node->line_number, scope_level, arraySize, external);
                 addDeleteStack(stack, node->name);
                 node->stEntry = getSymbolicTableEntry(symbolicTable, node->name);
                 if (fn != NULL){

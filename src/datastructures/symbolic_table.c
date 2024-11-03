@@ -1,6 +1,6 @@
 #include "symbolic_table.h"
 
-SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTableEntryKind kind, int line_number, int scope_level){
+SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTableEntryKind kind, int line_number, int scope_level, int external){
     SymbolicTableEntry *entry = (SymbolicTableEntry *)malloc(sizeof(SymbolicTableEntry));
     entry->name = name;
     entry->type = type;
@@ -15,13 +15,13 @@ SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTa
     entry->hasBody = 0;
     entry->numElements = 0;
     entry->offset = 0;
-    entry->external = 0;
+    entry->external = external;
     return entry;
 }
 
 
-SymbolicTableEntry *insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKind kind, DataType type, int line_number, int scope_level){
-    SymbolicTableEntry *newEntry = newSymbolicTableEntry(name, type, kind, line_number, scope_level);
+SymbolicTableEntry *insertSymbolicTable(SymbolicTable *table, char *name, SymbolicTableEntryKind kind, DataType type, int line_number, int scope_level, int external){
+    SymbolicTableEntry *newEntry = newSymbolicTableEntry(name, type, kind, line_number, scope_level, external);
     newEntry->type = type;
     SymbolicTableEntry *entry = NULL;
     HASH_FIND_STR(table->entries, name, entry);
@@ -35,13 +35,13 @@ SymbolicTableEntry *insertSymbolicTable(SymbolicTable *table, char *name, Symbol
     return newEntry;
 }
 
-void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, int numElements){
-    SymbolicTableEntry *newEntry = insertSymbolicTable(table, name, VARIABLE_ENTRY, type, line_number, scope_level);
+void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, int numElements, int external){
+    SymbolicTableEntry *newEntry = insertSymbolicTable(table, name, VARIABLE_ENTRY, type, line_number, scope_level, external);
     newEntry->numElements = numElements;
 }
 
 void insertFunction(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, DataTypeList *list){
-    SymbolicTableEntry *newEntry = insertSymbolicTable(table, name, FUNCTION_ENTRY, type, line_number, scope_level);
+    SymbolicTableEntry *newEntry = insertSymbolicTable(table, name, FUNCTION_ENTRY, type, line_number, scope_level, 0);
     newEntry->parameterTypes = list;
 }
 

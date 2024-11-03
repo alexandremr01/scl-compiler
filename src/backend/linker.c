@@ -4,7 +4,6 @@
 int link(IntermediateRepresentation *ir, SymbolicTable *table, Externals *ext) {
     // append externals
     for (ExternalNode *n = ext->first; n != NULL; n = n->next) {
-        printf("Linking external %s\n", n->external->name);
         int32_t buffer;
         IRNode* firstNode = NULL;
         while (fread(&buffer, sizeof(int32_t), 1, n->external->file) == 1) {
@@ -13,7 +12,6 @@ int link(IntermediateRepresentation *ir, SymbolicTable *table, Externals *ext) {
         }
         SymbolicTableEntry *entry = getSymbolicTableEntry(table, n->external->name);
         if (entry != NULL && entry->scope_level == 0 && entry->external) {
-            printf("Linking extern variable\n");
             entry->address = firstNode->address;
         }
     }

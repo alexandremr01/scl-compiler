@@ -15,16 +15,17 @@
     ASTNode *node;
     char* string;
 }
-%type  <data_type>  type_specifier
+%type <data_type>  type_specifier
 %type <node> program units external_declaration function_definition
 %type <node> declaration declaration_list compound_statement statement_list expression 
 %type <node> statement expression_statement selection_statement iteration_statement jump_statement assembly_statement
 %type <node> simple_exp sum_exp term factor call var args arg_list
-%type <node> parameters parameter_list parameter sum relational
+%type <node> parameters parameter_list parameter sum relational storage_specifier
 
 %token ERROR NEWLINE // internal
 %token IF ELSE WHILE // control
 %token VOID INT FLOAT// types
+%token EXTERN // storage specifier
 %token RETURN // others
 %token ASM
 %token PLUS MINUS TIMES OVER ASSIGN EQ LT GT LEQ GEQ DIFFERENT 
@@ -83,11 +84,26 @@ parameter: type_specifier ID  {
     }
 
 type_specifier: INT {$$ = INTEGER_TYPE;} | VOID {$$ = VOID_TYPE;} | FLOAT {$$ = FLOAT_TYPE;} 
+storage_specifier: EXTERN    { $$ = newASTNode(EXTERN_STORAGE); } 
 declaration: type_specifier ID SEMICOLON  { 
                 $$ = newASTNode(DECLARATION_NODE);
                 $$->type = $1;
                 $$->name = $2; 
                 $$->line_number = yylineno;
+            } | storage_specifier type_specifier ID SEMICOLON  { 
+                $$ = newASTNode(DECLARATION_NODE);
+                $$->type = $2;
+                $$->name = $3; 
+                $$->line_number = yylineno;
+                $$->firstChild = $1;
+            } | storage_specifier type_specifier ID LBRACKET NUM RBRACKET SEMICOLON  { 
+                $$ = newASTNode(DECLARATION_NODE);
+                $$->type = $2;
+                $$->name = $3; 
+                $$->line_number = yylineno;
+                $$->firstChild = newASTNode(VAR_INDEXING_NODE);
+                $$->firstChild->name = $5;
+                $$->firstChild->sibling = $1;
             }
             | type_specifier ID LBRACKET NUM RBRACKET SEMICOLON  { 
                 $$ = newASTNode(DECLARATION_NODE);

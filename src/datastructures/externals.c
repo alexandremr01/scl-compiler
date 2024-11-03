@@ -21,3 +21,17 @@ void addExternal(Externals *ext, char *name, FILE *f) {
     if (ext->first == NULL) ext->first = extNode;
 
 }
+
+
+void freeExternals(Externals *ext) {
+    ExternalNode *extNode = ext->first;
+    ExternalNode *next = NULL;
+    while(extNode != NULL){
+        next = extNode->next;
+        free(extNode->external);
+        free(extNode);
+        extNode = next;
+    }
+
+    free(ext);
+}

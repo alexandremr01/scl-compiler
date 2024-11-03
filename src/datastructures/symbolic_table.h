@@ -42,7 +42,7 @@ typedef struct symbtab {
     SymbolicTableEntry *entries;
 } SymbolicTable;
 
-void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, int numElements);
+void insertVariable(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, int numElements, int external);
 void insertFunction(SymbolicTable *table, char *name, DataType type, int line_number, int scope_level, DataTypeList *list);
 
 SymbolicTableEntry * getSymbolicTableEntry(SymbolicTable *table, char *name);

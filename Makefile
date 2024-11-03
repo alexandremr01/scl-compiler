@@ -42,6 +42,4 @@ clean:
 	-@rm -rvf $(BUILD) $(GEN) $(GENERATEDDIR) test/*.out**
 
 test: clean build
-	sh test/1-test-al.sh
-	sh test/2-test-syntax.sh
-	sh test/3-test-semantic.sh
+	cd test && python3 automatic-verification.py && cd ..

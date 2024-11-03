@@ -25,5 +25,6 @@ typedef struct externals {
 
 Externals* newExternals();
 void addExternal(Externals *ext, char *name, FILE *f);
+void freeExternals(Externals *ext);
 
 #endif
