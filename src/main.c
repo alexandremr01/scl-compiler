@@ -6,6 +6,7 @@
 #include "translator/riscv.h"
 #include "datastructures/ast.h"
 #include "datastructures/ir.h"
+#include "datastructures/externals.h"
 #include "generated/syntax.tab.h"
 
 #include "backend/codegen.h"
@@ -59,6 +60,7 @@ int main(int argc, char *argv[]) {
     free(asmFileName);
     
     // parse command line arguments
+    Externals *ext = newExternals();
     int asmDialect = 1;
     for (int i=3; i < argc; i++){
         if (strcmp(argv[i], "--lexical_only") == 0){
@@ -76,6 +78,15 @@ int main(int argc, char *argv[]) {
             asmDialect=2;
         } else if (strcmp(argv[i], "--dialect=raw") == 0){
             asmDialect=1;
+        } else if (strcmp(argv[i], "--external") == 0) {
+            FILE *f_ext = fopen(argv[i+2],"rb");
+            if (f_ext == NULL){
+                printf("FATAL: Could not open %s \n", argv[i+2]);
+                fclose(f_ext);
+                return 1;
+            }
+            addExternal(ext, argv[i+1], f_ext);
+            i+=2;
         } else {
             printf("FATAL: unrecognized command-line option \'%s\'\n", argv[i]);
             return 1;
@@ -110,7 +121,7 @@ int main(int argc, char *argv[]) {
 
     // Backend
     IntermediateRepresentation *ir = codeGen(tree);
-    int linkErrors = link(ir, table);
+    int linkErrors = link(ir, table, ext);
     if (linkErrors > 0) {
         printf("\n%d linker errors\n", linkErrors);
         freeIntermediateRepresentation(ir); 

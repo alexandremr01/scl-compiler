@@ -1,7 +1,16 @@
 #include "linker.h"
 
 // assert that all function calls have a destination
-int link(IntermediateRepresentation *ir, SymbolicTable *table) {
+int link(IntermediateRepresentation *ir, SymbolicTable *table, Externals *ext) {
+    // append externals
+    for (ExternalNode *n = ext->first; n != NULL; n = n->next) {
+        printf("Linking external %s\n", n->external->name);
+        int32_t buffer;
+        while (fread(&buffer, sizeof(int32_t), 1, n->external->file) == 1) {
+            addDataIR(ir, buffer);
+        }
+    }
+
     // give address to globals
     SymbolicTableEntry *entry;
     for (entry = table->entries; entry != NULL; entry = entry->hh.next) {

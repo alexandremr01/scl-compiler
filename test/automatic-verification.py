@@ -20,7 +20,7 @@ def compile_and_simulate(input_file):
         f'../bin/sclc {input_file} {input_file}.bin',
         f'riscv64-unknown-linux-gnu-objcopy -I binary -O elf64-littleriscv -B riscv {input_file}.bin {input_file}.obj',
         f'riscv64-unknown-linux-gnu-ld -T loader.ld -o {input_file}.elf  {input_file}.obj',
-        f'spike -d --isa=RV64I -m0x10000:0x4000 --pc=0x100b0 --debug-cmd=debug {input_file}.elf 2> {input_file}.log.txt'
+        f'spike -d --isa=RV64IM -m0x10000:0x4000 --pc=0x100b0 --debug-cmd=debug {input_file}.elf 2> {input_file}.log.txt'
     ]
     for i, command in enumerate(commands):
         # print(f'Stage {i}')
@@ -39,6 +39,7 @@ def e2e_test(input_file, validation, verbose):
     compile_and_simulate(input_file)    
     registers = parse_registers(input_file+'.log.txt')
     if verbose:
+        print(input_file)
         print(registers)
     assert validation(registers)
 
@@ -54,6 +55,10 @@ TESTS = [
     {
         "file": "matrices.in",
         "assertion": (lambda registers : ('a0' in registers and registers['a0'] == 18))
+    },
+    {
+        "file": "mlp0.in",
+        "assertion": (lambda registers : ('a0' in registers and registers['a0'] == 3))
     }
 ]
 

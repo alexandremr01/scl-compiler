@@ -8,7 +8,7 @@ GENERATEDDIR := $(SOURCEDIR)/generated
 
 SOURCEFILES    := main.c frontend/semantic_analysis.c \
 					datastructures/ast.c datastructures/ir.c datastructures/symbolic_table.c \
-					datastructures/datatypes.c datastructures/objectcode.c \
+					datastructures/datatypes.c datastructures/objectcode.c datastructures/externals.c \
 					backend/codegen.c backend/register_assignment.c backend/linker.c \
 					translator/riscv.c translator/binary.c \
 					generated/lex.yy.c generated/syntax.tab.c 

@@ -75,6 +75,12 @@ void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shi
     addNode(ir, node);
 }
 
+void addDataIR(IntermediateRepresentation *ir, int data) {
+    IRNode * node = newIRNode(DATA);
+    node->imm = data;
+    addNode(ir, node);
+}
+
 void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source){
     IRNode * node = newIRNode(LOAD);
     node->dest = destination_address;

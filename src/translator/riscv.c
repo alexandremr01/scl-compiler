@@ -133,12 +133,6 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                         p->imm
                     );
                 else if  (p->sourceKind == VARIABLE_SOURCE) {
-                    printf("trying to register the jump to %d of %d as %d and %d\n", 
-                    p->varSource->address,
-                     p->varSource->address-p->address, 
-                     (p->varSource->address-p->address) >> 12,  
-                     (p->varSource->address-p->address) & ((1 << 12) - 1));
-
                     sprintf(currObj->assembly, "auipc %s, %d", 
                         getReg(rm, p->dest),
                         ((p->varSource->address-p->address) + 0x800)  >> 12
@@ -228,6 +222,8 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
         }
         if (p->instruction == LABEL || p->instruction == COMMENT)
             currObj->binary = asmToBinary("NOP");
+        else if (p->instruction == DATA)
+            currObj->binary = p->imm;
         else currObj->binary = asmToBinary(currObj->assembly);
         // printf("%s was translated to %d\n", currObj->assembly, currObj->binary);
         
