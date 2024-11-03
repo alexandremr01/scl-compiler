@@ -15,6 +15,7 @@ SymbolicTableEntry * newSymbolicTableEntry(char *name, DataType type, SymbolicTa
     entry->hasBody = 0;
     entry->numElements = 0;
     entry->offset = 0;
+    entry->external = 0;
     return entry;
 }
 

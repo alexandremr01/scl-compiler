@@ -78,7 +78,7 @@ void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm);
 void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry);
 void addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry);
 
-void addDataIR(IntermediateRepresentation *ir, int data);
+IRNode* addDataIR(IntermediateRepresentation *ir, int data);
 void addLabelIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry); 
 void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry); 
 void addJumpRegisterIR(IntermediateRepresentation *ir, int destinationRegister);

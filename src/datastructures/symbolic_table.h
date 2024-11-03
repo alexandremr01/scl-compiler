@@ -28,6 +28,7 @@ typedef struct symbtabEntry {
     int hasBody;
     int offset;
     int numElements;
+    int external;
 
     DataTypeList *parameterTypes;
     struct symbtabEntry *next;

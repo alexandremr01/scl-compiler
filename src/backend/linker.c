@@ -6,15 +6,22 @@ int link(IntermediateRepresentation *ir, SymbolicTable *table, Externals *ext) {
     for (ExternalNode *n = ext->first; n != NULL; n = n->next) {
         printf("Linking external %s\n", n->external->name);
         int32_t buffer;
+        IRNode* firstNode = NULL;
         while (fread(&buffer, sizeof(int32_t), 1, n->external->file) == 1) {
-            addDataIR(ir, buffer);
+            IRNode* node = addDataIR(ir, buffer);
+            if (firstNode == NULL) firstNode = node;
+        }
+        SymbolicTableEntry *entry = getSymbolicTableEntry(table, n->external->name);
+        if (entry != NULL && entry->scope_level == 0 && entry->external) {
+            printf("Linking extern variable\n");
+            entry->address = firstNode->address;
         }
     }
 
     // give address to globals
     SymbolicTableEntry *entry;
     for (entry = table->entries; entry != NULL; entry = entry->hh.next) {
-        if (entry->scope_level == 0) {
+        if (entry->scope_level == 0 && !entry->external) {
             entry->address = ir->lastAddress;
             ir->lastAddress += getSize(entry->type)*entry->numElements;
         }
