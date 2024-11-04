@@ -201,7 +201,20 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 );
                 break;      
             case LOAD:
-                if (p->sourceKind == CONSTANT_SOURCE)
+                if (p->isFloat && p->sourceKind == VARIABLE_SOURCE) {
+                    sprintf(currObj->assembly, "flw %s, %d(%s)", 
+                        getFloatReg(rm, p->dest), 
+                        (p->varSource->address-p->address) & ((1 << 12) - 1),
+                        getReg(rm, p->source)
+                    );
+                } else if (p->isFloat && p->sourceKind == REG_SOURCE) {
+                    sprintf(currObj->assembly, "flw %s, %d(%s)", 
+                        getFloatReg(rm, p->dest), 
+                        p->imm,
+                        getReg(rm, p->source)
+                    );
+                }
+                else if (p->sourceKind == CONSTANT_SOURCE)
                     sprintf(currObj->assembly, "addi %s, %s, %d", 
                         getReg(rm, p->dest), 
                         getReg(rm, X0_REGISTER), 
@@ -228,14 +241,24 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 );
                 break;
             case STORE:
-                if  (p->sourceKind == VARIABLE_SOURCE) {
+                if (p->isFloat && p->sourceKind == VARIABLE_SOURCE) {
+                    sprintf(currObj->assembly, "fsw %s, %d(%s)", 
+                        getFloatReg(rm, p->dest), 
+                        (p->varSource->address-p->address) & ((1 << 12) - 1),
+                        getReg(rm, p->source)
+                    );
+                }
+                else if  (p->sourceKind == VARIABLE_SOURCE) {
                     sprintf(currObj->assembly, "sw %s, %d(%s)", 
                         getReg(rm, p->dest), 
                         (p->varSource->address-p->address) & ((1 << 12) - 1),
                         getReg(rm, p->source)
                     );
                 }
-                else sprintf(currObj->assembly, "sw %s, %d(%s)", getReg(rm, p->source), p->imm, getReg(rm, p->dest));
+                else if (p->isFloat)
+                    sprintf(currObj->assembly, "fsw %s, %d(%s)", getFloatReg(rm, p->source), p->imm, getReg(rm, p->dest));
+                else 
+                    sprintf(currObj->assembly, "sw %s, %d(%s)", getReg(rm, p->source), p->imm, getReg(rm, p->dest));
                 break;
             case RAW:
                 sprintf(currObj->assembly, "%s", p->comment);

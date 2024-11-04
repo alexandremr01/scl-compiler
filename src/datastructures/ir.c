@@ -87,13 +87,14 @@ void addLoadAddressIR(IntermediateRepresentation *ir, int destination, SymbolicT
     addNode(ir, node);  
 }
 
-void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source){
+void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source, int isFloat){
     IRNode * node = newIRNode(STORE);
     node->instruction = STORE;
     node->dest = destination_address;
     node->sourceKind = REG_SOURCE;
     node->source = register_source;
     node->imm = shift;
+    node->isFloat = isFloat;
     addNode(ir, node);
 }
 
@@ -104,12 +105,13 @@ IRNode *addDataIR(IntermediateRepresentation *ir, int data) {
     return node;
 }
 
-void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source){
+void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source, int isFloat){
     IRNode * node = newIRNode(LOAD);
     node->dest = destination_address;
     node->sourceKind = REG_SOURCE;
     node->source = register_source;
     node->imm = shift;
+    node->isFloat = isFloat;
     addNode(ir, node);
 }
 
@@ -203,21 +205,23 @@ void addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister,
     addNode(ir, node);
 }
 
-void addLoadVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry) {
+void addLoadVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry, int isFloat) {
     IRNode * node = newIRNode(LOAD);
     node->sourceKind = VARIABLE_SOURCE;
     node->varSource = entry;
     node->dest = destinationRegister;
     node->source = sourceRegister;
+    node->isFloat = isFloat;
     addNode(ir, node);
 }
 
-void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry) {
+void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry, int isFloat) {
     IRNode * node = newIRNode(STORE);
     node->sourceKind = VARIABLE_SOURCE;
     node->varSource = entry;
     node->dest = destinationRegister;
     node->source = sourceRegister;
+    node->isFloat = isFloat;
     addNode(ir, node);
 }
 

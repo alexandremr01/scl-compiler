@@ -80,12 +80,12 @@ void addLoadAddressIR(IntermediateRepresentation *ir, int destination, SymbolicT
 void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat);
 void addMultiplicationIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat);
 void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat);
-void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
-void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
+void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source, int isFloat);
+void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source, int isFloat);
 void addCommentIR(IntermediateRepresentation *ir, char *comment);
-void addLoadVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry);
+void addLoadVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry, int isFloat);
 void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm);
-void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry);
+void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry, int isFloat);
 void addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry);
 
 IRNode* addDataIR(IntermediateRepresentation *ir, int data);
