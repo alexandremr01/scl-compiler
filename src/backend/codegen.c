@@ -76,7 +76,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
         addSubtractionIR(ir, 
             X0_REGISTER, 
             node->firstChild->tempRegResult,
-            node->tempRegResult
+            node->tempRegResult,
+            0
         );
         return;
     }
@@ -198,16 +199,17 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             addMultiplicationIR(ir, 
                 node->firstChild->tempRegResult, 
                 node->firstChild->sibling->tempRegResult,
-                node->tempRegResult
+                node->tempRegResult, 
+                node->type == FLOAT_TYPE
             );
             break;
-
         case SUM_NODE:
             node->tempRegResult = registerNewTemporary(ir, 0);
             addAdditionIR(ir, 
                 node->firstChild->tempRegResult, 
                 node->firstChild->sibling->tempRegResult,
-                node->tempRegResult
+                node->tempRegResult, 
+                node->type == FLOAT_TYPE
             );
             break;
         case SUBTRACTION_NODE:
@@ -215,7 +217,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             addSubtractionIR(ir, 
                 node->firstChild->tempRegResult, 
                 node->firstChild->sibling->tempRegResult,
-                node->tempRegResult
+                node->tempRegResult, 
+                node->type == FLOAT_TYPE
             );
             break;
         case ASSIGNMENT_NODE:
@@ -238,17 +241,17 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 // global array
                 addLoadImIR(ir, address_register, 0);
                 for (int i=0; i<getSize(node->firstChild->stEntry->type); i++)
-                    addAdditionIR(ir, address_register, node->firstChild->firstChild->tempRegResult, address_register);
+                    addAdditionIR(ir, address_register, node->firstChild->firstChild->tempRegResult, address_register, 0);
                 addGetPCVarAddress(ir, aux_register, node->firstChild->stEntry);
                 addAdditionImIR(ir, aux_register, aux_register, 12);
-                addAdditionIR(ir, address_register, aux_register, address_register);
+                addAdditionIR(ir, address_register, aux_register, address_register, 0);
                 addStoreVarAddress(ir, result_register, address_register, node->firstChild->stEntry);
             } else if (node->firstChild->stEntry->scope_level > 0 && node->firstChild->firstChild != NULL) { 
                 // local array
                 addLoadImIR(ir, address_register, node->firstChild->stEntry->address);
                 for (int i=0; i<getSize(node->firstChild->stEntry->type); i++)
-                    addAdditionIR(ir, address_register, node->firstChild->firstChild->tempRegResult, address_register);
-                addAdditionIR(ir, address_register, SP_REGISTER, address_register);
+                    addAdditionIR(ir, address_register, node->firstChild->firstChild->tempRegResult, address_register, 0);
+                addAdditionIR(ir, address_register, SP_REGISTER, address_register, 0);
                 addStoreIR(ir, address_register, 0, result_register);
             } else { 
                 // local non array
@@ -283,7 +286,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             addSubtractionIR(ir, 
                 node->firstChild->tempRegResult, 
                 node->firstChild->sibling->tempRegResult,
-                auxReg
+                auxReg,
+                0
             );
             getComparisonFunction(node->kind)(
                 ir, 
@@ -328,17 +332,17 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 // global array
                 addLoadImIR(ir, address_register, 0); 
                 for (int i=0; i<getSize(node->stEntry->type); i++)
-                    addAdditionIR(ir, address_register, node->firstChild->tempRegResult, address_register);
+                    addAdditionIR(ir, address_register, node->firstChild->tempRegResult, address_register, 0);
                 addGetPCVarAddress(ir, aux_register, node->stEntry);
                 addAdditionImIR(ir, aux_register, aux_register, 12);
-                addAdditionIR(ir, address_register, aux_register, address_register);
+                addAdditionIR(ir, address_register, aux_register, address_register, 0);
                 addLoadVarAddress(ir, node->tempRegResult, address_register, node->stEntry);
             } else if (node->stEntry->scope_level > 0 && node->firstChild != NULL) { 
                 // local array
                 addLoadImIR(ir, address_register, node->stEntry->address);
                 for (int i=0; i<getSize(node->stEntry->type); i++)
-                    addAdditionIR(ir, address_register, node->firstChild->tempRegResult, address_register);
-                addAdditionIR(ir, address_register, SP_REGISTER, address_register);
+                    addAdditionIR(ir, address_register, node->firstChild->tempRegResult, address_register, 0);
+                addAdditionIR(ir, address_register, SP_REGISTER, address_register, 0);
                 addLoadMemIR(ir, node->tempRegResult, 0, address_register);
             } else { 
                 // local non array

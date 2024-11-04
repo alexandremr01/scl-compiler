@@ -59,6 +59,7 @@ IRNode *newIRNode(Instruction instruction){
     node->dest = X0_REGISTER;
     node->source = X0_REGISTER;
     node->source2 = X0_REGISTER;
+    node->isFloat = 0;
     return node;
 }
 
@@ -124,30 +125,33 @@ void addRawIR(IntermediateRepresentation *ir, char *instruction){
     addNode(ir, node);
 }
 
-void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat) {
     IRNode * node = newIRNode(ADD);
     node->dest = destination;
     node->sourceKind = REG_SOURCE;
     node->source = src1;
     node->source2 = src2;
+    node->isFloat = isFloat;
     addNode(ir, node);
 }
 
-void addMultiplicationIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+void addMultiplicationIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat) {
     IRNode * node = newIRNode(MUL);
     node->dest = destination;
     node->sourceKind = REG_SOURCE;
     node->source = src1;
     node->source2 = src2;
+    node->isFloat = isFloat;
     addNode(ir, node);
 }
 
-void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat) {
     IRNode * node = newIRNode(SUB);
     node->dest = destination;
     node->sourceKind = REG_SOURCE;
     node->source = src1;
     node->source2 = src2;
+    node->isFloat = isFloat;
     addNode(ir, node);
 }
 

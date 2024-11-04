@@ -124,21 +124,36 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
 
         switch (p->instruction) {
             case ADD:
-                if (p->sourceKind == CONSTANT_SOURCE){
-                    sprintf(currObj->assembly, "addi %s, %s, %d", 
+                if (p->isFloat)
+                    sprintf(currObj->assembly, "fadd.s %s, %s, %s", 
+                        getFloatReg(rm, p->dest),
+                        getFloatReg(rm, p->source),
+                        getFloatReg(rm, p->source2)
+                    );
+                else {
+                    if (p->sourceKind == CONSTANT_SOURCE){
+                        sprintf(currObj->assembly, "addi %s, %s, %d", 
+                            getReg(rm, p->dest),
+                            getReg(rm, p->source),
+                            p->imm
+                        );
+                    }
+                    else sprintf(currObj->assembly, "add %s, %s, %s", 
                         getReg(rm, p->dest),
                         getReg(rm, p->source),
-                        p->imm
+                        getReg(rm, p->source2)
                     );
                 }
-                else sprintf(currObj->assembly, "add %s, %s, %s", 
-                    getReg(rm, p->dest),
-                    getReg(rm, p->source),
-                    getReg(rm, p->source2)
-                );
                 
                 break;
             case MUL:
+                if (p->isFloat)
+                    sprintf(currObj->assembly, "fmul.s %s, %s, %s", 
+                        getFloatReg(rm, p->dest),
+                        getFloatReg(rm, p->source),
+                        getFloatReg(rm, p->source2)
+                    );
+                else
                 sprintf(currObj->assembly, "mul %s, %s, %s", 
                     getReg(rm, p->dest),
                     getReg(rm, p->source),
@@ -147,7 +162,13 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 
                 break;
             case SUB:
-                sprintf(currObj->assembly, "sub %s, %s, %s", 
+                if (p->isFloat)
+                    sprintf(currObj->assembly, "fsub.s %s, %s, %s", 
+                        getFloatReg(rm, p->dest),
+                        getFloatReg(rm, p->source),
+                        getFloatReg(rm, p->source2)
+                    );
+                else sprintf(currObj->assembly, "sub %s, %s, %s", 
                     getReg(rm, p->dest),
                     getReg(rm, p->source),
                     getReg(rm, p->source2)

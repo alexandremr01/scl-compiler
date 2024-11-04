@@ -43,6 +43,7 @@ typedef struct irNode {
     int source;
     int source2;
     int imm;
+    int isFloat;
     SymbolicTableEntry *varSource;
 
     struct irNode *target;
@@ -76,9 +77,9 @@ void addLoadImIR(IntermediateRepresentation *ir, int destination, int value);
 void addCSRReadWrite(IntermediateRepresentation *ir, int destination, int value, int source);
 void addLoadUpperImIR(IntermediateRepresentation *ir, int destination, int value);
 void addLoadAddressIR(IntermediateRepresentation *ir, int destination, SymbolicTableEntry *stEntry);
-void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-void addMultiplicationIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
+void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat);
+void addMultiplicationIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat);
+void addSubtractionIR(IntermediateRepresentation *ir, int src1, int src2, int destination, int isFloat);
 void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
 void addLoadMemIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source);
 void addCommentIR(IntermediateRepresentation *ir, char *comment);
