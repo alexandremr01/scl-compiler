@@ -3,9 +3,15 @@
 
 void codeGenNode(ASTNode*, IntermediateRepresentation*, IRNode*);
 
+void enableFloatingPoint(IntermediateRepresentation *ir){
+    addLoadUpperImIR(ir, T0_REGISTER, 0x6000>>12);
+    addCSRReadWrite(ir, X0_REGISTER, 0x300, T0_REGISTER);
+}
+
 void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     for (int i=0; i<2; i++)
         addNopIR(ir);
+    enableFloatingPoint(ir);
     addGetPC(ir, 
         SP_REGISTER, 
         3
@@ -65,7 +71,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
     int localsSize = 0;
     if (node->kind == FUNCTION_DECLARATION_NODE) return;
     if (node->kind == NEG_NODE) {
-        node->tempRegResult = ir->nextTempReg++;
+        node->tempRegResult = registerNewTemporary(ir, 0);
         codeGenNode(node->firstChild, ir, functionEnd);
         addSubtractionIR(ir, 
             X0_REGISTER, 
@@ -165,7 +171,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
     ASTNode *parameter;
     switch (node->kind){
         case FUNCTION_DEFINITION_NODE:
-            address_register = ir->nextTempReg++;
+            address_register = registerNewTemporary(ir, 0);
             addNode(ir, functionEnd);
 
             int reg = 6;
@@ -179,12 +185,16 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             ir->lastStackAddress = bkp_stack;
             break;
         case RETURN_NODE: 
-            if (node->firstChild != NULL)
-                addMovIR(ir, A0_REGISTER, node->firstChild->tempRegResult);
+            if (node->firstChild != NULL){ // there is return value
+                if (node->firstChild->type == INTEGER_TYPE)
+                    addMovIR(ir, A0_REGISTER, node->firstChild->tempRegResult);
+                else if (node->firstChild->type == FLOAT_TYPE)
+                    addFloatMovIR(ir, FA0_REGISTER, node->firstChild->tempRegResult);
+            }
             addRelativeJump(ir, functionEnd);
             break;
         case MULTIPLICATION_NODE:
-            node->tempRegResult = ir->nextTempReg++;
+            node->tempRegResult = registerNewTemporary(ir, 0);
             addMultiplicationIR(ir, 
                 node->firstChild->tempRegResult, 
                 node->firstChild->sibling->tempRegResult,
@@ -193,7 +203,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             break;
 
         case SUM_NODE:
-            node->tempRegResult = ir->nextTempReg++;
+            node->tempRegResult = registerNewTemporary(ir, 0);
             addAdditionIR(ir, 
                 node->firstChild->tempRegResult, 
                 node->firstChild->sibling->tempRegResult,
@@ -201,7 +211,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             );
             break;
         case SUBTRACTION_NODE:
-            node->tempRegResult = ir->nextTempReg++;
+            node->tempRegResult = registerNewTemporary(ir, 0);
             addSubtractionIR(ir, 
                 node->firstChild->tempRegResult, 
                 node->firstChild->sibling->tempRegResult,
@@ -216,8 +226,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 numElement = atoi(node->firstChild->firstChild->name);
             offset = (numElement-1)*getSize(node->firstChild->stEntry->type);
 
-            int address_register = ir->nextTempReg++;
-            aux_register = ir->nextTempReg++;
+            int address_register = registerNewTemporary(ir, 0);
+            aux_register = registerNewTemporary(ir, 0);
 
             if (node->firstChild->stEntry->scope_level == 0 && node->firstChild->firstChild == NULL) { 
                 // global non array variable 
@@ -247,9 +257,20 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             
             break;
         case CONSTANT_NODE:
-            node->tempRegResult = ir->nextTempReg++;
+            aux_register = registerNewTemporary(ir, 0);
+            node->tempRegResult = registerNewTemporary(ir, node->type == FLOAT_TYPE);
             addCommentIR(ir, "constant");
-            addLoadImIR(ir, node->tempRegResult, atoi(node->name));
+            if (node->type == FLOAT_TYPE) {
+                float floatVal = strtof(node->name, NULL);
+                union {
+                    float f;
+                    int i;
+                } u;
+                u.f = floatVal;
+                addLoadUpperImIR(ir, aux_register, u.i >> 12);
+                addAdditionImIR(ir, aux_register, aux_register, u.i & 0xFFF);
+                addMovFromIntegerToFloat(ir, node->tempRegResult, aux_register);
+            } else addLoadImIR(ir, node->tempRegResult, atoi(node->name));
             return;
         case LT_NODE:
         case GT_NODE:
@@ -257,8 +278,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
         case GEQ_NODE:
         case EQ_NODE:
         case DIFF_NODE:
-            node->tempRegResult = ir->nextTempReg++;
-            int auxReg = ir->nextTempReg++;
+            node->tempRegResult = registerNewTemporary(ir, 0);
+            int auxReg = registerNewTemporary(ir, 0);
             addSubtractionIR(ir, 
                 node->firstChild->tempRegResult, 
                 node->firstChild->sibling->tempRegResult,
@@ -282,7 +303,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 parameter = parameter->sibling;
             }
             addJumpIR(ir, node->stEntry);
-            node->tempRegResult = ir->nextTempReg++;
+            node->tempRegResult = registerNewTemporary(ir, 0);
             addMovIR(ir, node->tempRegResult, A0_REGISTER);
             break;
         case ASM_NODE:
@@ -294,9 +315,9 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 numElement = atoi(node->firstChild->name);
             offset = (numElement-1)*getSize(node->stEntry->type);
             
-            address_register = ir->nextTempReg++;
-            node->tempRegResult = ir->nextTempReg++;
-            aux_register = ir->nextTempReg++;
+            address_register = registerNewTemporary(ir, 0);
+            node->tempRegResult = registerNewTemporary(ir, 0);
+            aux_register = registerNewTemporary(ir, 0);
             addCommentIR(ir, "var reference");
             if (node->stEntry->scope_level == 0 && node->firstChild == NULL) { 
                 // global non array variable 

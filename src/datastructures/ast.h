@@ -5,6 +5,13 @@
 #include "symbolic_table.h"
 #include "datatypes.h"
 
+// typedef struct temporaryRegister {
+//     int id;
+//     int isFloat;
+// } TemporaryRegister;
+
+// TemporaryRegister *newTemporaryRegister(int id, int isFloat);
+
 typedef enum nodeKind {
     ROOT_NODE, DECLARATION_NODE, FUNCTION_DEFINITION_NODE, EMPTY_NODE,
     IF_NODE, WHILE_NODE, RETURN_NODE, EXPRESSION_NODE,

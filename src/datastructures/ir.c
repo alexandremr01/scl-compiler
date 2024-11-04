@@ -22,7 +22,20 @@ IntermediateRepresentation *newIntermediateRepresentation(){
     ir->nextTempReg = 0;
     ir->lastAddress = 0;
     ir->lastStackAddress = 0;
+    ir->_maxTemporaries = 256;
+    ir->temporaryIsFloat = (int *) malloc(sizeof(int) * ir->_maxTemporaries);
     return ir;
+}
+
+int registerNewTemporary(IntermediateRepresentation *ir, int isFloat){
+    int id = ir->nextTempReg++;
+    ir->temporaryIsFloat[id] = isFloat;
+    if (id == ir->_maxTemporaries - 2) {
+        ir->_maxTemporaries *= 2;
+        int *tmp = (int *) realloc(ir->temporaryIsFloat, sizeof(int) * ir->_maxTemporaries);
+        ir->temporaryIsFloat = tmp;
+    }
+    return id;
 }
 
 void addNode(IntermediateRepresentation *ir, IRNode *node){
@@ -51,6 +64,14 @@ IRNode *newIRNode(Instruction instruction){
 
 void addLoadImIR(IntermediateRepresentation *ir, int destination, int value) {
     IRNode * node = newIRNode(LOAD);
+    node->dest = destination;
+    node->sourceKind = CONSTANT_SOURCE;
+    node->source = value;
+    addNode(ir, node);
+}
+
+void addLoadUpperImIR(IntermediateRepresentation *ir, int destination, int value) {
+    IRNode * node = newIRNode(LUI);
     node->dest = destination;
     node->sourceKind = CONSTANT_SOURCE;
     node->source = value;
@@ -236,6 +257,31 @@ void addMovIR(IntermediateRepresentation *ir, int dest, int src) {
     node->sourceKind = REG_SOURCE;
     node->source = src;
     node->dest = dest;
+    addNode(ir, node);
+}
+
+void addFloatMovIR(IntermediateRepresentation *ir, int dest, int src) {
+    IRNode * node = newIRNode(FMOV);
+    node->sourceKind = REG_SOURCE;
+    node->source = src;
+    node->dest = dest;
+    addNode(ir, node);
+}
+
+void addCSRReadWrite(IntermediateRepresentation *ir, int destination, int value, int source) {
+    IRNode * node = newIRNode(CSRRW);
+    node->sourceKind = REG_SOURCE;
+    node->source = source;
+    node->dest = destination;
+    node->imm = value;
+    addNode(ir, node);  
+}
+
+void addMovFromIntegerToFloat(IntermediateRepresentation *ir, int destination, int source) {
+    IRNode * node = newIRNode(FMVWX);
+    node->sourceKind = REG_SOURCE;
+    node->source = source;
+    node->dest = destination;
     addNode(ir, node);
 }
 

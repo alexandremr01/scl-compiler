@@ -9,6 +9,7 @@
 
 #define SP_REGISTER -1
 #define A0_REGISTER -2
+#define FA0_REGISTER -15
 #define X0_REGISTER -3
 #define FP_REGISTER -4
 #define RA_REGISTER -5
@@ -28,8 +29,9 @@ typedef enum sourceKind {
 } SourceKind;
 
 typedef enum instruction {
-    MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP,
-    BEQ, BNEQ, BLE, BLT, BGE, BGQ, BGT, MUL, AUIPC, RAW, RELATIVE_JUMP, NEG, DATA
+    MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP, LUI,
+    BEQ, BNEQ, BLE, BLT, BGE, BGQ, BGT, MUL, AUIPC, RAW, RELATIVE_JUMP, NEG, DATA,
+    FMVWX, CSRRW, FMOV
 } Instruction;
 
 typedef struct irNode {
@@ -55,17 +57,24 @@ typedef struct intermediateRepresentation {
     int nextTempReg;
     int lastAddress;
     int lastStackAddress;
+    int *temporaryIsFloat;
+    int _maxTemporaries;
 } IntermediateRepresentation;
 
 IntermediateRepresentation *newIntermediateRepresentation();
+int registerNewTemporary(IntermediateRepresentation *ir, int isFloat);
 
 IRNode *newIRNode(Instruction instruction);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
 
 void freeIntermediateRepresentation(IntermediateRepresentation *ir);
 void addMovIR(IntermediateRepresentation *ir, int destination, int source);
+void addFloatMovIR(IntermediateRepresentation *ir, int destination, int source);
+void addMovFromIntegerToFloat(IntermediateRepresentation *ir, int destination, int source);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
 void addLoadImIR(IntermediateRepresentation *ir, int destination, int value);
+void addCSRReadWrite(IntermediateRepresentation *ir, int destination, int value, int source);
+void addLoadUpperImIR(IntermediateRepresentation *ir, int destination, int value);
 void addLoadAddressIR(IntermediateRepresentation *ir, int destination, SymbolicTableEntry *stEntry);
 void addAdditionIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
 void addMultiplicationIR(IntermediateRepresentation *ir, int src1, int src2, int destination);

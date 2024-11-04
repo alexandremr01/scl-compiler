@@ -5,8 +5,8 @@
 #include <assert.h>
 
 #define FUNCT7_DEFAULT 0
-#define FUNCT3_MAP_SIZE 34
-#define FUNCT7_MAP_SIZE 4
+#define FUNCT3_MAP_SIZE 35
+#define FUNCT7_MAP_SIZE 6
 #define MAX_LINE_LENGTH 128
 
 // Function to get the funct3 code
@@ -18,7 +18,7 @@ int get_funct3(const char* opcode) {
         {"SLTI", "010"}, {"SLTIU", "011"}, {"XORI", "100"}, {"ORI", "110"}, {"ANDI", "111"},
         {"SLLI", "001"}, {"SRLI", "101"}, {"SRAI", "101"}, {"ADD", "000"}, {"SUB", "000"},
         {"SLL", "001"}, {"SLT", "010"}, {"SLTU", "011"}, {"XOR", "100"}, {"SRL", "101"},
-        {"SRA", "101"}, {"OR", "110"}, {"AND", "111"}, {"MUL", "000"}
+        {"SRA", "101"}, {"OR", "110"}, {"AND", "111"}, {"MUL", "000"}, {"FMV.W.X", "000"}
     };
 
     for (int i = 0; i < FUNCT3_MAP_SIZE; ++i) {
@@ -41,11 +41,20 @@ int get_register_number(const char* name) {
         "T3", "T4", "T5", "T6"
     };
 
+    const char* floatingPointRegisters[] = {
+        "F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
+        "F9", "F10", "F11"
+    };
+
     // Check each register name for a match
     for (int i = 0; i < 32; ++i) 
         if (strcmp(name, registers[i]) == 0)
             return i;
-    
+
+    // Check each register name for a match
+    for (int i = 0; i < 12; ++i) 
+        if (strcmp(name, floatingPointRegisters[i]) == 0)
+            return i;
 
     return -1;
 }
@@ -53,12 +62,13 @@ int get_register_number(const char* name) {
 // Function to get the funct7 code
 int get_funct7(const char* opcode) {
     static const char* funct7_map[FUNCT7_MAP_SIZE][2] = {
-        {"SRAI", "0100000"}, {"SUB", "0100000"}, {"SRA", "0100000"}, {"MUL", "0000001"}
+        {"SRAI", "0100000"}, {"SUB", "0100000"}, {"SRA", "0100000"}, {"MUL", "0000001"},
+        {"FMV.W.X", "1111000"}, {"FSGNJ.S", "0010000"}
     };
 
     for (int i = 0; i < FUNCT7_MAP_SIZE; ++i) {
         if (strcmp(funct7_map[i][0], opcode) == 0) {
-            return atoi(funct7_map[i][1]);
+            return strtoul(funct7_map[i][1], NULL, 2);
         }
     }
     return FUNCT7_DEFAULT;
@@ -223,7 +233,27 @@ int asmToBinary(char *line) {
             int rs2 = get_register_number(words[3]);
             int opcode_number = 0b0110011;
             bytecode = ((get_funct7(opcode) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
+        } else if (strcmp(opcode, "FMV.W.X") == 0) {
+            int rd = get_register_number(words[1]);
+            int rs1 = get_register_number(words[2]);
+            int rs2 = 0;
+            int opcode_number = 0b1010011;
+            bytecode = ((get_funct7(opcode) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
+        } else if (strcmp(opcode, "CSRRW") == 0) {
+            int rd = get_register_number(words[1]);
+            int csr = atoi(words[2]);
+            int rs1 = get_register_number(words[3]);
+            int opcode_number = 0b1110011;
+            bytecode = (csr << 20) | ((rs1 & 0x1F) << 15) | ((0b001 & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
+        } else if (strcmp(opcode, "FSGNJ.S") == 0) {
+            int rd = get_register_number(words[1]);
+            int rs1 = get_register_number(words[2]);
+            int rs2 = get_register_number(words[3]);
+            int opcode_number = 0b1010011;
+            bytecode = ((get_funct7(opcode) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((0b000 & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
+            printf("CSR generated %X\n", bytecode);
         }
+    
     }
     return bytecode;
 }

@@ -50,6 +50,38 @@ char *getRegisterDialect2(RegisterAssignment *rm, int temporary){
     return registerNames[regIndex];
 }
 
+char *getFloatRegisterDialect2(RegisterAssignment *rm, int temporary){
+    if (rm == NULL) {
+        char *str = malloc(5); 
+        sprintf(str, "#%d", temporary);
+        return str;
+    }
+    char *registerNames[12] = {
+        "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8",
+        "f9", "f10", "f11"
+    };
+
+    if (temporary == FA0_REGISTER)
+        return "f10";
+    else if (temporary == SP_REGISTER)
+        return "sp";
+    else if (temporary == A0_REGISTER)
+        return "a0";
+    else if (temporary == X0_REGISTER)
+        return "zero"; 
+    else if (temporary == RA_REGISTER)
+        return "ra"; 
+    else if (temporary >= T0_REGISTER && temporary <= T6_REGISTER)
+        return registerNames[temporary - T0_REGISTER]; 
+    int regIndex = getRegisterAssignment(rm, temporary);
+    if (regIndex < 0 || regIndex > 12) {
+        char *str = malloc(5); 
+        sprintf(str, "#%d", temporary);
+        return str;
+    }
+    return registerNames[regIndex];
+}
+
 typedef char* (*getRegisterFunction)(RegisterAssignment*, int);
 
 getRegisterFunction getRegisterGenerator(int dialect) {
@@ -77,6 +109,7 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
     currObj = objCode;
     IRNode *p = ir->head;
     getRegisterFunction getReg = getRegisterGenerator(asmDialect);
+    getRegisterFunction getFloatReg = getFloatRegisterDialect2;
     int i = 0;
 
     while (p != NULL) {
@@ -138,8 +171,14 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                         ((p->varSource->address-p->address) + 0x800)  >> 12
                     );
                 }
-
-                break;            
+                break;      
+            case CSRRW:
+                sprintf(currObj->assembly, "csrrw %s, %d, %s", 
+                    getReg(rm, p->dest),
+                    p->imm,
+                    getReg(rm, p->source)
+                );
+                break;      
             case LOAD:
                 if (p->sourceKind == CONSTANT_SOURCE)
                     sprintf(currObj->assembly, "addi %s, %s, %d", 
@@ -160,6 +199,12 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                         getReg(rm, p->source)
                     );
                 }
+                break;  
+            case LUI:
+                sprintf(currObj->assembly, "lui %s, %d", 
+                    getReg(rm, p->dest), 
+                    p->source
+                );
                 break;
             case STORE:
                 if  (p->sourceKind == VARIABLE_SOURCE) {
@@ -194,6 +239,12 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 break;
             case MOV:
                 sprintf(currObj->assembly, "mv %s, %s", getReg(rm, p->dest), getReg(rm, p->source));
+                break;
+            case FMOV:
+                sprintf(currObj->assembly, "fsgnj.s %s, %s, %s", getFloatReg(rm, p->dest), getFloatReg(rm, p->source), getFloatReg(rm, p->source));
+                break;
+            case FMVWX:
+                sprintf(currObj->assembly, "fmv.w.x %s, %s", getFloatReg(rm, p->dest), getReg(rm, p->source));
                 break;
             case BEQ:
                 sprintf(currObj->assembly, "beq %s, %s, %d", getReg(rm, p->source), getReg(rm, p->source2), p->imm);

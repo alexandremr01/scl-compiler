@@ -30,6 +30,13 @@ ASTNode *appendSibling(ASTNode *reference, ASTNode *newSibling){
     return reference;
 }
 
+// TemporaryRegister *newTemporaryRegister(int id, int isFloat) {
+//     TemporaryRegister* reg = (TemporaryRegister*) malloc(sizeof(TemporaryRegister));
+//     reg->id = id;
+//     reg->isFloat = isFloat;
+//     return reg;
+// }
+
 void freeASTNode(ASTNode *node) {
     if (node == NULL) return;
     ASTNode *curr = node->firstChild;
