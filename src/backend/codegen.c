@@ -337,8 +337,10 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 parameter = parameter->sibling;
             }
             addJumpIR(ir, node->stEntry);
-            node->tempRegResult = registerNewTemporary(ir, 0);
-            addMovIR(ir, node->tempRegResult, A0_REGISTER);
+            node->tempRegResult = registerNewTemporary(ir, node->type==FLOAT_TYPE);
+            if (node->type==FLOAT_TYPE)
+                addFloatMovIR(ir, node->tempRegResult, FA0_REGISTER);
+            else addMovIR(ir, node->tempRegResult, A0_REGISTER);
             break;
         case ASM_NODE:
             addRawIR(ir, node->name);
