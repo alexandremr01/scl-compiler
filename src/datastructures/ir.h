@@ -31,7 +31,7 @@ typedef enum sourceKind {
 typedef enum instruction {
     MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP, LUI,
     BEQ, BNEQ, BLE, BLT, BGE, BGQ, BGT, MUL, AUIPC, RAW, RELATIVE_JUMP, NEG, DATA,
-    FMVWX, CSRRW, FMOV
+    FMVWX, CSRRW, FMOV, FLT, FLE, FSGNJ, FSGNJN
 } Instruction;
 
 typedef struct irNode {
@@ -106,5 +106,14 @@ IRNode* addBLEIR(IntermediateRepresentation *ir, int src1, int src2, int destina
 IRNode* addBGEIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
 IRNode* addBLTIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
 IRNode* addBGTIR(IntermediateRepresentation *ir, int src1, int src2, int destination);
-                                                                                               
+
+IRNode* addFloatLT(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addFloatGT(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addFloatLEQ(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addFloatGEQ(IntermediateRepresentation *ir, int src1, int src2, int destination);
+
+IRNode* addFSGNJ(IntermediateRepresentation *ir, int src1, int src2, int destination);
+IRNode* addFSGNJN(IntermediateRepresentation *ir, int src1, int src2, int destination);
+
+
 #endif

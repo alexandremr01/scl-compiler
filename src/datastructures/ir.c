@@ -354,3 +354,57 @@ IRNode* addBNEQIR(IntermediateRepresentation *ir, int src1, int src2, int destin
     addNode(ir, node);
     return node;
 }
+
+IRNode* addFloatLT(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(FLT);
+    node->sourceKind = REG_SOURCE;
+    node->source = src2;
+    node->source2 = src1;
+    node->dest = destination;
+    addNode(ir, node);
+}
+
+IRNode* addFloatGT(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(FLT);
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    node->dest = destination;
+    addNode(ir, node);
+}
+
+IRNode* addFloatLEQ(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(FLE);
+    node->sourceKind = REG_SOURCE;
+    node->source = src2;
+    node->source2 = src1;
+    node->dest = destination;
+    addNode(ir, node);
+}
+
+IRNode* addFloatGEQ(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(FLE);
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    node->dest = destination;
+    addNode(ir, node);
+}
+
+IRNode* addFSGNJ(IntermediateRepresentation *ir, int src1, int src2, int destination) {
+    IRNode * node = newIRNode(FSGNJ);
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    node->dest = destination;
+    addNode(ir, node);
+}
+
+IRNode* addFSGNJN(IntermediateRepresentation *ir, int src1, int src2, int destination){
+    IRNode * node = newIRNode(FSGNJN);
+    node->sourceKind = REG_SOURCE;
+    node->source = src1;
+    node->source2 = src2;
+    node->dest = destination;
+    addNode(ir, node);
+}

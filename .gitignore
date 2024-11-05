@@ -10,5 +10,8 @@ test/**.obj
 test/**.log.txt
 test/**.bin*
 
+**/.ipynb_checkpoints
+**/data/*.txt
+
 bin/
 src/generated/

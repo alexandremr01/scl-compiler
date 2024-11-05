@@ -1,0 +1,10 @@
+float relu(float x) {
+    if (x > 0) {
+        return x;
+    }
+    return 0.0;
+}
+
+float main() {
+    return relu(2.5);
+}

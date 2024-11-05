@@ -5,8 +5,8 @@
 #include <assert.h>
 
 #define FUNCT7_DEFAULT 0
-#define FUNCT3_MAP_SIZE 37
-#define FUNCT7_MAP_SIZE 9
+#define FUNCT3_MAP_SIZE 45
+#define FUNCT7_MAP_SIZE 13
 #define MAX_LINE_LENGTH 128
 
 // Function to get the funct3 code
@@ -19,7 +19,9 @@ int get_funct3(const char* opcode) {
         {"SLLI", "001"}, {"SRLI", "101"}, {"SRAI", "101"}, {"ADD", "000"}, {"SUB", "000"},
         {"SLL", "001"}, {"SLT", "010"}, {"SLTU", "011"}, {"XOR", "100"}, {"SRL", "101"},
         {"SRA", "101"}, {"OR", "110"}, {"AND", "111"}, {"MUL", "000"}, 
-        {"FMV.W.X", "000"}, {"FLW", "010"}, {"FSW", "010"}
+        {"FMV.W.X", "000"}, {"FLW", "010"}, {"FSW", "010"},
+        {"FEQ.S", "010"}, {"FLT.S", "001"}, {"FLE.S", "000"}, {"FSGNJN.S", "001"},
+        {"FSGNJ.S", "000"}, {"FADD.S", "000"}, {"FSUB.S", "000"}, {"FMUL.S", "000"}
     };
 
     for (int i = 0; i < FUNCT3_MAP_SIZE; ++i) {
@@ -66,6 +68,8 @@ int get_funct7(const char* opcode) {
         {"SRAI", "0100000"}, {"SUB", "0100000"}, {"SRA", "0100000"}, {"MUL", "0000001"},
         {"FMV.W.X", "1111000"}, {"FSGNJ.S", "0010000"}, 
         {"FADD.S", "0000000"}, {"FSUB.S", "0000100"}, {"FMUL.S", "0001000"}, 
+        {"FEQ.S", "1010000"}, {"FLT.S", "1010000"}, {"FLE.S", "1010000"},
+        {"FSGNJN.S", "0010000"},
     };
 
     for (int i = 0; i < FUNCT7_MAP_SIZE; ++i) {
@@ -248,13 +252,14 @@ int asmToBinary(char *line) {
             int opcode_number = 0b1110011;
             bytecode = (csr << 20) | ((rs1 & 0x1F) << 15) | ((0b001 & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
         } else if (strcmp(opcode, "FSGNJ.S") == 0 || strcmp(opcode, "FADD.S") == 0 || 
-                    strcmp(opcode, "FSUB.S") == 0 || strcmp(opcode, "FMUL.S") == 0) {
+                    strcmp(opcode, "FSUB.S") == 0 || strcmp(opcode, "FMUL.S") == 0 ||
+                    strcmp(opcode, "FEQ.S") == 0 || strcmp(opcode, "FLT.S") == 0 ||
+                    strcmp(opcode, "FLE.S") == 0 || strcmp(opcode, "FSGNJN.S") == 0) {
             int rd = get_register_number(words[1]);
             int rs1 = get_register_number(words[2]);
             int rs2 = get_register_number(words[3]);
             int opcode_number = 0b1010011;
-            bytecode = ((get_funct7(opcode) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((0b000 & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
-            printf("CSR generated %X\n", bytecode);
+            bytecode = ((get_funct7(opcode) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
         } else if (strcmp(opcode, "FLW") == 0) {
             int rd = get_register_number(words[1]);
             int rs1 = get_register_number(words[3]);

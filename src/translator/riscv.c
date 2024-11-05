@@ -174,6 +174,34 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                     getReg(rm, p->source2)
                 );
                 break;
+            case FLT:
+                sprintf(currObj->assembly, "flt.s %s, %s, %s", 
+                    getReg(rm, p->dest),
+                    getFloatReg(rm, p->source),
+                    getFloatReg(rm, p->source2)
+                );
+                break;
+            case FLE:
+                sprintf(currObj->assembly, "fle.s %s, %s, %s", 
+                    getReg(rm, p->dest),
+                    getFloatReg(rm, p->source),
+                    getFloatReg(rm, p->source2)
+                );
+                break;
+            case FSGNJ:
+                sprintf(currObj->assembly, "fsgnj.s %s, %s, %s", 
+                    getFloatReg(rm, p->dest),
+                    getFloatReg(rm, p->source),
+                    getFloatReg(rm, p->source2)
+                );
+                break;
+            case FSGNJN:
+                sprintf(currObj->assembly, "fsgnjn.s %s, %s, %s", 
+                    getFloatReg(rm, p->dest),
+                    getFloatReg(rm, p->source),
+                    getFloatReg(rm, p->source2)
+                );
+                break;
             case NEG:
                 sprintf(currObj->assembly, "neg %s, %s", 
                     getReg(rm, p->dest),

@@ -17,4 +17,4 @@ output_elf="$base_name.elf"
 ./bin/sclc "$input_file" "$output_bin" --dialect=ABI --external input vector.bin
 riscv64-unknown-linux-gnu-objcopy -I binary -O elf64-littleriscv -B riscv "$output_bin" "$output_obj"
 riscv64-unknown-linux-gnu-ld -T test/loader.ld -o "$output_elf" "$output_obj"
-spike -d --isa=RV64IMAFDCV_zvfh_zicsr -m0x10000:0x4000 --pc=0x100b0 "$output_elf"
+spike -d --isa=RV64IMF -m0x10000:0x4000 --pc=0x100b0 "$output_elf"

@@ -15,12 +15,18 @@ def parse_registers(file_path):
             registers[reg_name] = int(reg_value, 16)
     return registers
 
-def compile_and_simulate(input_file):
+def parse_last_line(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()[-1]
+    return lines.strip()
+
+def compile_and_simulate(input_file, is_float=False):
+    debug_cmd = 'debug_float' if is_float else 'debug'
     commands = [
         f'../bin/sclc {input_file} {input_file}.bin',
         f'riscv64-unknown-linux-gnu-objcopy -I binary -O elf64-littleriscv -B riscv {input_file}.bin {input_file}.obj',
         f'riscv64-unknown-linux-gnu-ld -T loader.ld -o {input_file}.elf  {input_file}.obj',
-        f'spike -d --isa=RV64IM -m0x10000:0x4000 --pc=0x100b0 --debug-cmd=debug {input_file}.elf 2> {input_file}.log.txt'
+        f'spike -d --isa=RV64IMF -m0x10000:0x4000 --pc=0x100b0 --debug-cmd={debug_cmd} {input_file}.elf 2> {input_file}.log.txt'
     ]
     for i, command in enumerate(commands):
         # print(f'Stage {i}')
@@ -35,9 +41,13 @@ def compile_and_simulate(input_file):
             print(result.stdout)
             exit(1)
 
-def e2e_test(input_file, validation, verbose):
-    compile_and_simulate(input_file)    
-    registers = parse_registers(input_file+'.log.txt')
+def e2e_test(input_file, validation, verbose, is_float):
+    compile_and_simulate(input_file, is_float)    
+    log_filename = f'{input_file}.log.txt'
+    if is_float:
+        registers = parse_last_line(log_filename)
+    else:
+        registers = parse_registers(log_filename)
     if verbose:
         print(input_file)
         print(registers)
@@ -59,6 +69,16 @@ TESTS = [
     {
         "file": "mlp0.in",
         "assertion": (lambda registers : ('a0' in registers and registers['a0'] == 3))
+    },
+    {
+        "file": "relupos.in",
+        "assertion": (lambda registers : registers == '2.5'),
+        "is_float": True
+    },
+    {
+        "file": "reluneg.in",
+        "assertion": (lambda registers : registers == '0'),
+        "is_float": True
     }
 ]
 
@@ -68,7 +88,8 @@ def main():
         e2e_test(
             test['file'],
             test['assertion'],
-            verbose
+            verbose,
+            test.get('is_float', False)
         )
 
 if __name__ == "__main__":        

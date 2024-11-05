@@ -304,6 +304,13 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
         case GEQ_NODE:
         case EQ_NODE:
         case DIFF_NODE:
+            if (canImplicitCast(node->firstChild->sibling->type, node->firstChild->type)){
+                node->firstChild->sibling->type = node->firstChild->type;
+            } else if (canImplicitCast(node->firstChild->type, node->firstChild->sibling->type)){
+                node->firstChild->type = node->firstChild->sibling->type;
+            }
+            node->type = INTEGER_TYPE;
+            return;
         case CONSTANT_NODE:
             node->type = INTEGER_TYPE;
             if (node->name != NULL && strchr(node->name, '.') != NULL)

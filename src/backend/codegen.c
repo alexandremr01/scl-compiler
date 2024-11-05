@@ -49,6 +49,22 @@ comparisonFunction getComparisonFunction(NodeKind instruction) {
     }
 }
 
+comparisonFunction getFloatComparisonFunction(NodeKind instruction) {
+    switch (instruction) {
+        case LT_NODE:
+            return addFloatLT;
+        case GT_NODE:
+            return addFloatGT;
+        case LEQ_NODE:
+            return addFloatLEQ;
+        case GEQ_NODE:
+            return addFloatGEQ;
+        default:
+            return NULL;
+    }
+}
+
+
 IntermediateRepresentation *codeGen(AbstractSyntaxTree *tree){
     IntermediateRepresentation *ir = newIntermediateRepresentation();
  
@@ -71,9 +87,11 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
     int localsSize = 0;
     if (node->kind == FUNCTION_DECLARATION_NODE) return;
     if (node->kind == NEG_NODE) {
-        node->tempRegResult = registerNewTemporary(ir, 0);
+        node->tempRegResult = registerNewTemporary(ir, node->type == FLOAT_TYPE);
         codeGenNode(node->firstChild, ir, functionEnd);
-        addSubtractionIR(ir, 
+        if (node->type == FLOAT_TYPE) 
+            addFSGNJN(ir, node->tempRegResult, node->tempRegResult, node->tempRegResult);
+        else addSubtractionIR(ir, 
             X0_REGISTER, 
             node->firstChild->tempRegResult,
             node->tempRegResult,
@@ -284,28 +302,38 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
         case EQ_NODE:
         case DIFF_NODE:
             node->tempRegResult = registerNewTemporary(ir, 0);
-            int auxReg = registerNewTemporary(ir, 0);
-            addSubtractionIR(ir, 
-                node->firstChild->tempRegResult, 
-                node->firstChild->sibling->tempRegResult,
-                auxReg,
-                0
-            );
-            getComparisonFunction(node->kind)(
-                ir, 
-                auxReg, 
-                X0_REGISTER,
-                12
-            );
-            addLoadImIR(ir, node->tempRegResult, 1);
-            addJumpImIR(ir, 8);
-            addLoadImIR(ir, node->tempRegResult, 0);
+            if (node->firstChild->type == INTEGER_TYPE){
+                int auxReg = registerNewTemporary(ir, 0);
+                printf("integer comparison");
+                addSubtractionIR(ir, 
+                    node->firstChild->tempRegResult, 
+                    node->firstChild->sibling->tempRegResult,
+                    auxReg,
+                    0
+                );
+                getComparisonFunction(node->kind)(
+                    ir, 
+                    auxReg, 
+                    X0_REGISTER,
+                    12
+                );
+                addLoadImIR(ir, node->tempRegResult, 1);
+                addJumpImIR(ir, 8);
+                addLoadImIR(ir, node->tempRegResult, 0);
+            } else {
+                getFloatComparisonFunction(node->kind)(
+                    ir, 
+                    node->firstChild->tempRegResult, 
+                    node->firstChild->sibling->tempRegResult,
+                    node->tempRegResult
+                );
+            }
             break;
         case CALL_NODE:
             parameter = node->firstChild;
             while (parameter != NULL){
                 addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4);
-                addStoreIR(ir, SP_REGISTER, 0, parameter->tempRegResult, 0); 
+                addStoreIR(ir, SP_REGISTER, 0, parameter->tempRegResult, parameter->type==FLOAT_TYPE); 
                 parameter = parameter->sibling;
             }
             addJumpIR(ir, node->stEntry);
