@@ -35,3 +35,7 @@ spike -d --isa=RV64I -m0x10000:0x4000 --pc=0x100b0 multiplication.elf
 run 1000
 reg 0
 ```
+
+Obs: Make sure to always match the initial address in the linker and the PC in Spike. E.g. if initial address is 0xb0 and memory starts at 10000, PC must be 100b0.
+
+We are reserving the initial 0x1000 addresses for the accelerator (4kB).

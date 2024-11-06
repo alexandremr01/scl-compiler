@@ -6,7 +6,7 @@ SECTIONS
 {
     everything :
     {
-    . = 0x0b0;
+    . = 0x1000;
 	 *(.*)
     } >RAM
 }

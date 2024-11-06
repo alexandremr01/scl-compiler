@@ -77,7 +77,7 @@ if __name__ == '__main__':
                 --external bias_output training/weights/bias_2.bin''',
             f'riscv64-unknown-linux-gnu-objcopy -I binary -O elf64-littleriscv -B riscv test/mlp.out test/mlp.o',
             f'riscv64-unknown-linux-gnu-ld -T test/loader.ld -o test/mlp.elf test/mlp.o',
-            f'spike -d --isa=RV64IMF -m0x10000:0x12000 --pc=0x100b0 --debug-cmd=test/debug_mlp test/mlp.elf 2> test/mlp.log.txt'
+            f'spike -d --isa=RV64IMF -m0x10000:0x12000 --pc=0x11000 --debug-cmd=test/debug_mlp test/mlp.elf 2> test/mlp.log.txt'
         ]
         for i, command in enumerate(commands):
             result = subprocess.run(command,

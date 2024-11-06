@@ -25,7 +25,7 @@ void freeObjectCode(ObjectCode *objCode){
 void writeAssembly(ObjectCode *objCode, FILE *f) {
     ObjectCode *currObj = objCode;
     while (currObj != NULL){
-        if (currObj->include) 
+        if (currObj->include && strlen(currObj->assembly) > 0) 
             fprintf(f, "%s\n", currObj->assembly);
         currObj = currObj->next;
     }

@@ -46,8 +46,10 @@ int get_register_number(const char* name) {
     };
 
     const char* floatingPointRegisters[] = {
-        "F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
-        "F9", "F10", "F11"
+        "F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", 
+        "FS0", "FS1", "FA0",  "FA1",  "FA2", "FA3", "FA4",  "FA5",
+        "FA6", "FA7", "FS2",  "FS3",  "FS4", "FS5", "FS6",  "FS7",
+        "FS8", "FS9", "FS10", "FS11", "F8", "F9", "F10", "F11"
     };
 
     // Check each register name for a match
@@ -56,7 +58,7 @@ int get_register_number(const char* name) {
             return i;
 
     // Check each register name for a match
-    for (int i = 0; i < 12; ++i) 
+    for (int i = 0; i < 32; ++i) 
         if (strcmp(name, floatingPointRegisters[i]) == 0)
             return i;
 
@@ -278,17 +280,17 @@ int asmToBinary(char *line) {
         
         } else if (strcmp(opcode, "SETPA") == 0 || strcmp(opcode, "SETPB") == 0) {
             int imm = atoi(words[1]);
-            imm = int2signedbin(imm, 12);
+            imm = int2signedbin(imm, 20);
             int opcode_number = 0X0B;
-            bytecode = (((imm) & 0xFFFF) << 20) | ((get_funct3(opcode) & 0x7) << 12) | (opcode_number & 0x7F);
+            bytecode = (((imm) & 0xFFFFF) << 12) | ((get_funct3(opcode) & 0x7) << 7) | (opcode_number & 0x7F);
         } else if (strcmp(opcode, "MACC") == 0) {
             int opcode_number = 0X0B;
             bytecode = opcode_number;
         } else if (strcmp(opcode, "STORE") == 0) {
             int imm = atoi(words[1]);
-            imm = int2signedbin(imm, 12);
+            imm = int2signedbin(imm, 20);
             int opcode_number = 0X0B;
-            bytecode = (((imm) & 0xFFFF) << 20) | ((get_funct3(opcode) & 0x7) << 12) | (opcode_number & 0x7F);        
+            bytecode = (((imm) & 0xFFFFF) << 12) | ((get_funct3(opcode) & 0x7) << 7) | (opcode_number & 0x7F);        
         } 
     }
     return bytecode;

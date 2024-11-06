@@ -13,11 +13,6 @@ void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
         addNopIR(ir);
     enableFloatingPoint(ir);
 
-    // addSetPA(ir, 0x20);
-    // addSetPB(ir, 0x20);
-    // addMACC(ir);
-    // addMACCStore(ir, 0x20);
-
     addGetPC(ir, 
         SP_REGISTER, 
         3
@@ -213,7 +208,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             if (node->firstChild != NULL){ // there is return value
                 if (node->firstChild->type == INTEGER_TYPE)
                     addMovIR(ir, A0_REGISTER, node->firstChild->tempRegResult);
-                else if (node->firstChild->type == FLOAT_TYPE)
+                else if (node->firstChild->type == FLOAT_TYPE) 
                     addFloatMovIR(ir, FA0_REGISTER, node->firstChild->tempRegResult);
             }
             addRelativeJump(ir, functionEnd);
@@ -386,6 +381,74 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 // local non array
                 addLoadMemIR(ir, node->tempRegResult, node->stEntry->address, SP_REGISTER, node->type == FLOAT_TYPE); 
             }
+            break;
+        case DOT_PRODUCT_NODE:
+            aux_register = registerNewTemporary(ir, 0);
+            node->tempRegResult = registerNewTemporary(ir, 1);
+            // store the address of the first variable in 0x10000
+            addLoadUpperImIR(ir, aux_register, 0x10000 >> 12);
+            addAdditionImIR(ir, aux_register, aux_register, 0x10000 & ((1 << 12) - 1));
+            addStoreIR(ir, aux_register, 0, node->firstChild->tempRegResult, 0);
+            // store the address of the sedon variable in 0x10004
+            addAdditionImIR(ir, aux_register, aux_register, 4);
+            addStoreIR(ir, aux_register, 0, node->firstChild->sibling->tempRegResult, 0);
+            // set PA to 0x100b0 and PB to 0x100b4
+
+                union {
+                    float f;
+                    int i;
+                } u;
+                u.f = 0;
+                addLoadUpperImIR(ir, aux_register, u.i >> 12);
+                addAdditionImIR(ir, aux_register, aux_register, u.i & 0xFFF);
+                addMovFromIntegerToFloat(ir, FS3_REGISTER, aux_register);
+
+            // call accelerator
+            addSetPA(ir, 0x10000);
+            addSetPB(ir, 0x10004);
+            addMACC(ir);
+            addMACCStore(ir, 0x10008);
+
+            // store result in a register
+            addLoadUpperImIR(ir, aux_register, 0x10008 >> 12);
+            addAdditionImIR(ir, aux_register, aux_register, 0x10008 & ((1 << 12) - 1));
+            addLoadMemIR(ir, node->tempRegResult, 0, aux_register, 1);
+            break;
+        case REFERENCE_NODE: // similar to previous, but does not load
+            numElement = 1;
+            ASTNode *varNode = node->firstChild;
+            if (varNode->firstChild != NULL && varNode->firstChild->kind == VAR_INDEXING_NODE) 
+                numElement = atoi(varNode->firstChild->name);
+            offset = (numElement-1)*getSize(node->stEntry->type);
+            
+            node->tempRegResult = registerNewTemporary(ir, 0);
+            aux_register = registerNewTemporary(ir, 0);
+            addCommentIR(ir, "reference");
+            if (node->stEntry->scope_level == 0 && varNode->firstChild == NULL) { 
+                // global non array variable 
+                IRNode *n = addGetPCVarAddress(ir, node->tempRegResult, node->stEntry);
+                addSumAddressDistance(ir, node->tempRegResult, node->stEntry, 4);
+            } else if (node->stEntry->scope_level == 0 && varNode->firstChild != NULL) { 
+                // global array
+                addLoadImIR(ir, aux_register, 0); 
+                for (int i=0; i<getSize(node->stEntry->type); i++)
+                    addAdditionIR(ir, aux_register, varNode->firstChild->tempRegResult, aux_register, 0);
+                IRNode *n = addGetPCVarAddress(ir, node->tempRegResult, node->stEntry);
+                addAdditionIR(ir, node->tempRegResult, node->tempRegResult, aux_register, 0);
+                addSumAddressDistance(ir, node->tempRegResult, node->stEntry, 8);
+            } 
+            // TODO: Next two cases, not working for local variables. Will need it soon
+            // else if (node->stEntry->scope_level > 0 && varNode->firstChild != NULL) { 
+            //     // local array
+            //     addLoadImIR(ir, address_register, node->stEntry->address);
+            //     for (int i=0; i<getSize(node->stEntry->type); i++)
+            //         addAdditionIR(ir, address_register, varNode->firstChild->tempRegResult, address_register, 0);
+            //     addAdditionIR(ir, address_register, SP_REGISTER, address_register, 0);
+            //     addLoadMemIR(ir, node->tempRegResult, 0, address_register, varNode->type == FLOAT_TYPE);
+            // } else { 
+            //     // local non array
+            //     addLoadMemIR(ir, node->tempRegResult, node->stEntry->address, SP_REGISTER, varNode->type == FLOAT_TYPE); 
+            // }
             break;
     }
     return;

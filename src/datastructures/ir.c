@@ -197,11 +197,21 @@ void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm) 
     addNode(ir, node);
 }
 
-void addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry) {
-    IRNode * node = newIRNode(AUIPC);
+IRNode* addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry) {
+    IRNode* node = newIRNode(AUIPC);
     node->dest = destinationRegister;
     node->sourceKind = VARIABLE_SOURCE;
     node->varSource = entry;
+    addNode(ir, node);
+    return node;
+}
+
+void addSumAddressDistance(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry, int correction) {
+    IRNode * node = newIRNode(ADD);
+    node->dest = destinationRegister;
+    node->sourceKind = VARIABLE_SOURCE;
+    node->varSource = entry;
+    node->imm = correction;
     addNode(ir, node);
 }
 

@@ -24,6 +24,8 @@ multi_line_comment     \/\*.+\*\/
 "+"             {return PLUS;}
 "-"             {return MINUS;}
 "*"             {return TIMES;}
+"@"             {return DOT_PRODUCT;}
+"&"             {return REFERENCE;}
 "/"             {return OVER;}
 "="             {return ASSIGN;}
 "=="            {return EQ;}

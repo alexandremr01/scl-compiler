@@ -56,13 +56,15 @@ char *getFloatRegisterDialect2(RegisterAssignment *rm, int temporary){
         sprintf(str, "#%d", temporary);
         return str;
     }
-    char *registerNames[12] = {
-        "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8",
-        "f9", "f10", "f11"
+    char *registerNames[32] = {
+        "F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", 
+        "FS0", "FS1", "FA0",  "FA1",  "FA2", "FA3", "FA4",  "FA5",
+        "FA6", "FA7", "FS2",  "FS3",  "FS4", "FS5", "FS6",  "FS7",
+        "FS8", "FS9", "FS10", "FS11", "F8", "F9", "F10", "F11"
     };
 
     if (temporary == FA0_REGISTER)
-        return "f10";
+        return "fa0";
     else if (temporary == SP_REGISTER)
         return "sp";
     else if (temporary == A0_REGISTER)
@@ -71,6 +73,8 @@ char *getFloatRegisterDialect2(RegisterAssignment *rm, int temporary){
         return "zero"; 
     else if (temporary == RA_REGISTER)
         return "ra"; 
+    else if (temporary == FS3_REGISTER)
+        return "fs3"; 
     else if (temporary >= T0_REGISTER && temporary <= T6_REGISTER)
         return registerNames[temporary - T0_REGISTER]; 
     int regIndex = getRegisterAssignment(rm, temporary);
@@ -138,11 +142,17 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                             p->imm
                         );
                     }
-                    else sprintf(currObj->assembly, "add %s, %s, %s", 
-                        getReg(rm, p->dest),
-                        getReg(rm, p->source),
-                        getReg(rm, p->source2)
-                    );
+                    else if (p->sourceKind == REG_SOURCE)
+                        sprintf(currObj->assembly, "add %s, %s, %s", 
+                            getReg(rm, p->dest),
+                            getReg(rm, p->source),
+                            getReg(rm, p->source2)
+                        );
+                    else sprintf(currObj->assembly, "addi %s, %s, %d", 
+                            getReg(rm, p->dest),
+                            getReg(rm, p->dest),
+                            ((p->varSource->address - p->address) & ((1 << 12) - 1)) + p->imm
+                        );
                 }
                 
                 break;

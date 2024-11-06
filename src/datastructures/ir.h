@@ -7,6 +7,8 @@
 #include "symbolic_table.h"
 #include "datatypes.h"
 
+#define FS3_REGISTER -23
+
 #define SP_REGISTER -1
 #define A0_REGISTER -2
 #define FA0_REGISTER -15
@@ -87,7 +89,8 @@ void addCommentIR(IntermediateRepresentation *ir, char *comment);
 void addLoadVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry, int isFloat);
 void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm);
 void addStoreVarAddress(IntermediateRepresentation *ir, int destinationRegister, int sourceRegister, SymbolicTableEntry *entry, int isFloat);
-void addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry);
+IRNode* addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry);
+void addSumAddressDistance(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry, int correction);
 
 IRNode* addDataIR(IntermediateRepresentation *ir, int data);
 void addLabelIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry); 

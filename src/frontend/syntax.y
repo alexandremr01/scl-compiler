@@ -27,6 +27,7 @@
 %token VOID INT FLOAT// types
 %token EXTERN // storage specifier
 %token RETURN // others
+%token DOT_PRODUCT REFERENCE
 %token ASM
 %token PLUS MINUS TIMES OVER ASSIGN EQ LT GT LEQ GEQ DIFFERENT 
 %token SEMICOLON COMMA
@@ -221,15 +222,26 @@ term:       term mult_op factor {
                 $$->firstChild = $1;
                 $1->sibling = $3;
                 $$->line_number = yylineno;
-            }| factor {$$ = $1;}
+            }
+            | term DOT_PRODUCT factor {
+                $$ = newASTNode(DOT_PRODUCT_NODE);
+                $$->firstChild = $1;
+                $1->sibling = $3;
+                $$->line_number = yylineno;
+            } 
+            | factor {$$ = $1;}
 mult_op:    TIMES | OVER
 factor:     LPAREN expression RPAREN {$$=$2;}
              | var {$$=$1;}
+             | REFERENCE factor {
+                $$ = newASTNode(REFERENCE_NODE);
+                $$->line_number = yylineno;
+                $$->firstChild = $2;
+             }
              | NUM {
                 $$ = newASTNode(CONSTANT_NODE);
                 $$->name = $1;
                 $$->line_number = yylineno;
-                // $$->type = INTEGER_TYPE;
             }
              | call {$$=$1;}
 call:       ID LPAREN args RPAREN {

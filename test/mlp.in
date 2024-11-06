@@ -30,7 +30,7 @@ float mlp_inference() {
         hidden_layer1[i] = bias1[i];
         j = 0;
         while ( j < 123 ) {
-            aux = j * 50 + i;
+            aux = j + 123 * i;
             hidden_layer1[i] = hidden_layer1[i] + input[j] * weights1[aux];
             j = j + 1;
         }
@@ -43,7 +43,7 @@ float mlp_inference() {
         hidden_layer2[i] = bias2[i];
         j = 0;
         while ( j < 50 ) {
-            aux = j * 25 + i;
+            aux = j + 50*i;
             hidden_layer2[i] = hidden_layer2[i] + hidden_layer1[j] * weights2[aux];
             j = j + 1;
         }
@@ -57,7 +57,7 @@ float mlp_inference() {
         output_layer[i] = bias_output[i];
         j = 0;
         while ( j < 25 ) {
-            aux = j * 1 + i;
+            aux = j + 25*i;
             output_layer[i] = output_layer[i] + hidden_layer2[j] * weights_output[aux];
             j = j + 1;
         }
