@@ -98,9 +98,9 @@ void addJumpIR(IntermediateRepresentation *ir, SymbolicTableEntry *entry);
 void addJumpRegisterIR(IntermediateRepresentation *ir, int destinationRegister);
 void addRawIR(IntermediateRepresentation *ir, char *instruction);
 
-void addSetPA(IntermediateRepresentation *ir, int address);
+IRNode* addSetPA(IntermediateRepresentation *ir, int address);
 void addSetPB(IntermediateRepresentation *ir, int address);
-void addMACC(IntermediateRepresentation *ir);
+IRNode* addMACC(IntermediateRepresentation *ir);
 void addMACCStore(IntermediateRepresentation *ir, int address);
 
 void addAdditionImIR(IntermediateRepresentation *ir, int dest, int src, int imm);

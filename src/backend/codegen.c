@@ -383,15 +383,19 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             }
             break;
         case DOT_PRODUCT_NODE:
-            aux_register = registerNewTemporary(ir, 0);
             node->tempRegResult = registerNewTemporary(ir, 1);
+            int aux_register_pa = registerNewTemporary(ir, 0);
+            int aux_register = registerNewTemporary(ir, 0);
+            int aux_register_current_a = registerNewTemporary(ir, 0);
+            int aux_register_current_b = registerNewTemporary(ir, 0);
+            addMovIR(ir, aux_register_current_a, node->firstChild->tempRegResult);
+            addMovIR(ir, aux_register_current_b, node->firstChild->sibling->tempRegResult);
             // store the address of the first variable in 0x10000
-            addLoadUpperImIR(ir, aux_register, 0x10000 >> 12);
-            addAdditionImIR(ir, aux_register, aux_register, 0x10000 & ((1 << 12) - 1));
-            addStoreIR(ir, aux_register, 0, node->firstChild->tempRegResult, 0);
+            addLoadUpperImIR(ir, aux_register_pa, 0x10000 >> 12);
+            addAdditionImIR(ir, aux_register_pa, aux_register_pa, 0x10000 & ((1 << 12) - 1));
+            addStoreIR(ir, aux_register_pa, 0, node->firstChild->tempRegResult, 0);
             // store the address of the sedon variable in 0x10004
-            addAdditionImIR(ir, aux_register, aux_register, 4);
-            addStoreIR(ir, aux_register, 0, node->firstChild->sibling->tempRegResult, 0);
+            addStoreIR(ir, aux_register_pa, 4, node->firstChild->sibling->tempRegResult, 0);
             // set PA to 0x100b0 and PB to 0x100b4
 
                 union {
@@ -404,15 +408,38 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 addMovFromIntegerToFloat(ir, FS3_REGISTER, aux_register);
 
             // call accelerator
-            addSetPA(ir, 0x10000);
+            int first_child_size = node->firstChild->stEntry->numElements;
+            int second_child_size = node->firstChild->sibling->stEntry->numElements;
+            int vector_size = (first_child_size < second_child_size)? first_child_size : second_child_size;
+            int num_iterations = (int) vector_size / 2;
+            addLoadImIR(ir, aux_register, num_iterations);
+            IRNode* macc_node = addSetPA(ir, 0x10000);
             addSetPB(ir, 0x10004);
             addMACC(ir);
+            addAdditionImIR(ir, aux_register_current_a, aux_register_current_a, 8);
+            addAdditionImIR(ir, aux_register_current_b, aux_register_current_b, 8);
+            addStoreIR(ir, aux_register_pa, 0, aux_register_current_a, 0);
+            addStoreIR(ir, aux_register_pa, 4, aux_register_current_b, 0);
+            addAdditionImIR(ir, aux_register, aux_register, -1);
+            addBEQIR(ir, aux_register, X0_REGISTER, 8);
+            IRNode* n = addJumpImIR(ir, 0);
+            n->source = macc_node->address - n->address; 
+            
             addMACCStore(ir, 0x10008);
-
+            addStoreIR(ir, aux_register_pa, 0, node->firstChild->tempRegResult, 0);
             // store result in a register
             addLoadUpperImIR(ir, aux_register, 0x10008 >> 12);
             addAdditionImIR(ir, aux_register, aux_register, 0x10008 & ((1 << 12) - 1));
             addLoadMemIR(ir, node->tempRegResult, 0, aux_register, 1);
+            // Last element
+            if (vector_size % 2 != 0) {
+                int floatAuxRegister1 = registerNewTemporary(ir, 1);
+                int floatAuxRegister2 = registerNewTemporary(ir, 1);
+                addLoadMemIR(ir, floatAuxRegister1, 0, aux_register_current_a, 1);
+                addLoadMemIR(ir, floatAuxRegister1, 0, aux_register_current_b, 1);
+                addMultiplicationIR(ir, floatAuxRegister1, floatAuxRegister1, floatAuxRegister2, 1);
+                addAdditionIR(ir, node->tempRegResult, node->tempRegResult, floatAuxRegister2, 1);
+            }
             break;
         case REFERENCE_NODE: // similar to previous, but does not load
             numElement = 1;
@@ -434,25 +461,26 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 for (int i=0; i<getSize(node->stEntry->type); i++)
                     addAdditionIR(ir, aux_register, varNode->firstChild->tempRegResult, aux_register, 0);
                 IRNode *n = addGetPCVarAddress(ir, node->tempRegResult, node->stEntry);
-                addAdditionIR(ir, node->tempRegResult, node->tempRegResult, aux_register, 0);
+                addAdditionIR(ir, node->tempRegResult, aux_register, node->tempRegResult, 0);
                 addSumAddressDistance(ir, node->tempRegResult, node->stEntry, 8);
             } 
             // TODO: Next two cases, not working for local variables. Will need it soon
-            // else if (node->stEntry->scope_level > 0 && varNode->firstChild != NULL) { 
-            //     // local array
-            //     addLoadImIR(ir, address_register, node->stEntry->address);
-            //     for (int i=0; i<getSize(node->stEntry->type); i++)
-            //         addAdditionIR(ir, address_register, varNode->firstChild->tempRegResult, address_register, 0);
-            //     addAdditionIR(ir, address_register, SP_REGISTER, address_register, 0);
-            //     addLoadMemIR(ir, node->tempRegResult, 0, address_register, varNode->type == FLOAT_TYPE);
-            // } else { 
-            //     // local non array
-            //     addLoadMemIR(ir, node->tempRegResult, node->stEntry->address, SP_REGISTER, varNode->type == FLOAT_TYPE); 
-            // }
+            else if (node->stEntry->scope_level > 0 && varNode->firstChild != NULL) { 
+                // local array
+                address_register = registerNewTemporary(ir, 0);
+                addLoadImIR(ir, address_register, node->stEntry->address);
+                for (int i=0; i<getSize(node->stEntry->type); i++)
+                    addAdditionIR(ir, address_register, varNode->firstChild->tempRegResult, address_register, 0);
+                addAdditionIR(ir, SP_REGISTER, address_register, node->tempRegResult, 0);
+            } else { 
+                // local non array
+                addAdditionImIR(ir, node->tempRegResult, SP_REGISTER, node->stEntry->address); 
+            }
             break;
     }
     return;
 }
 
-
-                
+//erro em 39050
+2.17958 to 2.63081
+// 

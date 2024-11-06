@@ -419,11 +419,12 @@ IRNode* addFSGNJN(IntermediateRepresentation *ir, int src1, int src2, int destin
     addNode(ir, node);
 }
 
-void addSetPA(IntermediateRepresentation *ir, int address){
+IRNode* addSetPA(IntermediateRepresentation *ir, int address){
     IRNode * node = newIRNode(SETPA);
     node->sourceKind = CONSTANT_SOURCE;
     node->imm = address;
     addNode(ir, node);
+    return node;
 }
 
 void addSetPB(IntermediateRepresentation *ir, int address){
@@ -433,10 +434,11 @@ void addSetPB(IntermediateRepresentation *ir, int address){
     addNode(ir, node);
 }
 
-void addMACC(IntermediateRepresentation *ir){
+IRNode* addMACC(IntermediateRepresentation *ir){
     IRNode * node = newIRNode(MACC);
     node->sourceKind = CONSTANT_SOURCE;
     addNode(ir, node);
+    return node;
 }
 
 void addMACCStore(IntermediateRepresentation *ir, int address){
