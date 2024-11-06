@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #define FUNCT7_DEFAULT 0
-#define FUNCT3_MAP_SIZE 45
+#define FUNCT3_MAP_SIZE 49
 #define FUNCT7_MAP_SIZE 13
 #define MAX_LINE_LENGTH 128
 
@@ -21,7 +21,8 @@ int get_funct3(const char* opcode) {
         {"SRA", "101"}, {"OR", "110"}, {"AND", "111"}, {"MUL", "000"}, 
         {"FMV.W.X", "000"}, {"FLW", "010"}, {"FSW", "010"},
         {"FEQ.S", "010"}, {"FLT.S", "001"}, {"FLE.S", "000"}, {"FSGNJN.S", "001"},
-        {"FSGNJ.S", "000"}, {"FADD.S", "000"}, {"FSUB.S", "000"}, {"FMUL.S", "000"}
+        {"FSGNJ.S", "000"}, {"FADD.S", "000"}, {"FSUB.S", "000"}, {"FMUL.S", "000"},
+        {"STORE", "011"}, {"SETPA", "001"}, {"SETPB", "010"}, {"MACC", "000"}
     };
 
     for (int i = 0; i < FUNCT3_MAP_SIZE; ++i) {
@@ -271,12 +272,24 @@ int asmToBinary(char *line) {
             int rs2 = get_register_number(words[1]);
             int rs1 = get_register_number(words[3]);
             int imm = atoi(words[2]);
-            imm = int2signedbin(imm, 12);
+            imm = int2signedbin(imm, 16);
             int opcode_number = 0b0100111;
             bytecode = (((imm >> 5) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((imm & 0x1F) << 7) | (opcode_number & 0x7F);
         
+        } else if (strcmp(opcode, "SETPA") == 0 || strcmp(opcode, "SETPB") == 0) {
+            int imm = atoi(words[1]);
+            imm = int2signedbin(imm, 12);
+            int opcode_number = 0X0B;
+            bytecode = (((imm) & 0xFFFF) << 20) | ((get_funct3(opcode) & 0x7) << 12) | (opcode_number & 0x7F);
+        } else if (strcmp(opcode, "MACC") == 0) {
+            int opcode_number = 0X0B;
+            bytecode = opcode_number;
+        } else if (strcmp(opcode, "STORE") == 0) {
+            int imm = atoi(words[1]);
+            imm = int2signedbin(imm, 12);
+            int opcode_number = 0X0B;
+            bytecode = (((imm) & 0xFFFF) << 20) | ((get_funct3(opcode) & 0x7) << 12) | (opcode_number & 0x7F);        
         } 
-    
     }
     return bytecode;
 }

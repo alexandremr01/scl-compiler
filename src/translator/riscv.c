@@ -181,6 +181,18 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                     getFloatReg(rm, p->source2)
                 );
                 break;
+            case MACC:
+                sprintf(currObj->assembly, "macc");
+                break;
+            case MACCSTORE:
+                sprintf(currObj->assembly, "store %d", p->imm);
+                break;
+            case SETPA:
+                sprintf(currObj->assembly, "setpa %d", p->imm);
+                break;
+            case SETPB:
+                sprintf(currObj->assembly, "setpb %d", p->imm);
+                break;
             case FLE:
                 sprintf(currObj->assembly, "fle.s %s, %s, %s", 
                     getReg(rm, p->dest),

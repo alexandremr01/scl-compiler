@@ -23,18 +23,18 @@ IntermediateRepresentation *newIntermediateRepresentation(){
     ir->lastAddress = 0;
     ir->lastStackAddress = 0;
     ir->_maxTemporaries = 256;
-    ir->temporaryIsFloat = (int *) malloc(sizeof(int) * ir->_maxTemporaries);
+    // ir->temporaryIsFloat = (int *) malloc(sizeof(int) * ir->_maxTemporaries);
     return ir;
 }
 
 int registerNewTemporary(IntermediateRepresentation *ir, int isFloat){
     int id = ir->nextTempReg++;
-    ir->temporaryIsFloat[id] = isFloat;
-    if (id == ir->_maxTemporaries - 2) {
-        ir->_maxTemporaries *= 2;
-        int *tmp = (int *) realloc(ir->temporaryIsFloat, sizeof(int) * ir->_maxTemporaries);
-        ir->temporaryIsFloat = tmp;
-    }
+    // ir->temporaryIsFloat[id] = isFloat;
+    // if (id == ir->_maxTemporaries - 2) {
+        // ir->_maxTemporaries *= 2;
+        // int *tmp = (int *) realloc(ir->temporaryIsFloat, sizeof(int) * ir->_maxTemporaries);
+        // ir->temporaryIsFloat = tmp;
+    // }
     return id;
 }
 
@@ -406,5 +406,32 @@ IRNode* addFSGNJN(IntermediateRepresentation *ir, int src1, int src2, int destin
     node->source = src1;
     node->source2 = src2;
     node->dest = destination;
+    addNode(ir, node);
+}
+
+void addSetPA(IntermediateRepresentation *ir, int address){
+    IRNode * node = newIRNode(SETPA);
+    node->sourceKind = CONSTANT_SOURCE;
+    node->imm = address;
+    addNode(ir, node);
+}
+
+void addSetPB(IntermediateRepresentation *ir, int address){
+    IRNode * node = newIRNode(SETPB);
+    node->sourceKind = CONSTANT_SOURCE;    
+    node->imm = address;
+    addNode(ir, node);
+}
+
+void addMACC(IntermediateRepresentation *ir){
+    IRNode * node = newIRNode(MACC);
+    node->sourceKind = CONSTANT_SOURCE;
+    addNode(ir, node);
+}
+
+void addMACCStore(IntermediateRepresentation *ir, int address){
+    IRNode * node = newIRNode(MACCSTORE);
+    node->sourceKind = CONSTANT_SOURCE;    
+    node->imm = address;
     addNode(ir, node);
 }

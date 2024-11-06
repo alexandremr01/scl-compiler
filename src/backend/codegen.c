@@ -12,6 +12,12 @@ void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     for (int i=0; i<2; i++)
         addNopIR(ir);
     enableFloatingPoint(ir);
+
+    // addSetPA(ir, 0x20);
+    // addSetPB(ir, 0x20);
+    // addMACC(ir);
+    // addMACCStore(ir, 0x20);
+
     addGetPC(ir, 
         SP_REGISTER, 
         3

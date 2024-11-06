@@ -1,6 +1,6 @@
 CC        := gcc
 CFLAGS    := -Wextra -Wundef -Wpointer-arith -Wcast-align -std=c11 -D_XOPEN_SOURCE=500 -Werror=vla
-LDFLAGS   := -lfl
+LDFLAGS   := -lfl -lpthread
 BUILD     := ./bin
 
 SOURCEDIR := $(CURDIR)/src
@@ -24,7 +24,7 @@ build-docker:
 	docker build -t scl_compiler_docker -f Dockerfile.complete .
 
 run-docker:
-	docker run -it -v $(PWD):/app scl_compiler_docker
+	docker run -it -v $(PWD):/app -v $(PWD)/spike/riscv-isa-sim:/tmp/riscv-isa-sim scl_compiler_docker
 
 all: build
 
@@ -33,7 +33,7 @@ build:
 	flex -o $(GENERATEDDIR)/lex.yy.c $(SOURCEDIR)/frontend/lex.l
 	bison --debug -o $(GENERATEDDIR)/syntax.tab.c  -t -v -d $(SOURCEDIR)/frontend/syntax.y
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(BUILD)/sclc
-	$(CC) $(CFLAGS) $(SOURCEDIR)/bin2vhdl.c -o $(BUILD)/bin2vhdl
+	$(CC) $(CFLAGS) $(SOURCEDIR)/bin2vhdl.c -o $(BUILD)/bin2vhdl 
 
 debug: CFLAGS += -g -fsanitize=address
 debug: all
