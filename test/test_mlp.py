@@ -61,13 +61,13 @@ def parse_last_line(file_path):
 if __name__ == '__main__':
     X_train, y_train, preprocessor = prepare('./training/data/KDDTrain+.txt')
     X_test, y_test = prepare('./training/data/KDDTest+.txt', preprocessor)
-
+    input_file = 'mlp.in'
     num_total = 0
     num_matches = 0
     for ix, row in tqdm(enumerate(X_test[:10]), total=10):
         save_vector(row, 'input.bin')
         commands = [
-            f'''./bin/sclc test/mlp.in test/mlp.out --dialect=ABI \
+            f'''./bin/sclc test/{input_file} test/mlp.out --dialect=ABI \
                 --external input input.bin \
                 --external weights1 training/weights/weights_0.bin \
                 --external bias1 training/weights/bias_0.bin \
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                 --external bias_output training/weights/bias_2.bin''',
             f'riscv64-unknown-linux-gnu-objcopy -I binary -O elf64-littleriscv -B riscv test/mlp.out test/mlp.o',
             f'riscv64-unknown-linux-gnu-ld -T test/loader.ld -o test/mlp.elf test/mlp.o',
-            f'spike -d --isa=RV64IMF -m0x10000:0x12000 --pc=0x11000 --debug-cmd=test/debug_mlp test/mlp.elf 2> test/mlp.log.txt'
+            f'spike -d --isa=RV64IMF -m0x10000:0x12000 --pc=0x11000 --debug-cmd=test/debug_mlp test/mlp.elf 2> test/mlp_PYTHON.log.txt'
         ]
         for i, command in enumerate(commands):
             result = subprocess.run(command,
@@ -95,5 +95,6 @@ if __name__ == '__main__':
         prediction = int(float(value) > 0)
         num_total += 1
         num_matches += 1 if prediction == y_test[ix] else 0
+        break
     
     print(f'Got {num_matches}/{num_total} ({num_matches/num_total:.2%})')

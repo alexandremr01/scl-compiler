@@ -7,22 +7,17 @@
 #include "symbolic_table.h"
 #include "datatypes.h"
 
-#define FS3_REGISTER -23
+#define SAVED_REGISTERS 26
 
-#define SP_REGISTER -1
-#define A0_REGISTER -2
-#define FA0_REGISTER -15
-#define X0_REGISTER -3
+#define FS3_REGISTER -20
+
+#define SP_REGISTER -3
+#define A0_REGISTER -11
+#define FA0_REGISTER -11
+#define X0_REGISTER -1
 #define FP_REGISTER -4
-#define RA_REGISTER -5
-
-#define T0_REGISTER -12
-#define T1_REGISTER -11
-#define T2_REGISTER -10
-#define T3_REGISTER -9
-#define T4_REGISTER -8
-#define T5_REGISTER -7
-#define T6_REGISTER -6
+#define RA_REGISTER -2
+#define T0_REGISTER -6
 
 int get_tx_register(int x);
 
@@ -34,7 +29,7 @@ typedef enum instruction {
     MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP, LUI,
     BEQ, BNEQ, BLE, BLT, BGE, BGQ, BGT, MUL, AUIPC, RAW, RELATIVE_JUMP, NEG, DATA,
     FMVWX, CSRRW, FMOV, FLT, FLE, FSGNJ, FSGNJN,
-    SETPA, SETPB, MACC, MACCSTORE
+    SETPA, SETPB, MACC, MACCSTORE, PREPARE_STACK
 } Instruction;
 
 typedef struct irNode {
@@ -70,6 +65,7 @@ int registerNewTemporary(IntermediateRepresentation *ir, int isFloat);
 
 IRNode *newIRNode(Instruction instruction);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
+void addPrepareStack(IntermediateRepresentation *ir);
 
 void freeIntermediateRepresentation(IntermediateRepresentation *ir);
 void addMovIR(IntermediateRepresentation *ir, int destination, int source);

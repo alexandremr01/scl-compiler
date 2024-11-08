@@ -23,10 +23,10 @@ def parse_last_line(file_path):
 def compile_and_simulate(input_file, is_float=False):
     debug_cmd = 'debug_float' if is_float else 'debug'
     commands = [
-        f'../bin/sclc {input_file} {input_file}.bin',
+        f'../bin/sclc {input_file} {input_file}.bin --dialect=ABI',
         f'riscv64-unknown-linux-gnu-objcopy -I binary -O elf64-littleriscv -B riscv {input_file}.bin {input_file}.obj',
         f'riscv64-unknown-linux-gnu-ld -T loader.ld -o {input_file}.elf  {input_file}.obj',
-        f'spike -d --isa=RV64IMF -m0x10000:0x4000 --pc=0x11000 --debug-cmd={debug_cmd} {input_file}.elf 2> {input_file}.log.txt'
+        f'spike -d --isa=RV64IMF -m0x10000:0x12000 --pc=0x11000 --debug-cmd={debug_cmd} {input_file}.elf 2> {input_file}.log.txt'
     ]
     for i, command in enumerate(commands):
         # print(f'Stage {i}')

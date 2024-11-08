@@ -5,6 +5,10 @@ int get_tx_register(int x) {
     return T0_REGISTER + x;
 }
 
+int get_register(int x){
+    return -x;
+}
+
 void printIR(IntermediateRepresentation *ir) {
     IRNode *p = ir->head;
     int i = 0;
@@ -196,6 +200,14 @@ void addGetPC(IntermediateRepresentation *ir, int destinationRegister, int imm) 
     node->imm = imm;
     addNode(ir, node);
 }
+
+
+void addPrepareStack(IntermediateRepresentation *ir) {
+    IRNode * node = newIRNode(PREPARE_STACK);
+    node->sourceKind = CONSTANT_SOURCE;
+    addNode(ir, node);
+}
+
 
 IRNode* addGetPCVarAddress(IntermediateRepresentation *ir, int destinationRegister, SymbolicTableEntry *entry) {
     IRNode* node = newIRNode(AUIPC);

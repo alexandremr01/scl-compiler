@@ -9,16 +9,6 @@ char *getRegisterDialect1(RegisterAssignment *rm, int temporary){
     char *registerNames[13] = {
         "x5", "x6", "x7", "x28", "x29", "x30", "x31", "x12", "x13", "x14", "x15", "x16", "x17"
     };
-    if (temporary == SP_REGISTER)
-        return "x2"; //sp or x2
-    else if (temporary == A0_REGISTER)
-        return "x10"; //a0 or x10
-    else if (temporary == X0_REGISTER)
-        return "x0"; 
-    else if (temporary == RA_REGISTER)
-        return "x1"; 
-    else if (temporary >= T0_REGISTER && temporary <= T6_REGISTER)
-        return registerNames[temporary - T0_REGISTER]; 
     return registerNames[getRegisterAssignment(rm, temporary)];
 }
 
@@ -31,16 +21,15 @@ char *getRegisterDialect2(RegisterAssignment *rm, int temporary){
     char *registerNames[13] = {
         "t0", "t1", "t2", "t3", "t4", "t5", "t6", "a2", "a3", "a4", "a5", "a6", "a7"
     };
-    if (temporary == SP_REGISTER)
-        return "sp";
-    else if (temporary == A0_REGISTER)
-        return "a0";
-    else if (temporary == X0_REGISTER)
-        return "zero"; 
-    else if (temporary == RA_REGISTER)
-        return "ra"; 
-    else if (temporary >= T0_REGISTER && temporary <= T6_REGISTER)
-        return registerNames[temporary - T0_REGISTER]; 
+    char *registerIndex[32] = {
+        "zero", "ra", "sp",  "gp",  "tp", "t0",  "t1",  "t2",
+        "s0",   "s1", "a0",  "a1",  "a2", "a3",  "a4",  "a5",
+        "a6",   "a7", "s2",  "s3",  "s4", "s5",  "s6",  "s7",
+        "s8",   "s9", "s10", "s11", "t3", "t4",  "t5",  "t6"
+    };
+    // way to identify fixed temporaries - avoid allocation
+    if (temporary < 0)
+    return registerIndex[-1-temporary];
     int regIndex = getRegisterAssignment(rm, temporary);
     if (regIndex < 0 || regIndex > 12) {
         char *str = malloc(5); 
@@ -56,27 +45,21 @@ char *getFloatRegisterDialect2(RegisterAssignment *rm, int temporary){
         sprintf(str, "#%d", temporary);
         return str;
     }
-    char *registerNames[32] = {
-        "F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", 
-        "FS0", "FS1", "FA0",  "FA1",  "FA2", "FA3", "FA4",  "FA5",
-        "FA6", "FA7", "FS2",  "FS3",  "FS4", "FS5", "FS6",  "FS7",
-        "FS8", "FS9", "FS10", "FS11", "F8", "F9", "F10", "F11"
+    // used by allocation
+    char *registerNames[13] = {
+        "ft0", "ft1", "ft2", "ft3", "ft4", "ft5", "ft6", "ft7", 
+        "ft8", "ft9", "ft10", "ft11", "fa1"
     };
+    char *registerIndex[32] = {
+        "ft0", "ft1", "ft2",  "ft3",  "ft4", "ft5", "ft6",  "ft7",
+        "fs0", "fs1", "fa0",  "fa1",  "fa2", "fa3", "fa4",  "fa5",
+        "fa6", "fa7", "fs2",  "fs3",  "fs4", "fs5", "fs6",  "fs7",
+        "fs8", "fs9", "fs10", "fs11", "ft8", "ft9", "ft10", "ft11"
+    };
+    // way to identify fixed temporaries - avoid allocation
+    if (temporary < 0)
+        return registerIndex[-1-temporary];
 
-    if (temporary == FA0_REGISTER)
-        return "fa0";
-    else if (temporary == SP_REGISTER)
-        return "sp";
-    else if (temporary == A0_REGISTER)
-        return "a0";
-    else if (temporary == X0_REGISTER)
-        return "zero"; 
-    else if (temporary == RA_REGISTER)
-        return "ra"; 
-    else if (temporary == FS3_REGISTER)
-        return "fs3"; 
-    else if (temporary >= T0_REGISTER && temporary <= T6_REGISTER)
-        return registerNames[temporary - T0_REGISTER]; 
     int regIndex = getRegisterAssignment(rm, temporary);
     if (regIndex < 0 || regIndex > 12) {
         char *str = malloc(5); 
@@ -230,6 +213,12 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                     getReg(rm, p->source)
                 );
                 break;
+            case PREPARE_STACK:
+                sprintf(currObj->assembly, "auipc %s, %d", 
+                        getReg(rm, SP_REGISTER),
+                        ((ir->tail->address - ir->head->address) >> 12) + 3
+                    );
+                break;
             case AUIPC:
                 if (p->sourceKind == CONSTANT_SOURCE)
                     sprintf(currObj->assembly, "auipc %s, %d", 
@@ -252,6 +241,8 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                 break;      
             case LOAD:
                 if (p->isFloat && p->sourceKind == VARIABLE_SOURCE) {
+                    printf("Adding LOAD for distance %d which is %d and %d\n", p->varSource->address-p->address,  ((p->varSource->address-p->address) + 0x800)  >> 12, (p->varSource->address-p->address) & ((1 << 12) - 1));
+
                     sprintf(currObj->assembly, "flw %s, %d(%s)", 
                         getFloatReg(rm, p->dest), 
                         (p->varSource->address-p->address) & ((1 << 12) - 1),

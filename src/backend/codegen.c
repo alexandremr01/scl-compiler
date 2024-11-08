@@ -1,6 +1,5 @@
 #include "codegen.h"
 #define INITIAL_STACK 2000
-
 void codeGenNode(ASTNode*, IntermediateRepresentation*, IRNode*);
 
 void enableFloatingPoint(IntermediateRepresentation *ir){
@@ -8,15 +7,22 @@ void enableFloatingPoint(IntermediateRepresentation *ir){
     addCSRReadWrite(ir, X0_REGISTER, 0x300, T0_REGISTER);
 }
 
+int savedRegisters[SAVED_REGISTERS] = {
+    -6, -7, -8, -29, -30, -31, -32, -13, -14, -15, -16, -17, -18
+};
+
+int savedFloatingPointRegisters[SAVED_REGISTERS] = {
+    -1, -2, -3, -4, -5, -6, -7, -8, -12,
+    -29, -30, -31, -32
+};
+
 void genHeader(IntermediateRepresentation *ir, SymbolicTableEntry *main){
     for (int i=0; i<2; i++)
         addNopIR(ir);
     enableFloatingPoint(ir);
 
-    addGetPC(ir, 
-        SP_REGISTER, 
-        3
-    );
+    addPrepareStack(ir);
+
     addAdditionImIR(ir, 
         SP_REGISTER, 
         SP_REGISTER,
@@ -91,7 +97,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
         node->tempRegResult = registerNewTemporary(ir, node->type == FLOAT_TYPE);
         codeGenNode(node->firstChild, ir, functionEnd);
         if (node->type == FLOAT_TYPE) 
-            addFSGNJN(ir, node->tempRegResult, node->tempRegResult, node->tempRegResult);
+            addFSGNJN(ir, node->firstChild->tempRegResult, node->firstChild->tempRegResult, node->tempRegResult);
         else addSubtractionIR(ir, 
             X0_REGISTER, 
             node->firstChild->tempRegResult,
@@ -153,12 +159,14 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
     if (node->kind == FUNCTION_DEFINITION_NODE){
         ir->lastStackAddress = 0;
         addLabelIR(ir, node->stEntry);
-        addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4*8);
-        addStoreIR(ir, SP_REGISTER, 4*7, RA_REGISTER, 0); 
+        addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -4*(SAVED_REGISTERS+1));
+        addStoreIR(ir, SP_REGISTER, 4*SAVED_REGISTERS, RA_REGISTER, 0); 
         // store preserved registers
         int reg = 0;
-        while (reg < 7) {
-            addStoreIR(ir, SP_REGISTER, 4*(6-reg), get_tx_register(reg), 0);
+        while (reg < SAVED_REGISTERS) {
+            if (reg < SAVED_REGISTERS/2)
+                addStoreIR(ir, SP_REGISTER, 4*(SAVED_REGISTERS-1-reg), savedRegisters[reg], 0);
+            else addStoreIR(ir, SP_REGISTER, 4*(SAVED_REGISTERS-1-reg), savedFloatingPointRegisters[reg-SAVED_REGISTERS/2], 1);
             reg += 1;
         } 
         // first, iterate over non-parameter locals
@@ -172,7 +180,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
         }
         addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, -localsSize);
         returnStackPosition = localsSize;
-        localsSize += 4*8; // skip return address and registers t0-t6
+        localsSize += 4*(SAVED_REGISTERS+1); // skip return address and registers t0-t6
         // now, iterate over parameters to give their addresses
         local = node->stEntry->locals;
         while(local != NULL) {
@@ -194,12 +202,15 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             address_register = registerNewTemporary(ir, 0);
             addNode(ir, functionEnd);
 
-            int reg = 6;
+            int reg = SAVED_REGISTERS-1;
             while (reg >= 0) {
-                addLoadMemIR(ir, get_tx_register(reg), returnStackPosition + 4*(6-reg), SP_REGISTER, 0); 
+                if (reg < SAVED_REGISTERS/2)
+                    addLoadMemIR(ir, savedRegisters[reg], returnStackPosition + 4*(SAVED_REGISTERS-1-reg), SP_REGISTER, 0); 
+                else addLoadMemIR(ir, savedFloatingPointRegisters[reg-SAVED_REGISTERS/2], returnStackPosition + 4*(SAVED_REGISTERS-1-reg), SP_REGISTER, 1);                 
                 reg -= 1;
             } 
-            addLoadMemIR(ir, RA_REGISTER, returnStackPosition + 4*7, SP_REGISTER, 0); 
+            
+            addLoadMemIR(ir, RA_REGISTER, returnStackPosition + 4*SAVED_REGISTERS, SP_REGISTER, 0); 
             addAdditionImIR(ir, SP_REGISTER, SP_REGISTER, localsSize);
             addJumpRegisterIR(ir, RA_REGISTER);
             ir->lastStackAddress = bkp_stack;
@@ -305,7 +316,6 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             node->tempRegResult = registerNewTemporary(ir, 0);
             if (node->firstChild->type == INTEGER_TYPE){
                 int auxReg = registerNewTemporary(ir, 0);
-                printf("integer comparison");
                 addSubtractionIR(ir, 
                     node->firstChild->tempRegResult, 
                     node->firstChild->sibling->tempRegResult,
@@ -398,14 +408,8 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             addStoreIR(ir, aux_register_pa, 4, node->firstChild->sibling->tempRegResult, 0);
             // set PA to 0x100b0 and PB to 0x100b4
 
-                union {
-                    float f;
-                    int i;
-                } u;
-                u.f = 0;
-                addLoadUpperImIR(ir, aux_register, u.i >> 12);
-                addAdditionImIR(ir, aux_register, aux_register, u.i & 0xFFF);
-                addMovFromIntegerToFloat(ir, FS3_REGISTER, aux_register);
+            // clear accumulator
+            addMACCStore(ir, 0x10008);
 
             // call accelerator
             int first_child_size = node->firstChild->stEntry->numElements;
@@ -436,9 +440,9 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 int floatAuxRegister1 = registerNewTemporary(ir, 1);
                 int floatAuxRegister2 = registerNewTemporary(ir, 1);
                 addLoadMemIR(ir, floatAuxRegister1, 0, aux_register_current_a, 1);
-                addLoadMemIR(ir, floatAuxRegister1, 0, aux_register_current_b, 1);
-                addMultiplicationIR(ir, floatAuxRegister1, floatAuxRegister1, floatAuxRegister2, 1);
-                addAdditionIR(ir, node->tempRegResult, node->tempRegResult, floatAuxRegister2, 1);
+                addLoadMemIR(ir, floatAuxRegister2, 0, aux_register_current_b, 1);
+                addMultiplicationIR(ir, floatAuxRegister1, floatAuxRegister2, floatAuxRegister2, 1);
+                addAdditionIR(ir, node->tempRegResult, floatAuxRegister2, node->tempRegResult, 1);
             }
             break;
         case REFERENCE_NODE: // similar to previous, but does not load
@@ -464,7 +468,6 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                 addAdditionIR(ir, node->tempRegResult, aux_register, node->tempRegResult, 0);
                 addSumAddressDistance(ir, node->tempRegResult, node->stEntry, 8);
             } 
-            // TODO: Next two cases, not working for local variables. Will need it soon
             else if (node->stEntry->scope_level > 0 && varNode->firstChild != NULL) { 
                 // local array
                 address_register = registerNewTemporary(ir, 0);
@@ -482,5 +485,5 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
 }
 
 //erro em 39050
-2.17958 to 2.63081
+// 2.17958 to 2.63081
 // 

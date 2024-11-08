@@ -46,10 +46,10 @@ int get_register_number(const char* name) {
     };
 
     const char* floatingPointRegisters[] = {
-        "F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", 
+        "FT0", "FT1", "FT2",  "FT3",  "FT4", "FT5", "FT6",  "FT7",
         "FS0", "FS1", "FA0",  "FA1",  "FA2", "FA3", "FA4",  "FA5",
         "FA6", "FA7", "FS2",  "FS3",  "FS4", "FS5", "FS6",  "FS7",
-        "FS8", "FS9", "FS10", "FS11", "F8", "F9", "F10", "F11"
+        "FS8", "FS9", "FS10", "FS11", "FT8", "FT9", "FT10", "FT11"
     };
 
     // Check each register name for a match
