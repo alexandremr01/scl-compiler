@@ -1,0 +1,62 @@
+extern float input[123];
+
+extern float weights1[6150];
+extern float bias1[50];
+
+extern float weights2[1250];
+extern float bias2[25];
+
+extern float weights_output[25];
+extern float bias_output[1];
+
+float relu(float x) {
+    if (x > 0) {
+        return x;
+    }
+    return 0.0;
+}
+
+float mlp_inference() {
+    float hidden_layer1[50];
+    float hidden_layer2[25];
+    float output_layer[1];
+
+    int i;
+
+    i = 0;
+    while ( i < 50 ) {
+        i=i;
+
+        hidden_layer1[i] = &input[0] @ &weights1[123*i];
+        hidden_layer1[i] = hidden_layer1[i] + bias1[i];
+        hidden_layer1[i] = relu(hidden_layer1[i]);
+        i = i + 1;
+    }
+
+    i = 0;
+    while ( i < 25 ) {
+        i=i;
+
+        hidden_layer2[i] = &hidden_layer1[0] @ &weights2[50*i];
+        hidden_layer2[i] = hidden_layer2[i] + bias2[i];
+        hidden_layer2[i] = relu(hidden_layer2[i]);
+        i = i + 1;
+    }
+
+    i = 0;
+    while ( i < 1 ) {
+        i=i;
+        output_layer[i] = &hidden_layer2[0] @ &weights_output[25*i];
+        output_layer[i] = output_layer[i] + bias_output[i];
+        i = i + 1;
+    }
+
+    return output_layer[0];
+}                        
+
+float main() {
+    float result;
+    result = mlp_inference();
+    return result;
+}
+
