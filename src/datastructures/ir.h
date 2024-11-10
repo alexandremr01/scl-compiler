@@ -29,7 +29,7 @@ typedef enum instruction {
     MOV, LOAD, STORE, COMMENT, ADD, SUB, LABEL, JUMP, JUMP_REGISTER, NOP, LUI,
     BEQ, BNEQ, BLE, BLT, BGE, BGQ, BGT, MUL, AUIPC, RAW, RELATIVE_JUMP, NEG, DATA,
     FMVWX, CSRRW, FMOV, FLT, FLE, FSGNJ, FSGNJN,
-    SETPA, SETPB, MACC, MACCSTORE, PREPARE_STACK
+    SETPA, SETPB, MACC, MACCSTORE, PREPARE_STACK, FCVTSW
 } Instruction;
 
 typedef struct irNode {
@@ -67,6 +67,7 @@ IRNode *newIRNode(Instruction instruction);
 void addNode(IntermediateRepresentation *ir, IRNode *node);
 void addPrepareStack(IntermediateRepresentation *ir);
 
+void addFloatConvertIR(IntermediateRepresentation *ir, int destination, int source);
 void freeIntermediateRepresentation(IntermediateRepresentation *ir);
 void addMovIR(IntermediateRepresentation *ir, int destination, int source);
 void addFloatMovIR(IntermediateRepresentation *ir, int destination, int source);

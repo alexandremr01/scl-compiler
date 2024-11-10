@@ -264,10 +264,13 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
             ) {
                 // if one of the types is none, it is ok (e.g. undeclared variable)
                 if (canImplicitCast(node->firstChild->sibling->type, node->firstChild->type)){
-                    node->firstChild->sibling->type = node->firstChild->type;
-                    // TODO: need more complex logic to deal with downstream casting
-                    if (node->firstChild->sibling->kind == NEG_NODE)
-                        node->firstChild->sibling->firstChild->type = node->firstChild->type;
+                    int castNodeType = getCastNode(node->firstChild->sibling->type, node->firstChild->type);
+                    if (castNodeType != -1) {
+                        ASTNode *castNode = newASTNode(castNodeType);
+                        castNode->firstChild = node->firstChild->sibling;
+                        node->firstChild->sibling = castNode;
+                        castNode->type = node->firstChild->type;
+                    }
 
                 } else {
                     printf("Line %d: incorrect assignment from type %s to variable of type %s.\n", node->line_number, printType(node->firstChild->sibling->type), printType(node->firstChild->type));                                                                  
@@ -289,9 +292,29 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
                 );
                 if (canImplicitCast(node->firstChild->type, priorityType) &&
                     canImplicitCast(node->firstChild->sibling->type, priorityType)) {
+
                     node->type = priorityType;
                     node->firstChild->type = priorityType;
                     node->firstChild->sibling->type = priorityType;
+
+                    int castNodeTypeLeft = getCastNode(node->firstChild->type, priorityType);
+                    if (castNodeTypeLeft != -1) {
+                        ASTNode *castNode = newASTNode(castNodeTypeLeft);
+                        castNode->firstChild = node->firstChild;
+                        castNode->sibling = node->firstChild->sibling;
+                        node->firstChild->sibling = NULL;
+                        node->firstChild = castNode;
+                        castNode->type = priorityType;
+                    }
+
+                    int castNodeTypeRight = getCastNode(node->firstChild->sibling->type, priorityType);
+                    if (castNodeTypeRight != -1) {
+                        ASTNode *castNode = newASTNode(castNodeTypeRight);                        
+                        castNode->firstChild = node->firstChild->sibling;
+                        node->firstChild->sibling = castNode;
+                        castNode->type = priorityType;
+                    }
+
                 } else {
                     printf("Line %d: Cannot cast %s and %s to the same type.\n", 
                         node->line_number,
@@ -310,6 +333,13 @@ void semanticAnalysisNode(ASTNode *node, SymbolicTable* symbolicTable, int *erro
         case DIFF_NODE:
             if (canImplicitCast(node->firstChild->sibling->type, node->firstChild->type)){
                 node->firstChild->sibling->type = node->firstChild->type;
+                // int castNodeType = getCastNode(node->firstChild->type);
+                // if (castNodeType != -1) {
+                //     ASTNode *castNode = newASTNode(castNodeType);
+                //     castNode->firstChild = node->firstChild->sibling;
+                //     node->firstChild->sibling = castNode->firstChild;
+                //     castNode->type = node->firstChild->type;
+                // }
             } else if (canImplicitCast(node->firstChild->type, node->firstChild->sibling->type)){
                 node->firstChild->type = node->firstChild->sibling->type;
             }

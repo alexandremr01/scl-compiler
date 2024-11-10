@@ -20,7 +20,7 @@ typedef enum nodeKind {
     VAR_REFERENCE_NODE, COMPOUND_STATEMENT_NODE,
     LT_NODE, GT_NODE, LEQ_NODE, GEQ_NODE, EQ_NODE, DIFF_NODE, NEG_NODE,
     FUNCTION_DECLARATION_NODE, VAR_INDEXING_NODE, ASM_NODE, EXTERN_STORAGE,
-    REFERENCE_NODE, DOT_PRODUCT_NODE
+    REFERENCE_NODE, DOT_PRODUCT_NODE, INTEGER_TO_FLOAT_NODE
 } NodeKind;
 
 typedef struct astNode {
@@ -39,6 +39,8 @@ typedef struct astNode {
 typedef struct abstractSyntaxTree {
     ASTNode *root;
 } AbstractSyntaxTree;
+
+int getCastNode(DataType from, DataType to);
 
 AbstractSyntaxTree *newAbstractSyntaxTree();
 ASTNode *newASTNode(NodeKind nodeKind);

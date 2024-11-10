@@ -20,6 +20,16 @@ ASTNode *newASTNode(NodeKind nodeKind){
     return node;
 }
 
+int getCastNode(DataType from, DataType to) {
+    if (from == INTEGER_TYPE && to==FLOAT_TYPE) {
+        return INTEGER_TO_FLOAT_NODE;
+    }
+    if (from == to) {
+        return -1; // no need to cast
+    }
+    return -2; // cannot cast
+}
+
 ASTNode *appendSibling(ASTNode *reference, ASTNode *newSibling){
     if (reference == NULL) 
         return newSibling;

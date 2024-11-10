@@ -198,6 +198,12 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
     }
     ASTNode *parameter;
     switch (node->kind){
+        case INTEGER_TO_FLOAT_NODE:
+            // FCVT.S.W
+        printf("Running it to float node\n");
+            node->tempRegResult = registerNewTemporary(ir, 0);
+            addFloatConvertIR(ir, node->tempRegResult, node->firstChild->tempRegResult);
+            break;
         case FUNCTION_DEFINITION_NODE:
             address_register = registerNewTemporary(ir, 0);
             addNode(ir, functionEnd);
@@ -302,8 +308,7 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                     int i;
                 } u;
                 u.f = floatVal;
-                printf("Representing %X as %X + %X\n", u.i, (u.i >> 12) + (u.i > 0x7FF ? 1 : 0), u.i & 0xFFF);
-                addLoadUpperImIR(ir, aux_register, (u.i >> 12) + (u.i > 0x7FF ? 1 : 0));
+                addLoadUpperImIR(ir, aux_register, (u.i >> 12) + ((u.i & 0xFFF) > 0x7FF ? 1 : 0));
                 if (u.i & 0xFFF) // if last 12 bits are non zero
                     addAdditionImIR(ir, aux_register, aux_register, u.i & 0xFFF);
                 addMovFromIntegerToFloat(ir, node->tempRegResult, aux_register);

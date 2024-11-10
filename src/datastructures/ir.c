@@ -91,6 +91,15 @@ void addLoadAddressIR(IntermediateRepresentation *ir, int destination, SymbolicT
     addNode(ir, node);  
 }
 
+
+void addFloatConvertIR(IntermediateRepresentation *ir, int destination, int source) {
+    IRNode * node = newIRNode(FCVTSW);
+    node->dest = destination;
+    node->sourceKind = REG_SOURCE;
+    node->source = source;
+    addNode(ir, node);
+}
+
 void addStoreIR(IntermediateRepresentation *ir, int destination_address, int shift, int register_source, int isFloat){
     IRNode * node = newIRNode(STORE);
     node->instruction = STORE;

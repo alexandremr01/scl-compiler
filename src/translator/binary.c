@@ -6,7 +6,7 @@
 
 #define FUNCT7_DEFAULT 0
 #define FUNCT3_MAP_SIZE 49
-#define FUNCT7_MAP_SIZE 13
+#define FUNCT7_MAP_SIZE 14
 #define MAX_LINE_LENGTH 128
 
 // Function to get the funct3 code
@@ -72,7 +72,7 @@ int get_funct7(const char* opcode) {
         {"FMV.W.X", "1111000"}, {"FSGNJ.S", "0010000"}, 
         {"FADD.S", "0000000"}, {"FSUB.S", "0000100"}, {"FMUL.S", "0001000"}, 
         {"FEQ.S", "1010000"}, {"FLT.S", "1010000"}, {"FLE.S", "1010000"},
-        {"FSGNJN.S", "0010000"},
+        {"FSGNJN.S", "0010000"}, {"FCVT.S.W", "1101000"}
     };
 
     for (int i = 0; i < FUNCT7_MAP_SIZE; ++i) {
@@ -242,7 +242,7 @@ int asmToBinary(char *line) {
             int rs2 = get_register_number(words[3]);
             int opcode_number = 0b0110011;
             bytecode = ((get_funct7(opcode) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((rd & 0x1F) << 7) | (opcode_number & 0x7F);
-        } else if (strcmp(opcode, "FMV.W.X") == 0) {
+        } else if (strcmp(opcode, "FMV.W.X") == 0 || strcmp(opcode, "FCVT.S.W") == 0 ) {
             int rd = get_register_number(words[1]);
             int rs1 = get_register_number(words[2]);
             int rs2 = 0;

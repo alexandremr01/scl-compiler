@@ -239,6 +239,9 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
                     getReg(rm, p->source)
                 );
                 break;      
+            case FCVTSW: 
+                sprintf(currObj->assembly, "fcvt.s.w %s, %s", getFloatReg(rm, p->dest), getReg(rm, p->source));
+                break;
             case LOAD:
                 if (p->isFloat && p->sourceKind == VARIABLE_SOURCE) {
                     printf("Adding LOAD for distance %d which is %d and %d\n", p->varSource->address-p->address,  ((p->varSource->address-p->address) + 0x800)  >> 12, (p->varSource->address-p->address) & ((1 << 12) - 1));
