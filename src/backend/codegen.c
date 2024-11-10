@@ -302,8 +302,10 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
                     int i;
                 } u;
                 u.f = floatVal;
-                addLoadUpperImIR(ir, aux_register, u.i >> 12);
-                addAdditionImIR(ir, aux_register, aux_register, u.i & 0xFFF);
+                printf("Representing %X as %X + %X\n", u.i, (u.i >> 12) + (u.i > 0x7FF ? 1 : 0), u.i & 0xFFF);
+                addLoadUpperImIR(ir, aux_register, (u.i >> 12) + (u.i > 0x7FF ? 1 : 0));
+                if (u.i & 0xFFF) // if last 12 bits are non zero
+                    addAdditionImIR(ir, aux_register, aux_register, u.i & 0xFFF);
                 addMovFromIntegerToFloat(ir, node->tempRegResult, aux_register);
             } else addLoadImIR(ir, node->tempRegResult, atoi(node->name));
             return;
