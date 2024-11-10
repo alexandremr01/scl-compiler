@@ -413,15 +413,13 @@ void codeGenNode(ASTNode *node, IntermediateRepresentation *ir, IRNode *function
             addStoreIR(ir, aux_register_pa, 0, node->firstChild->tempRegResult, 0);
             // store the address of the sedon variable in 0x10004
             addStoreIR(ir, aux_register_pa, 4, node->firstChild->sibling->tempRegResult, 0);
-            // set PA to 0x100b0 and PB to 0x100b4
 
-            // clear accumulator
-            addMACCStore(ir, 0x10008);
+            // initialize accumulator to value in 0x10008 that comes from bias
+            addStoreIR(ir, aux_register_pa, 8, node->firstChild->sibling->sibling->tempRegResult, 1);
+            addSetACC(ir, 0x10008);
 
             // call accelerator
-            int first_child_size = node->firstChild->stEntry->numElements;
-            int second_child_size = node->firstChild->sibling->stEntry->numElements;
-            int vector_size = (first_child_size < second_child_size)? first_child_size : second_child_size;
+            int vector_size = atoi(node->firstChild->sibling->sibling->sibling->name);
             int num_iterations = (int) vector_size / 2;
             addLoadImIR(ir, aux_register, num_iterations);
             IRNode* macc_node = addSetPA(ir, 0x10000);

@@ -245,10 +245,13 @@ call:       ID LPAREN args RPAREN {
                 $$->firstChild = $3;
                 $$->line_number = yylineno;
             }
-macc:       MULACC LPAREN expression COMMA expression COMMA expression RPAREN {
+macc:       MULACC LPAREN expression COMMA expression COMMA expression COMMA NUM RPAREN {
                 $$ = newASTNode(DOT_PRODUCT_NODE);
                 $$->firstChild = $3;
                 $$->firstChild->sibling = $5;
+                $$->firstChild->sibling->sibling = $7;
+                $$->firstChild->sibling->sibling->sibling = newASTNode(CONSTANT_NODE);
+                $$->firstChild->sibling->sibling->sibling->name = $9;
                 $$->line_number = yylineno;
             }       
 args:       arg_list {$$=$1;} | %empty {$$=NULL;}

@@ -25,29 +25,21 @@ float mlp_inference() {
 
     i = 0;
     while ( i < 50 ) {
-        i=i;
-
-        hidden_layer1[i] = mulacc(&input[0], &weights1[123*i], 0);
-        hidden_layer1[i] = hidden_layer1[i] + bias1[i];
+        hidden_layer1[i] = mulacc(&input, &weights1[123*i], bias1[i], 123);
         hidden_layer1[i] = relu(hidden_layer1[i]);
         i = i + 1;
     }
 
     i = 0;
     while ( i < 25 ) {
-        i=i;
-
-        hidden_layer2[i] = mulacc(&hidden_layer1[0], &weights2[50*i], 0);
-        hidden_layer2[i] = hidden_layer2[i] + bias2[i];
+        hidden_layer2[i] = mulacc(&hidden_layer1, &weights2[50*i], bias2[i], 50);
         hidden_layer2[i] = relu(hidden_layer2[i]);
         i = i + 1;
     }
 
     i = 0;
     while ( i < 1 ) {
-        i=i;
-        output_layer[i] = mulacc(&hidden_layer2[0], &weights_output[25*i], 0);
-        output_layer[i] = output_layer[i] + bias_output[i];
+        output_layer[i] = mulacc(&hidden_layer2, &weights_output[25*i], bias_output[i], 25);
         i = i + 1;
     }
 

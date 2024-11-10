@@ -974,6 +974,7 @@ void disassembler_t::add_instructions(const isa_parser_t* isa)
 
   DEFINE_ITYPE(setpa);
   DEFINE_ITYPE(setpb);
+  DEFINE_ITYPE(setacc);
   DEFINE_ITYPE(addpa);
   DEFINE_ITYPE(addpb);
   DEFINE_ITYPE(macc);

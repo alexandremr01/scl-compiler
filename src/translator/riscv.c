@@ -183,6 +183,9 @@ ObjectCode *translateIRToObj(IntermediateRepresentation *ir, RegisterAssignment 
             case SETPA:
                 sprintf(currObj->assembly, "setpa %d", p->imm);
                 break;
+            case SETACC:
+                sprintf(currObj->assembly, "setacc %d", p->imm);
+                break;
             case SETPB:
                 sprintf(currObj->assembly, "setpb %d", p->imm);
                 break;

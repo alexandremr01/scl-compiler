@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #define FUNCT7_DEFAULT 0
-#define FUNCT3_MAP_SIZE 49
+#define FUNCT3_MAP_SIZE 50
 #define FUNCT7_MAP_SIZE 14
 #define MAX_LINE_LENGTH 128
 
@@ -22,7 +22,7 @@ int get_funct3(const char* opcode) {
         {"FMV.W.X", "000"}, {"FLW", "010"}, {"FSW", "010"},
         {"FEQ.S", "010"}, {"FLT.S", "001"}, {"FLE.S", "000"}, {"FSGNJN.S", "001"},
         {"FSGNJ.S", "000"}, {"FADD.S", "000"}, {"FSUB.S", "000"}, {"FMUL.S", "000"},
-        {"STORE", "011"}, {"SETPA", "001"}, {"SETPB", "010"}, {"MACC", "000"}
+        {"STORE", "011"}, {"SETPA", "001"}, {"SETPB", "010"}, {"MACC", "000"}, {"SETACC", "110"}
     };
 
     for (int i = 0; i < FUNCT3_MAP_SIZE; ++i) {
@@ -278,11 +278,12 @@ int asmToBinary(char *line) {
             int opcode_number = 0b0100111;
             bytecode = (((imm >> 5) & 0x7F) << 25) | ((rs2 & 0x1F) << 20) | ((rs1 & 0x1F) << 15) | ((get_funct3(opcode) & 0x7) << 12) | ((imm & 0x1F) << 7) | (opcode_number & 0x7F);
         
-        } else if (strcmp(opcode, "SETPA") == 0 || strcmp(opcode, "SETPB") == 0) {
+        } else if (strcmp(opcode, "SETPA") == 0 || strcmp(opcode, "SETPB") == 0 || strcmp(opcode, "SETACC") == 0) {
             int imm = atoi(words[1]);
             imm = int2signedbin(imm, 20);
             int opcode_number = 0X0B;
             bytecode = (((imm) & 0xFFFFF) << 12) | ((get_funct3(opcode) & 0x7) << 7) | (opcode_number & 0x7F);
+            printf("for instruction %s generating %X", opcode, bytecode);
         } else if (strcmp(opcode, "MACC") == 0) {
             int opcode_number = 0X0B;
             bytecode = opcode_number;

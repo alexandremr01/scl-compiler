@@ -448,6 +448,14 @@ IRNode* addSetPA(IntermediateRepresentation *ir, int address){
     return node;
 }
 
+IRNode* addSetACC(IntermediateRepresentation *ir, int address){
+    IRNode * node = newIRNode(SETACC);
+    node->sourceKind = CONSTANT_SOURCE;
+    node->imm = address;
+    addNode(ir, node);
+    return node;
+}
+
 void addSetPB(IntermediateRepresentation *ir, int address){
     IRNode * node = newIRNode(SETPB);
     node->sourceKind = CONSTANT_SOURCE;    
