@@ -42,4 +42,4 @@ clean:
 	-@rm -rvf $(BUILD) $(GEN) $(GENERATEDDIR) test/*.out**
 
 test: clean build
-	cd test && python3 automatic-verification.py && cd ..
+	python3 test/automatic-verification.py

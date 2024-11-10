@@ -20,13 +20,25 @@ def parse_last_line(file_path):
         lines = file.readlines()[-1]
     return lines.strip()
 
-def compile_and_simulate(input_file, is_float=False):
-    debug_cmd = 'debug_float' if is_float else 'debug'
+def compile_and_simulate(input_file, runs, is_float=False, externals=None):
+    if externals is None:
+        externals = {}
+    input_file = f'test/{input_file}'
+    external_str = ' '.join([f'--external {k} {v}' for k, v in externals.items()])
+
+    float_cmd = "fregs 0 fa0"
+    int_cmd = "reg 0"
+    debug_cmds =f'''run {runs}
+{float_cmd if is_float else int_cmd}
+q'''
+    with open('test/debug.txt', 'w') as f:
+        f.write(debug_cmds)
+
     commands = [
-        f'../bin/sclc {input_file} {input_file}.bin --dialect=ABI',
+        f'./bin/sclc {input_file} {input_file}.bin --dialect=ABI {external_str}',
         f'riscv64-unknown-linux-gnu-objcopy -I binary -O elf64-littleriscv -B riscv {input_file}.bin {input_file}.obj',
-        f'riscv64-unknown-linux-gnu-ld -T loader.ld -o {input_file}.elf  {input_file}.obj',
-        f'spike -d --isa=RV64IMF -m0x10000:0x12000 --pc=0x11000 --debug-cmd={debug_cmd} {input_file}.elf 2> {input_file}.log.txt'
+        f'riscv64-unknown-linux-gnu-ld -T test/loader.ld -o {input_file}.elf  {input_file}.obj',
+        f'spike -d --isa=RV64IMF -m0x10000:0x12000 --pc=0x11000 --debug-cmd=test/debug.txt {input_file}.elf 2> {input_file}.log.txt'
     ]
     for i, command in enumerate(commands):
         # print(f'Stage {i}')
@@ -41,9 +53,9 @@ def compile_and_simulate(input_file, is_float=False):
             print(result.stdout)
             exit(1)
 
-def e2e_test(input_file, validation, verbose, is_float):
-    compile_and_simulate(input_file, is_float)    
-    log_filename = f'{input_file}.log.txt'
+def e2e_test(input_file, validation, verbose, runs, is_float, externals):
+    compile_and_simulate(input_file, runs, is_float, externals)    
+    log_filename = f'test/{input_file}.log.txt'
     if is_float:
         registers = parse_last_line(log_filename)
     else:
@@ -79,6 +91,21 @@ TESTS = [
         "file": "reluneg.in",
         "assertion": (lambda registers : registers == '0'),
         "is_float": True
+    },
+    {
+        "file": "mlp.in",
+        "assertion": (lambda registers : registers == '16.8637'),
+        "runs": 500000,
+        "is_float": True,
+        "externals": {
+            'input': 'training/test0.bin',
+            'weights1': 'training/weights/weights_0.bin',
+            'bias1': 'training/weights/bias_0.bin',
+            'weights2': 'training/weights/weights_1.bin',
+            'bias2': 'training/weights/bias_1.bin',
+            'weights_output': 'training/weights/weights_2.bin',
+            'bias_output': 'training/weights/bias_2.bin'
+        }
     }
 ]
 
@@ -89,7 +116,9 @@ def main():
             test['file'],
             test['assertion'],
             verbose,
-            test.get('is_float', False)
+            test.get('runs', 5000),
+            test.get('is_float', False),
+            test.get('externals', None),
         )
 
 if __name__ == "__main__":        
