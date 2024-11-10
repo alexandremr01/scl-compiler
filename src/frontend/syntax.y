@@ -19,7 +19,7 @@
 %type <node> program units external_declaration function_definition
 %type <node> declaration declaration_list compound_statement statement_list expression 
 %type <node> statement expression_statement selection_statement iteration_statement jump_statement assembly_statement
-%type <node> simple_exp sum_exp term factor call var args arg_list
+%type <node> simple_exp sum_exp term factor call var args arg_list macc
 %type <node> parameters parameter_list parameter sum relational storage_specifier
 
 %token ERROR NEWLINE // internal
@@ -27,7 +27,7 @@
 %token VOID INT FLOAT// types
 %token EXTERN // storage specifier
 %token RETURN // others
-%token DOT_PRODUCT REFERENCE
+%token DOT_PRODUCT REFERENCE MULACC
 %token ASM
 %token PLUS MINUS TIMES OVER ASSIGN EQ LT GT LEQ GEQ DIFFERENT 
 %token SEMICOLON COMMA
@@ -223,12 +223,6 @@ term:       term mult_op factor {
                 $1->sibling = $3;
                 $$->line_number = yylineno;
             }
-            | term DOT_PRODUCT factor {
-                $$ = newASTNode(DOT_PRODUCT_NODE);
-                $$->firstChild = $1;
-                $1->sibling = $3;
-                $$->line_number = yylineno;
-            } 
             | factor {$$ = $1;}
 mult_op:    TIMES | OVER
 factor:     LPAREN expression RPAREN {$$=$2;}
@@ -243,13 +237,20 @@ factor:     LPAREN expression RPAREN {$$=$2;}
                 $$->name = $1;
                 $$->line_number = yylineno;
             }
-             | call {$$=$1;}
+             | call {$$=$1;} 
+             | macc {$$=$1;}
 call:       ID LPAREN args RPAREN {
                 $$ = newASTNode(CALL_NODE);
                 $$->name = $1;
                 $$->firstChild = $3;
                 $$->line_number = yylineno;
             }
+macc:       MULACC LPAREN expression COMMA expression COMMA expression RPAREN {
+                $$ = newASTNode(DOT_PRODUCT_NODE);
+                $$->firstChild = $3;
+                $$->firstChild->sibling = $5;
+                $$->line_number = yylineno;
+            }       
 args:       arg_list {$$=$1;} | %empty {$$=NULL;}
 arg_list:   arg_list COMMA expression { $$ = appendSibling($1, $3); }
             | expression  {$$=$1;} 

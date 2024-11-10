@@ -21,6 +21,7 @@ multi_line_comment     \/\*.+\*\/
 "return"        {return RETURN;}
 "asm"           {return ASM;}
 "extern"        {return EXTERN;}
+"mulacc"        {return MULACC;}
 "+"             {return PLUS;}
 "-"             {return MINUS;}
 "*"             {return TIMES;}
